@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2012/06/02 08:47:42 meridian Exp $
+# $Id: Makefile,v 1.1 2012/08/17 10:47:08 pandolf Exp $
 ROOTLIBS      = $(shell $(ROOTSYS)/bin/root-config --libs)
 ROOTGLIBS     = $(shell $(ROOTSYS)/bin/root-config --glibs)
 
@@ -8,7 +8,7 @@ PROGRAMS = $(patsubst %.cc,%,$(BINFILES))
 
 
 # --- External configuration ---------------------------------
-CC         = g++ -Wno-deprecated
+CC         = g++ -Wall
 CCFLAGS    =  -g 
 MFLAGS     = -MM
 INCLUDES   =
@@ -29,10 +29,22 @@ ROOTSYS  ?= ERROR_RootSysIsNotDefined
 EXTRALIBS  :=  -L$(ROOTSYS)/lib -L$(ROOFIT_LIBDIR)/ -lHtml -lMathCore -lGenVector -lMinuit -lEG -lRooFitCore -lRooFit -lRIO -lTMVA
 
 # CC files excluding the binaries
+#CCFILES=$(filter-out $(BINFILES),$(wildcard $(CMSSW_BASE)/src/UserCode/pandolf/CommonTools/*.cc))
 CCFILES=$(filter-out $(BINFILES),$(wildcard *.cc))
 
 # List of all object files to build
-OLIST=$(patsubst %.cc,$(OBJDIR)/%.o,$(CCFILES))
+OLIST = $(OBJDIR)/RedNtpFinalizer.o $(OBJDIR)/AnalysisJet.o
+OLIST +=$(patsubst %.cc,$(OBJDIR)/%.o,$(notdir $(CCFILES)))
+
+$(OBJDIR)/RedNtpFinalizer.o: $(CMSSW_BASE)/src/UserCode/pandolf/CommonTools/RedNtpFinalizer.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/AnalysisJet.o: $(CMSSW_BASE)/src/UserCode/pandolf/CommonTools/AnalysisJet.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
 # Implicit rule to compile all classes
 $(OBJDIR)/%.o : %.cc
