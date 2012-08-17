@@ -901,9 +901,15 @@ public :
    virtual ~RedNtpFinalizer_VHgg();
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
-   virtual void     Init(TTree *tree);
-   void setSelectionType( const std::string& selectionType ) {
+   virtual void     Init(TChain *tree);
+   void setSelectionType( const std::string& selectionType );
    virtual void     finalize();
+
+
+   std::string selectionType_;
+   std::string bTaggerType_;
+
+
 };
 
 #endif
