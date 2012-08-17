@@ -662,3 +662,6 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
 
 
 }
+
+
+#endif

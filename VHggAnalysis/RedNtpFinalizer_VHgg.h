@@ -11,6 +11,8 @@
 #include <TChain.h>
 #include <TFile.h>
 
+#include "RedNtpFinalizer.h"
+
 
 class RedNtpFinalizer_VHgg : public RedNtpFinalizer {
 
@@ -904,4 +906,4 @@ public :
    virtual void     finalize();
 };
 
-
+#endif
