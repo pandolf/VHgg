@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2012/08/17 14:24:39 pandolf Exp $
+# $Id: Makefile,v 1.3 2012/08/20 12:41:45 pandolf Exp $
 ROOTLIBS      = $(shell $(ROOTSYS)/bin/root-config --libs)
 ROOTGLIBS     = $(shell $(ROOTSYS)/bin/root-config --glibs)
 
@@ -33,7 +33,7 @@ EXTRALIBS  :=  -L$(ROOTSYS)/lib -L$(ROOFIT_LIBDIR)/ -lHtml -lMathCore -lGenVecto
 CCFILES=$(filter-out $(BINFILES),$(wildcard *.cc))
 
 # List of all object files to build
-OLIST = $(OBJDIR)/RedNtpFinalizer.o $(OBJDIR)/AnalysisJet.o
+OLIST = $(OBJDIR)/RedNtpFinalizer.o $(OBJDIR)/AnalysisJet.o $(OBJDIR)/BTagSFUtil.o $(OBJDIR)/SFlightFuncs.o $(OBJDIR)/MistagFuncs.o
 OLIST +=$(patsubst %.cc,$(OBJDIR)/%.o,$(notdir $(CCFILES)))
 
 $(OBJDIR)/RedNtpFinalizer.o: $(CMSSW_BASE)/src/UserCode/pandolf/CommonTools/RedNtpFinalizer.cc
@@ -42,6 +42,21 @@ $(OBJDIR)/RedNtpFinalizer.o: $(CMSSW_BASE)/src/UserCode/pandolf/CommonTools/RedN
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
 $(OBJDIR)/AnalysisJet.o: $(CMSSW_BASE)/src/UserCode/pandolf/CommonTools/AnalysisJet.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/BTagSFUtil.o: $(CMSSW_BASE)/src/UserCode/pandolf/BTagSFUtil/src/BTagSFUtil.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/SFlightFuncs.o: $(CMSSW_BASE)/src/UserCode/pandolf/BTagSFUtil/src/SFlightFuncs.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/MistagFuncs.o: $(CMSSW_BASE)/src/UserCode/pandolf/BTagSFUtil/src/MistagFuncs.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
