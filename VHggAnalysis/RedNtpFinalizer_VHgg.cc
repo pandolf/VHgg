@@ -178,6 +178,7 @@ void RedNtpFinalizer_VHgg::finalize()
 
        for( unsigned ijet=0; ijet<njets; ++ijet ) {
 
+//std::cout << ijet << "/" << njets << " pt: " << ptcorrjet[ijet] << " eta: " << etajet[ijet] << std::endl;
          if( ptcorrjet[ijet] < ptjetthresh_ ) continue;
          if( fabs(etajet[ijet]) > etajetthresh_ ) continue;
 
