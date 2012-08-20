@@ -1,10 +1,10 @@
-# $Id: Makefile,v 1.1 2012/08/17 10:47:08 pandolf Exp $
+# $Id: Makefile,v 1.2 2012/08/17 14:24:39 pandolf Exp $
 ROOTLIBS      = $(shell $(ROOTSYS)/bin/root-config --libs)
 ROOTGLIBS     = $(shell $(ROOTSYS)/bin/root-config --glibs)
 
-BINFILES =  analysis.cc redntpApp.cc
+BINFILES = $(wildcard *.cpp)
 
-PROGRAMS = $(patsubst %.cc,%,$(BINFILES))
+PROGRAMS = $(patsubst %.cpp,%,$(BINFILES))
 
 
 # --- External configuration ---------------------------------
@@ -56,7 +56,7 @@ $(OBJDIR)/%.o : %.cc
 $(PROGRAMS) : $(OLIST)
 	@echo "Linking $@"
 	@$(CC) $(CCFLAGS)  $(INCLUDES) $(OLIST) \
-	$(ROOTLIBS) $(EXTRALIBS) -o $(WORKDIR)/$@   $(patsubst %,%.cc,$@)
+	$(ROOTLIBS) $(EXTRALIBS) -o $(WORKDIR)/$@  $(patsubst %,%.cpp,$@)
 
 default : analysis 
 
