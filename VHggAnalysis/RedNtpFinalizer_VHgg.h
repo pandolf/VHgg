@@ -4,8 +4,8 @@
 // from TChain AnaTree/
 //////////////////////////////////////////////////////////
 
-#ifndef RedNtpFinalizer_h
-#define RedNtpFinalizer_h
+#ifndef RedNtpFinalizer_VHgg_h
+#define RedNtpFinalizer_VHgg_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -109,88 +109,38 @@ public :
    Float_t         pid_ecalisophot2;
    Float_t         pid_hcalisophot1;
    Float_t         pid_hcalisophot2;
-   Float_t         ptjet1;
-   Float_t         ptjet2;
-   Float_t         ptjet3;
-   Float_t         ptjet4;
-   Float_t         ptcorrjet1;
-   Float_t         ptcorrjet2;
-   Float_t         ptcorrjet3;
-   Float_t         ptcorrjet4;
-   Float_t         ecorrjet1;
-   Float_t         ecorrjet2;
-   Float_t         ecorrjet3;
-   Float_t         ecorrjet4;
-   Float_t         etajet1;
-   Float_t         etajet2;
-   Float_t         etajet3;
-   Float_t         etajet4;
-   Float_t         phijet1;
-   Float_t         phijet2;
-   Float_t         phijet3;
-   Float_t         phijet4;
-   Float_t         betajet1;
-   Float_t         betajet2;
-   Float_t         betastarjet1;
-   Float_t         betastarjet2;
-   Float_t         btagvtxjet1;
-   Float_t         btagvtxjet2;
-   Float_t         btagvtxjet3;
-   Float_t         btagvtxjet4;
-   Float_t         btagtrkjet1;
-   Float_t         btagtrkjet2;
-   Float_t         btagtrkjet3;
-   Float_t         btagtrkjet4;
-   Float_t         btagjprobjet1;
-   Float_t         btagjprobjet2;
-   Float_t         btagjprobjet3;
-   Float_t         btagjprobjet4;
-   Float_t         ptDjet1;
-   Float_t         rmsjet1;
-   Int_t           ntrkjet1;
-   Int_t           nneutjet1;
-   Float_t         jetIdSimple_mvajet1;
-   Float_t         jetIdFull_mvajet1;
-   Float_t         jetId_dR2Meanjet1;
-   Float_t         jetId_betaStarClassicjet1;
-   Float_t         jetId_frac01jet1;
-   Float_t         jetId_frac02jet1;
-   Float_t         jetId_frac03jet1;
-   Float_t         jetId_frac04jet1;
-   Float_t         jetId_frac05jet1;
-   Float_t         jetId_betajet1;
-   Float_t         jetId_betaStarjet1;
-   Int_t           jetIdCutBased_wpjet1;
-   Int_t           jetIdSimple_wpjet1;
-   Int_t           jetIdFull_wpjet1;
-   Float_t         ptDjet2;
-   Float_t         rmsjet2;
-   Int_t           ntrkjet2;
-   Int_t           nneutjet2;
-   Float_t         jetIdSimple_mvajet2;
-   Float_t         jetIdFull_mvajet2;
-   Float_t         jetId_dR2Meanjet2;
-   Float_t         jetId_betaStarClassicjet2;
-   Int_t           jetIdCutBased_wpjet2;
-   Int_t           jetIdSimple_wpjet2;
-   Int_t           jetIdFull_wpjet2;
-   Float_t         jetId_frac01jet2;
-   Float_t         jetId_frac02jet2;
-   Float_t         jetId_frac03jet2;
-   Float_t         jetId_frac04jet2;
-   Float_t         jetId_frac05jet2;
-   Float_t         jetId_betajet2;
-   Float_t         jetId_betaStarjet2;
-   Float_t         ptDjet3;
-   Float_t         rmsjet3;
-   Int_t           ntrkjet3;
-   Int_t           nneutjet3;
-   Float_t         ptDjet4;
-   Float_t         rmsjet4;
-   Int_t           ntrkjet4;
-   Int_t           nneutjet4;
-   Int_t           assjet1;
-   Int_t           assjet2;
+   Float_t         njets;
+   Float_t         ptjet[10];
+   Float_t         ptcorrjet[10];
+   Float_t         ecorrjet[10];
+   Float_t         etajet[10];
+   Float_t         phijet[10];
+   Float_t         betajet[10];
+   Float_t         betastarjet[10];
+   Float_t         btagvtxjet[10];
+   Float_t         btagtrkjet[10];
+   Float_t         btagjprobjet[10];
+   Float_t         ptDjet[10];
+   Float_t         rmsjet[10];
+   Int_t           ntrkjet[10];
+   Int_t           nneutjet[10];
+   Float_t         jetIdSimple_mvajet[10];
+   Float_t         jetIdFull_mvajet[10];
+   Float_t         jetId_dR2Meanjet[10];
+   Float_t         jetId_betaStarClassicjet[10];
+   Float_t         jetId_frac01jet[10];
+   Float_t         jetId_frac02jet[10];
+   Float_t         jetId_frac03jet[10];
+   Float_t         jetId_frac04jet[10];
+   Float_t         jetId_frac05jet[10];
+   Float_t         jetId_betajet[10];
+   Float_t         jetId_betaStarjet[10];
+   Int_t           jetIdCutBased_wpjet[10];
+   Int_t           jetIdSimple_wpjet[10];
+   Int_t           jetIdFull_wpjet[10];
+   Int_t           assjet[10];
+   Int_t           partPdgIDjet[10];
+   Int_t           partMomPdgIDjet[10];
    Float_t         deltaeta;
    Float_t         zeppenjet;
    Float_t         deltaphi;
@@ -547,88 +497,38 @@ public :
    TBranch        *b_pid_ecalisophot2;   //!
    TBranch        *b_pid_hcalisophot1;   //!
    TBranch        *b_pid_hcalisophot2;   //!
-   TBranch        *b_ptjet1;   //!
-   TBranch        *b_ptjet2;   //!
-   TBranch        *b_ptjet3;   //!
-   TBranch        *b_ptjet4;   //!
-   TBranch        *b_ptcorrjet1;   //!
-   TBranch        *b_ptcorrjet2;   //!
-   TBranch        *b_ptcorrjet3;   //!
-   TBranch        *b_ptcorrjet4;   //!
-   TBranch        *b_ecorrjet1;   //!
-   TBranch        *b_ecorrjet2;   //!
-   TBranch        *b_ecorrjet3;   //!
-   TBranch        *b_ecorrjet4;   //!
-   TBranch        *b_etajet1;   //!
-   TBranch        *b_etajet2;   //!
-   TBranch        *b_etajet3;   //!
-   TBranch        *b_etajet4;   //!
-   TBranch        *b_phijet1;   //!
-   TBranch        *b_phijet2;   //!
-   TBranch        *b_phijet3;   //!
-   TBranch        *b_phijet4;   //!
-   TBranch        *b_betajet1;   //!
-   TBranch        *b_betajet2;   //!
-   TBranch        *b_betastarjet1;   //!
-   TBranch        *b_betastarjet2;   //!
-   TBranch        *b_btagvtxjet1;   //!
-   TBranch        *b_btagvtxjet2;   //!
-   TBranch        *b_btagvtxjet3;   //!
-   TBranch        *b_btagvtxjet4;   //!
-   TBranch        *b_btagtrkjet1;   //!
-   TBranch        *b_btagtrkjet2;   //!
-   TBranch        *b_btagtrkjet3;   //!
-   TBranch        *b_btagtrkjet4;   //!
-   TBranch        *b_btagjprobjet1;   //!
-   TBranch        *b_btagjprobjet2;   //!
-   TBranch        *b_btagjprobjet3;   //!
-   TBranch        *b_btagjprobjet4;   //!
-   TBranch        *b_ptDjet1;   //!
-   TBranch        *b_rmsjet1;   //!
-   TBranch        *b_ntrkjet1;   //!
-   TBranch        *b_nneutjet1;   //!
-   TBranch        *b_jetIdSimple_mvajet1;   //!
-   TBranch        *b_jetIdFull_mvajet1;   //!
-   TBranch        *b_jetId_dR2Meanjet1;   //!
-   TBranch        *b_jetId_betaStarClassicjet1;   //!
-   TBranch        *b_jetId_frac01jet1;   //!
-   TBranch        *b_jetId_frac02jet1;   //!
-   TBranch        *b_jetId_frac03jet1;   //!
-   TBranch        *b_jetId_frac04jet1;   //!
-   TBranch        *b_jetId_frac05jet1;   //!
-   TBranch        *b_jetId_betajet1;   //!
-   TBranch        *b_jetId_betaStarjet1;   //!
-   TBranch        *b_jetIdCutBased_wpjet1;   //!
-   TBranch        *b_jetIdSimple_wpjet1;   //!
-   TBranch        *b_jetIdFull_wpjet1;   //!
-   TBranch        *b_ptDjet2;   //!
-   TBranch        *b_rmsjet2;   //!
-   TBranch        *b_ntrkjet2;   //!
-   TBranch        *b_nneutjet2;   //!
-   TBranch        *b_jetIdSimple_mvajet2;   //!
-   TBranch        *b_jetIdFull_mvajet2;   //!
-   TBranch        *b_jetId_dR2Meanjet2;   //!
-   TBranch        *b_jetId_betaStarClassicjet2;   //!
-   TBranch        *b_jetIdCutBased_wpjet2;   //!
-   TBranch        *b_jetIdSimple_wpjet2;   //!
-   TBranch        *b_jetIdFull_wpjet2;   //!
-   TBranch        *b_jetId_frac01jet2;   //!
-   TBranch        *b_jetId_frac02jet2;   //!
-   TBranch        *b_jetId_frac03jet2;   //!
-   TBranch        *b_jetId_frac04jet2;   //!
-   TBranch        *b_jetId_frac05jet2;   //!
-   TBranch        *b_jetId_betajet2;   //!
-   TBranch        *b_jetId_betaStarjet2;   //!
-   TBranch        *b_ptDjet3;   //!
-   TBranch        *b_rmsjet3;   //!
-   TBranch        *b_ntrkjet3;   //!
-   TBranch        *b_nneutjet3;   //!
-   TBranch        *b_ptDjet4;   //!
-   TBranch        *b_rmsjet4;   //!
-   TBranch        *b_ntrkjet4;   //!
-   TBranch        *b_nneutjet4;   //!
-   TBranch        *b_assjet1;   //!
-   TBranch        *b_assjet2;   //!
+   TBranch        *b_njets;   //!
+   TBranch        *b_ptjet;   //!
+   TBranch        *b_ptcorrjet;   //!
+   TBranch        *b_ecorrjet;   //!
+   TBranch        *b_etajet;   //!
+   TBranch        *b_phijet;   //!
+   TBranch        *b_betajet;   //!
+   TBranch        *b_betastarjet;   //!
+   TBranch        *b_btagvtxjet;   //!
+   TBranch        *b_btagtrkjet;   //!
+   TBranch        *b_btagjprobjet;   //!
+   TBranch        *b_ptDjet;   //!
+   TBranch        *b_rmsjet;   //!
+   TBranch        *b_ntrkjet;   //!
+   TBranch        *b_nneutjet;   //!
+   TBranch        *b_jetIdSimple_mvajet;   //!
+   TBranch        *b_jetIdFull_mvajet;   //!
+   TBranch        *b_jetId_dR2Meanjet;   //!
+   TBranch        *b_jetId_betaStarClassicjet;   //!
+   TBranch        *b_jetId_frac01jet;   //!
+   TBranch        *b_jetId_frac02jet;   //!
+   TBranch        *b_jetId_frac03jet;   //!
+   TBranch        *b_jetId_frac04jet;   //!
+   TBranch        *b_jetId_frac05jet;   //!
+   TBranch        *b_jetId_betajet;   //!
+   TBranch        *b_jetId_betaStarjet;   //!
+   TBranch        *b_jetIdCutBased_wpjet;   //!
+   TBranch        *b_jetIdSimple_wpjet;   //!
+   TBranch        *b_jetIdFull_wpjet;   //!
+   TBranch        *b_assjet;   //!
+   TBranch        *b_partPdgIDjet;   //!
+   TBranch        *b_partMomPdgIDjet;   //!
    TBranch        *b_deltaeta;   //!
    TBranch        *b_zeppenjet;   //!
    TBranch        *b_deltaphi;   //!
@@ -901,13 +801,29 @@ public :
    virtual ~RedNtpFinalizer_VHgg();
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
-   virtual void     Init(TChain *tree);
+   virtual void     Init();
    void setSelectionType( const std::string& selectionType );
    virtual void     finalize();
 
 
    std::string selectionType_;
    std::string bTaggerType_;
+
+
+
+   bool dopureeventWeight_;
+   bool doptreeventWeight_;
+   int r9cat_;
+   int cicselection_;
+   bool cs_;
+   float ptphot2cut_;
+   float ptphot1cut_;
+   float pthiggsmincut_;
+   float pthiggsmaxcut_;
+
+   float ptjetthresh_;
+   float etajetthresh_;
+
 
 
 };

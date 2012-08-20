@@ -13,7 +13,7 @@ RedNtpFinalizer_VHgg::RedNtpFinalizer_VHgg( const std::string& dataset, const st
 
 }
 
-RedNtpFinalizer::~RedNtpFinalizer()
+RedNtpFinalizer_VHgg::~RedNtpFinalizer_VHgg()
 {
    if (!tree_) return;
    delete tree_->GetCurrentFile();
@@ -26,6 +26,36 @@ RedNtpFinalizer::~RedNtpFinalizer()
 void RedNtpFinalizer_VHgg::finalize()
 {
 
+
+   this->Init();
+
+
+   std::string fullFlags = selectionType_ + "_" + bTaggerType_;
+   this->set_flags(fullFlags); //this is for the outfile name
+   this->createOutputFile();
+
+   outFile_->cd();
+
+
+
+   TH1D*  h1_njets = new TH1D("njets", "", 11, -0.5, 10.5);
+   h1_njets->Sumw2();
+   TH1D*  h1_nbjets_loose = new TH1D("nbjets_loose", "", 11, -0.5, 10.5);
+   h1_nbjets_loose->Sumw2();
+   TH1D*  h1_nbjets_medium = new TH1D("nbjets_medium", "", 11, -0.5, 10.5);
+   h1_nbjets_medium->Sumw2();
+
+   TH1D*  h1_posMatchedJet = new TH1D("posMatchedJet", "", 11, -0.5, 10.5);
+   h1_posMatchedJet->Sumw2();
+   TH1D*  h1_ptMatchedJet = new TH1D("ptMatchedJet", "", 1000, 0., 1000.);
+   h1_ptMatchedJet->Sumw2();
+   TH1D*  h1_etaMatchedJet = new TH1D("etaMatchedJet", "", 100, -5., 5.);
+   h1_etaMatchedJet->Sumw2();
+   TH1D*  h1_phiMatchedJet = new TH1D("phiMatchedJet", "", 100, -3.1416, 3.1416);
+   h1_phiMatchedJet->Sumw2();
+
+
+
    if (tree_ == 0) return;
 
    Long64_t nentries = tree_->GetEntries();
@@ -36,6 +66,8 @@ void RedNtpFinalizer_VHgg::finalize()
 
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
+
+      if( ientry % 10000 == 0 ) std::cout << "-> Entry " << ientry << " / " << nentries << std::endl;
 
       nb = tree_->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
@@ -57,8 +89,8 @@ void RedNtpFinalizer_VHgg::finalize()
         eventWeight = xSection_ / nGenEvents_ ;
  
         // pu/pt reeventWeighting
-        if(dopureeventWeight) eventWeight *= pu_weight; 
-        if(doptreeventWeight) eventWeight *= pt_eventWeight; 
+        if(dopureeventWeight_) eventWeight *= pu_weight; 
+        if(doptreeventWeight_) eventWeight *= pt_weight; 
 
       }
 
@@ -75,18 +107,18 @@ void RedNtpFinalizer_VHgg::finalize()
          || TMath::Abs(etascphot1)>2.5 || TMath::Abs(etascphot2)>2.5) continue;  // acceptance
 
       //     if(ptphot1<ptphot1cut) continue; //pt first photon
-      if(ptphot2<ptphot2cut) continue; //pt second photon
+      if(ptphot2<ptphot2cut_) continue; //pt second photon
 
 
-      if(ptphot1<ptphot1cut* massggnewvtx/120.) continue; //pt first photon
+      if(ptphot1<ptphot1cut_* massggnewvtx/120.) continue; //pt first photon
 //       if(ptphot2<ptphot2cut* massggnewvtx/120.) continue; //pt second photon
 
-      if(pthiggsmincut>0 && ptgg<pthiggsmincut) continue; //pt higgs min
-      if(pthiggsmaxcut>0 && ptgg>=pthiggsmaxcut) continue; //pt higgs max
+      if(pthiggsmincut_>0 && ptgg< pthiggsmincut_) continue; //pt higgs min
+      if(pthiggsmaxcut_>0 && ptgg>=pthiggsmaxcut_) continue; //pt higgs max
 
 
-      if(ptjet1cut>0 && (ptcorrjet1<ptjet1cut || TMath::Abs(etajet1)>4.7)) continue; //pt first jet
-      if(ptjet2cut>0 && (ptcorrjet2<ptjet2cut || TMath::Abs(etajet2)>4.7)) continue; //pt second jet
+//    if(ptjet1cut>0 && (ptcorrjet1<ptjet1cut_ || TMath::Abs(etajet1)>4.7)) continue; //pt first jet
+//    if(ptjet2cut>0 && (ptcorrjet2<ptjet2cut_ || TMath::Abs(etajet2)>4.7)) continue; //pt second jet
 
 
        // photon identification
@@ -99,9 +131,9 @@ void RedNtpFinalizer_VHgg::finalize()
        if(TMath::Abs(etascphot1)>1.4442 && r9phot1>.94) isr9phot1 = 1;
        if(TMath::Abs(etascphot2)>1.4442 && r9phot2>.94) isr9phot2 = 1;
  
-       if(r9cat == 1) {
+       if(r9cat_ == 1) {
          if(!isr9phot1 || !isr9phot2) continue;
-       } else if (r9cat == 0){
+       } else if (r9cat_ == 0){
          if(isr9phot1 && isr9phot2) continue;
        } 
  
@@ -113,12 +145,12 @@ void RedNtpFinalizer_VHgg::finalize()
  // 	pxlphot2 = !pid_haspixelseedphot2;
  //       }
        
-       idphot1 = (idcicphot1 >= cicselection);
-       idphot2 = (idcicphot2 >= cicselection);
+       idphot1 = (idcicphot1 >= cicselection_);
+       idphot2 = (idcicphot2 >= cicselection_);
  
-       if(!cs){ // photon id no control sample
+       if(!cs_){ // photon id no control sample
  
-       if(cicselection>0) {
+       if(cicselection_>0) {
          if(!(idphot1)) continue;
          if(!(idphot2)) continue;
        }else{
@@ -138,11 +170,56 @@ void RedNtpFinalizer_VHgg::finalize()
 
 
 
+       // jets
+
+       int njets_selected = 0;
+       int njets_selected_btagloose = 0;
+       int njets_selected_btagmedium = 0;
+
+       for( unsigned ijet=0; ijet<njets; ++ijet ) {
+
+         if( ptcorrjet[ijet] < ptjetthresh_ ) continue;
+         if( fabs(etajet[ijet]) > etajetthresh_ ) continue;
+
+         if( isMC ) {
+           if( partMomPdgIDjet[ijet] == 23 || abs( partMomPdgIDjet[ijet] ) == 24 ) {
+             h1_posMatchedJet->Fill( ijet, eventWeight );
+             h1_ptMatchedJet->Fill( ptcorrjet[ijet], eventWeight );
+             h1_etaMatchedJet->Fill( etajet[ijet], eventWeight );
+             h1_phiMatchedJet->Fill( phijet[ijet], eventWeight );
+             //index_MatchedJet->push_back(ijet);
+           }
+         }
+
+         if( btagjprobjet[ijet]>0.275 ) njets_selected_btagloose++;
+         if( btagjprobjet[ijet]>0.545 ) njets_selected_btagmedium++;
+
+         njets_selected++;
+
+         //AnalysisJet thisJet;
+         //thisJet.set
+         //selectedJets.push_back( thisJet );
+
+       } //for jets
+
+       h1_njets->Fill( njets_selected, eventWeight );
+       h1_nbjets_loose->Fill( njets_selected_btagloose, eventWeight );
+       h1_nbjets_medium->Fill( njets_selected_btagmedium, eventWeight );
 
 
    } //for entries
 
 
+
+   outFile_->cd();
+
+   h1_njets->Write();
+   h1_nbjets_loose->Write();
+   h1_nbjets_medium->Write();
+   h1_posMatchedJet->Write();
+   h1_ptMatchedJet->Write();
+   h1_etaMatchedJet->Write();
+   h1_phiMatchedJet->Write();
 
 } //finalize
 
@@ -181,7 +258,7 @@ Long64_t RedNtpFinalizer_VHgg::LoadTree(Long64_t entry)
    return centry;
 }
 
-void RedNtpFinalizer_VHgg::Init(TChain *tree)
+void RedNtpFinalizer_VHgg::Init()
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -192,8 +269,6 @@ void RedNtpFinalizer_VHgg::Init(TChain *tree)
    // (once per file to be processed).
 
    // Set branch addresses and branch pointers
-   if (!tree) return;
-   tree_ = tree;
    fCurrent = -1;
    tree_->SetMakeClass(1);
 
@@ -285,88 +360,38 @@ void RedNtpFinalizer_VHgg::Init(TChain *tree)
    tree_->SetBranchAddress("pid_ecalisophot2", &pid_ecalisophot2, &b_pid_ecalisophot2);
    tree_->SetBranchAddress("pid_hcalisophot1", &pid_hcalisophot1, &b_pid_hcalisophot1);
    tree_->SetBranchAddress("pid_hcalisophot2", &pid_hcalisophot2, &b_pid_hcalisophot2);
-   tree_->SetBranchAddress("ptjet1", &ptjet1, &b_ptjet1);
-   tree_->SetBranchAddress("ptjet2", &ptjet2, &b_ptjet2);
-   tree_->SetBranchAddress("ptjet3", &ptjet3, &b_ptjet3);
-   tree_->SetBranchAddress("ptjet4", &ptjet4, &b_ptjet4);
-   tree_->SetBranchAddress("ptcorrjet1", &ptcorrjet1, &b_ptcorrjet1);
-   tree_->SetBranchAddress("ptcorrjet2", &ptcorrjet2, &b_ptcorrjet2);
-   tree_->SetBranchAddress("ptcorrjet3", &ptcorrjet3, &b_ptcorrjet3);
-   tree_->SetBranchAddress("ptcorrjet4", &ptcorrjet4, &b_ptcorrjet4);
-   tree_->SetBranchAddress("ecorrjet1", &ecorrjet1, &b_ecorrjet1);
-   tree_->SetBranchAddress("ecorrjet2", &ecorrjet2, &b_ecorrjet2);
-   tree_->SetBranchAddress("ecorrjet3", &ecorrjet3, &b_ecorrjet3);
-   tree_->SetBranchAddress("ecorrjet4", &ecorrjet4, &b_ecorrjet4);
-   tree_->SetBranchAddress("etajet1", &etajet1, &b_etajet1);
-   tree_->SetBranchAddress("etajet2", &etajet2, &b_etajet2);
-   tree_->SetBranchAddress("etajet3", &etajet3, &b_etajet3);
-   tree_->SetBranchAddress("etajet4", &etajet4, &b_etajet4);
-   tree_->SetBranchAddress("phijet1", &phijet1, &b_phijet1);
-   tree_->SetBranchAddress("phijet2", &phijet2, &b_phijet2);
-   tree_->SetBranchAddress("phijet3", &phijet3, &b_phijet3);
-   tree_->SetBranchAddress("phijet4", &phijet4, &b_phijet4);
-   tree_->SetBranchAddress("betajet1", &betajet1, &b_betajet1);
-   tree_->SetBranchAddress("betajet2", &betajet2, &b_betajet2);
-   tree_->SetBranchAddress("betastarjet1", &betastarjet1, &b_betastarjet1);
-   tree_->SetBranchAddress("betastarjet2", &betastarjet2, &b_betastarjet2);
-   tree_->SetBranchAddress("btagvtxjet1", &btagvtxjet1, &b_btagvtxjet1);
-   tree_->SetBranchAddress("btagvtxjet2", &btagvtxjet2, &b_btagvtxjet2);
-   tree_->SetBranchAddress("btagvtxjet3", &btagvtxjet3, &b_btagvtxjet3);
-   tree_->SetBranchAddress("btagvtxjet4", &btagvtxjet4, &b_btagvtxjet4);
-   tree_->SetBranchAddress("btagtrkjet1", &btagtrkjet1, &b_btagtrkjet1);
-   tree_->SetBranchAddress("btagtrkjet2", &btagtrkjet2, &b_btagtrkjet2);
-   tree_->SetBranchAddress("btagtrkjet3", &btagtrkjet3, &b_btagtrkjet3);
-   tree_->SetBranchAddress("btagtrkjet4", &btagtrkjet4, &b_btagtrkjet4);
-   tree_->SetBranchAddress("btagjprobjet1", &btagjprobjet1, &b_btagjprobjet1);
-   tree_->SetBranchAddress("btagjprobjet2", &btagjprobjet2, &b_btagjprobjet2);
-   tree_->SetBranchAddress("btagjprobjet3", &btagjprobjet3, &b_btagjprobjet3);
-   tree_->SetBranchAddress("btagjprobjet4", &btagjprobjet4, &b_btagjprobjet4);
-   tree_->SetBranchAddress("ptDjet1", &ptDjet1, &b_ptDjet1);
-   tree_->SetBranchAddress("rmsjet1", &rmsjet1, &b_rmsjet1);
-   tree_->SetBranchAddress("ntrkjet1", &ntrkjet1, &b_ntrkjet1);
-   tree_->SetBranchAddress("nneutjet1", &nneutjet1, &b_nneutjet1);
-   tree_->SetBranchAddress("jetIdSimple_mvajet1", &jetIdSimple_mvajet1, &b_jetIdSimple_mvajet1);
-   tree_->SetBranchAddress("jetIdFull_mvajet1", &jetIdFull_mvajet1, &b_jetIdFull_mvajet1);
-   tree_->SetBranchAddress("jetId_dR2Meanjet1", &jetId_dR2Meanjet1, &b_jetId_dR2Meanjet1);
-   tree_->SetBranchAddress("jetId_betaStarClassicjet1", &jetId_betaStarClassicjet1, &b_jetId_betaStarClassicjet1);
-   tree_->SetBranchAddress("jetId_frac01jet1", &jetId_frac01jet1, &b_jetId_frac01jet1);
-   tree_->SetBranchAddress("jetId_frac02jet1", &jetId_frac02jet1, &b_jetId_frac02jet1);
-   tree_->SetBranchAddress("jetId_frac03jet1", &jetId_frac03jet1, &b_jetId_frac03jet1);
-   tree_->SetBranchAddress("jetId_frac04jet1", &jetId_frac04jet1, &b_jetId_frac04jet1);
-   tree_->SetBranchAddress("jetId_frac05jet1", &jetId_frac05jet1, &b_jetId_frac05jet1);
-   tree_->SetBranchAddress("jetId_betajet1", &jetId_betajet1, &b_jetId_betajet1);
-   tree_->SetBranchAddress("jetId_betaStarjet1", &jetId_betaStarjet1, &b_jetId_betaStarjet1);
-   tree_->SetBranchAddress("jetIdCutBased_wpjet1", &jetIdCutBased_wpjet1, &b_jetIdCutBased_wpjet1);
-   tree_->SetBranchAddress("jetIdSimple_wpjet1", &jetIdSimple_wpjet1, &b_jetIdSimple_wpjet1);
-   tree_->SetBranchAddress("jetIdFull_wpjet1", &jetIdFull_wpjet1, &b_jetIdFull_wpjet1);
-   tree_->SetBranchAddress("ptDjet2", &ptDjet2, &b_ptDjet2);
-   tree_->SetBranchAddress("rmsjet2", &rmsjet2, &b_rmsjet2);
-   tree_->SetBranchAddress("ntrkjet2", &ntrkjet2, &b_ntrkjet2);
-   tree_->SetBranchAddress("nneutjet2", &nneutjet2, &b_nneutjet2);
-   tree_->SetBranchAddress("jetIdSimple_mvajet2", &jetIdSimple_mvajet2, &b_jetIdSimple_mvajet2);
-   tree_->SetBranchAddress("jetIdFull_mvajet2", &jetIdFull_mvajet2, &b_jetIdFull_mvajet2);
-   tree_->SetBranchAddress("jetId_dR2Meanjet2", &jetId_dR2Meanjet2, &b_jetId_dR2Meanjet2);
-   tree_->SetBranchAddress("jetId_betaStarClassicjet2", &jetId_betaStarClassicjet2, &b_jetId_betaStarClassicjet2);
-   tree_->SetBranchAddress("jetIdCutBased_wpjet2", &jetIdCutBased_wpjet2, &b_jetIdCutBased_wpjet2);
-   tree_->SetBranchAddress("jetIdSimple_wpjet2", &jetIdSimple_wpjet2, &b_jetIdSimple_wpjet2);
-   tree_->SetBranchAddress("jetIdFull_wpjet2", &jetIdFull_wpjet2, &b_jetIdFull_wpjet2);
-   tree_->SetBranchAddress("jetId_frac01jet2", &jetId_frac01jet2, &b_jetId_frac01jet2);
-   tree_->SetBranchAddress("jetId_frac02jet2", &jetId_frac02jet2, &b_jetId_frac02jet2);
-   tree_->SetBranchAddress("jetId_frac03jet2", &jetId_frac03jet2, &b_jetId_frac03jet2);
-   tree_->SetBranchAddress("jetId_frac04jet2", &jetId_frac04jet2, &b_jetId_frac04jet2);
-   tree_->SetBranchAddress("jetId_frac05jet2", &jetId_frac05jet2, &b_jetId_frac05jet2);
-   tree_->SetBranchAddress("jetId_betajet2", &jetId_betajet2, &b_jetId_betajet2);
-   tree_->SetBranchAddress("jetId_betaStarjet2", &jetId_betaStarjet2, &b_jetId_betaStarjet2);
-   tree_->SetBranchAddress("ptDjet3", &ptDjet3, &b_ptDjet3);
-   tree_->SetBranchAddress("rmsjet3", &rmsjet3, &b_rmsjet3);
-   tree_->SetBranchAddress("ntrkjet3", &ntrkjet3, &b_ntrkjet3);
-   tree_->SetBranchAddress("nneutjet3", &nneutjet3, &b_nneutjet3);
-   tree_->SetBranchAddress("ptDjet4", &ptDjet4, &b_ptDjet4);
-   tree_->SetBranchAddress("rmsjet4", &rmsjet4, &b_rmsjet4);
-   tree_->SetBranchAddress("ntrkjet4", &ntrkjet4, &b_ntrkjet4);
-   tree_->SetBranchAddress("nneutjet4", &nneutjet4, &b_nneutjet4);
-   tree_->SetBranchAddress("assjet1", &assjet1, &b_assjet1);
-   tree_->SetBranchAddress("assjet2", &assjet2, &b_assjet2);
+   tree_->SetBranchAddress("njets", &njets, &b_njets);
+   tree_->SetBranchAddress("ptjet", ptjet, &b_ptjet);
+   tree_->SetBranchAddress("ptcorrjet", ptcorrjet, &b_ptcorrjet);
+   tree_->SetBranchAddress("ecorrjet", ecorrjet, &b_ecorrjet);
+   tree_->SetBranchAddress("etajet", etajet, &b_etajet);
+   tree_->SetBranchAddress("phijet", phijet, &b_phijet);
+   tree_->SetBranchAddress("betajet", betajet, &b_betajet);
+   tree_->SetBranchAddress("betastarjet", betastarjet, &b_betastarjet);
+   tree_->SetBranchAddress("btagvtxjet", btagvtxjet, &b_btagvtxjet);
+   tree_->SetBranchAddress("btagtrkjet", btagtrkjet, &b_btagtrkjet);
+   tree_->SetBranchAddress("btagjprobjet", btagjprobjet, &b_btagjprobjet);
+   tree_->SetBranchAddress("ptDjet", ptDjet, &b_ptDjet);
+   tree_->SetBranchAddress("rmsjet", rmsjet, &b_rmsjet);
+   tree_->SetBranchAddress("ntrkjet", ntrkjet, &b_ntrkjet);
+   tree_->SetBranchAddress("nneutjet", nneutjet, &b_nneutjet);
+   tree_->SetBranchAddress("jetIdSimple_mvajet", jetIdSimple_mvajet, &b_jetIdSimple_mvajet);
+   tree_->SetBranchAddress("jetIdFull_mvajet", jetIdFull_mvajet, &b_jetIdFull_mvajet);
+   tree_->SetBranchAddress("jetId_dR2Meanjet", jetId_dR2Meanjet, &b_jetId_dR2Meanjet);
+   tree_->SetBranchAddress("jetId_betaStarClassicjet", jetId_betaStarClassicjet, &b_jetId_betaStarClassicjet);
+   tree_->SetBranchAddress("jetId_frac01jet", jetId_frac01jet, &b_jetId_frac01jet);
+   tree_->SetBranchAddress("jetId_frac02jet", jetId_frac02jet, &b_jetId_frac02jet);
+   tree_->SetBranchAddress("jetId_frac03jet", jetId_frac03jet, &b_jetId_frac03jet);
+   tree_->SetBranchAddress("jetId_frac04jet", jetId_frac04jet, &b_jetId_frac04jet);
+   tree_->SetBranchAddress("jetId_frac05jet", jetId_frac05jet, &b_jetId_frac05jet);
+   tree_->SetBranchAddress("jetId_betajet", jetId_betajet, &b_jetId_betajet);
+   tree_->SetBranchAddress("jetId_betaStarjet", jetId_betaStarjet, &b_jetId_betaStarjet);
+   tree_->SetBranchAddress("jetIdCutBased_wpjet", jetIdCutBased_wpjet, &b_jetIdCutBased_wpjet);
+   tree_->SetBranchAddress("jetIdSimple_wpjet", jetIdSimple_wpjet, &b_jetIdSimple_wpjet);
+   tree_->SetBranchAddress("jetIdFull_wpjet", jetIdFull_wpjet, &b_jetIdFull_wpjet);
+   tree_->SetBranchAddress("assjet", assjet, &b_assjet);
+   tree_->SetBranchAddress("partPdgIDjet", partPdgIDjet, &b_partPdgIDjet);
+   tree_->SetBranchAddress("partMomPdgIDjet", partMomPdgIDjet, &b_partMomPdgIDjet);
    tree_->SetBranchAddress("deltaeta", &deltaeta, &b_deltaeta);
    tree_->SetBranchAddress("zeppenjet", &zeppenjet, &b_zeppenjet);
    tree_->SetBranchAddress("deltaphi", &deltaphi, &b_deltaphi);
@@ -645,7 +670,18 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
 
   if( selectionType=="sel0" ) {
 
+   dopureeventWeight_ = true;
+   doptreeventWeight_ = true;
+   r9cat_ = 1;
+   cicselection_ = 4;
+   cs_ = false;
+   ptphot1cut_ = 50.;
+   ptphot2cut_ = 30.;
+   pthiggsmincut_ = 0.;
+   pthiggsmaxcut_ = 10000.;
 
+   ptjetthresh_ = 20.;
+   etajetthresh_ = 20.;
 
   } else {
 
