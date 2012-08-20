@@ -24,6 +24,9 @@ public :
    Int_t           run;
    Int_t           event;
    Int_t           lumi;
+   Bool_t          H_event;
+   Bool_t          V_event;
+   Bool_t          Zbb_event;
    Float_t         rhoPF;
    Float_t         massgg;
    Float_t         ptgg;
@@ -109,7 +112,7 @@ public :
    Float_t         pid_ecalisophot2;
    Float_t         pid_hcalisophot1;
    Float_t         pid_hcalisophot2;
-   Float_t         njets;
+   Int_t           njets;
    Float_t         ptjet[10];
    Float_t         ptcorrjet[10];
    Float_t         ecorrjet[10];
@@ -412,6 +415,9 @@ public :
    TBranch        *b_run;   //!
    TBranch        *b_event;   //!
    TBranch        *b_lumi;   //!
+   TBranch        *b_H_event;   //!
+   TBranch        *b_V_event;   //!
+   TBranch        *b_Zbb_event;   //!
    TBranch        *b_rhoPF;   //!
    TBranch        *b_massgg;   //!
    TBranch        *b_ptgg;   //!

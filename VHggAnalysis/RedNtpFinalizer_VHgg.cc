@@ -44,6 +44,10 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_nbjets_loose->Sumw2();
    TH1D*  h1_nbjets_medium = new TH1D("nbjets_medium", "", 11, -0.5, 10.5);
    h1_nbjets_medium->Sumw2();
+   TH1D*  h1_nbjets_loose_ZbbHgg = new TH1D("nbjets_loose_ZbbHgg", "", 11, -0.5, 10.5);
+   h1_nbjets_loose_ZbbHgg->Sumw2();
+   TH1D*  h1_nbjets_medium_ZbbHgg = new TH1D("nbjets_medium_ZbbHgg", "", 11, -0.5, 10.5);
+   h1_nbjets_medium_ZbbHgg->Sumw2();
 
    TH1D*  h1_posMatchedJet = new TH1D("posMatchedJet", "", 11, -0.5, 10.5);
    h1_posMatchedJet->Sumw2();
@@ -206,6 +210,10 @@ void RedNtpFinalizer_VHgg::finalize()
        h1_njets->Fill( njets_selected, eventWeight );
        h1_nbjets_loose->Fill( njets_selected_btagloose, eventWeight );
        h1_nbjets_medium->Fill( njets_selected_btagmedium, eventWeight );
+       if( H_event && V_event && Zbb_event ) {
+         h1_nbjets_loose_ZbbHgg->Fill( njets_selected_btagloose, eventWeight );
+         h1_nbjets_medium_ZbbHgg->Fill( njets_selected_btagmedium, eventWeight );
+       }
 
 
    } //for entries
@@ -217,6 +225,8 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_njets->Write();
    h1_nbjets_loose->Write();
    h1_nbjets_medium->Write();
+   h1_nbjets_loose_ZbbHgg->Write();
+   h1_nbjets_medium_ZbbHgg->Write();
    h1_posMatchedJet->Write();
    h1_ptMatchedJet->Write();
    h1_etaMatchedJet->Write();
@@ -276,6 +286,9 @@ void RedNtpFinalizer_VHgg::Init()
    tree_->SetBranchAddress("run", &run, &b_run);
    tree_->SetBranchAddress("event", &event, &b_event);
    tree_->SetBranchAddress("lumi", &lumi, &b_lumi);
+   tree_->SetBranchAddress("H_event", &H_event, &b_H_event);
+   tree_->SetBranchAddress("V_event", &V_event, &b_V_event);
+   tree_->SetBranchAddress("Zbb_event", &Zbb_event, &b_Zbb_event);
    tree_->SetBranchAddress("rhoPF", &rhoPF, &b_rhoPF);
    tree_->SetBranchAddress("massgg", &massgg, &b_massgg);
    tree_->SetBranchAddress("ptgg", &ptgg, &b_ptgg);
