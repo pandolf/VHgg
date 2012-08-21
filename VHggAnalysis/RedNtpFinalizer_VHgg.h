@@ -27,6 +27,7 @@ public :
    Bool_t          H_event;
    Bool_t          V_event;
    Bool_t          Zbb_event;
+   Bool_t          Vqq_event;
    Float_t         rhoPF;
    Float_t         massgg;
    Float_t         ptgg;
@@ -418,6 +419,7 @@ public :
    TBranch        *b_H_event;   //!
    TBranch        *b_V_event;   //!
    TBranch        *b_Zbb_event;   //!
+   TBranch        *b_Vqq_event;   //!
    TBranch        *b_rhoPF;   //!
    TBranch        *b_massgg;   //!
    TBranch        *b_ptgg;   //!

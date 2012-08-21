@@ -403,6 +403,7 @@ void RedNtpFinalizer_VHgg::Init()
    tree_->SetBranchAddress("lumi", &lumi, &b_lumi);
    tree_->SetBranchAddress("H_event", &H_event, &b_H_event);
    tree_->SetBranchAddress("V_event", &V_event, &b_V_event);
+   tree_->SetBranchAddress("Vqq_event", &Vqq_event, &b_Vqq_event);
    tree_->SetBranchAddress("Zbb_event", &Zbb_event, &b_Zbb_event);
    tree_->SetBranchAddress("rhoPF", &rhoPF, &b_rhoPF);
    tree_->SetBranchAddress("massgg", &massgg, &b_massgg);
