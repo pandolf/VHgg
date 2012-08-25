@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2012/08/20 12:41:45 pandolf Exp $
+# $Id: Makefile,v 1.4 2012/08/20 12:59:13 pandolf Exp $
 ROOTLIBS      = $(shell $(ROOTSYS)/bin/root-config --libs)
 ROOTGLIBS     = $(shell $(ROOTSYS)/bin/root-config --glibs)
 
@@ -33,7 +33,7 @@ EXTRALIBS  :=  -L$(ROOTSYS)/lib -L$(ROOFIT_LIBDIR)/ -lHtml -lMathCore -lGenVecto
 CCFILES=$(filter-out $(BINFILES),$(wildcard *.cc))
 
 # List of all object files to build
-OLIST = $(OBJDIR)/RedNtpFinalizer.o $(OBJDIR)/AnalysisJet.o $(OBJDIR)/BTagSFUtil.o $(OBJDIR)/SFlightFuncs.o $(OBJDIR)/MistagFuncs.o
+OLIST = $(OBJDIR)/RedNtpFinalizer.o $(OBJDIR)/AnalysisJet.o $(OBJDIR)/BTagSFUtil.o $(OBJDIR)/SFlightFuncs.o $(OBJDIR)/MistagFuncs.o $(OBJDIR)/QGLikelihoodCalculator.o
 OLIST +=$(patsubst %.cc,$(OBJDIR)/%.o,$(notdir $(CCFILES)))
 
 $(OBJDIR)/RedNtpFinalizer.o: $(CMSSW_BASE)/src/UserCode/pandolf/CommonTools/RedNtpFinalizer.cc
@@ -61,6 +61,11 @@ $(OBJDIR)/MistagFuncs.o: $(CMSSW_BASE)/src/UserCode/pandolf/BTagSFUtil/src/Mista
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
+$(OBJDIR)/QGLikelihoodCalculator.o: $(CMSSW_BASE)/src/UserCode/pandolf/QGLikelihood/src/QGLikelihoodCalculator.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
 # Implicit rule to compile all classes
 $(OBJDIR)/%.o : %.cc
 	@echo "Compiling $<"
@@ -68,7 +73,7 @@ $(OBJDIR)/%.o : %.cc
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
 
-$(PROGRAMS) : $(OLIST)
+$(PROGRAMS) : $(OLIST) $(BINFILES)
 	@echo "Linking $@"
 	@$(CC) $(CCFLAGS)  $(INCLUDES) $(OLIST) \
 	$(ROOTLIBS) $(EXTRALIBS) -o $(WORKDIR)/$@  $(patsubst %,%.cpp,$@)
