@@ -1,5 +1,6 @@
 #include "RedNtpFinalizer_VHgg.h"
 
+#include "QGLikelihood/interface/QGLikelihoodCalculator.h"
 
 
 
@@ -77,6 +78,19 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_mgg_1btag->Sumw2();
    TH1D* h1_mgg_2btag = new TH1D("mgg_2btag", "", 80, 100., 180.);
    h1_mgg_2btag->Sumw2();
+
+   TH1D* h1_qgljet0 = new TH1D("qgljet0", "", 100, 0., 1.0001);
+   h1_qgljet0->Sumw2();
+   TH1D* h1_qgljet1 = new TH1D("qgljet1", "", 100, 0., 1.0001);
+   h1_qgljet1->Sumw2();
+   TH1D* h1_qgljet0_correct = new TH1D("qgljet0_correct", "", 100, 0., 1.0001);
+   h1_qgljet0_correct->Sumw2();
+   TH1D* h1_qgljet1_correct = new TH1D("qgljet1_correct", "", 100, 0., 1.0001);
+   h1_qgljet1_correct->Sumw2();
+   TH1D* h1_qgljet0_incorrect = new TH1D("qgljet0_incorrect", "", 100, 0., 1.0001);
+   h1_qgljet0_incorrect->Sumw2();
+   TH1D* h1_qgljet1_incorrect = new TH1D("qgljet1_incorrect", "", 100, 0., 1.0001);
+   h1_qgljet1_incorrect->Sumw2();
   
 
 // TTree* tree_passedEvents = new TTree("tree_passedEvents");
@@ -88,6 +102,10 @@ void RedNtpFinalizer_VHgg::finalize()
 // tree_passedEvents->Branch( "nbjets_loose", &nbjets_loose_t, "nbjets_loose_t/F" );
 // tree_passedEvents->Branch( "nbjets_medium", &nbjets_medium_t, "nbjets_medium_t/F" );
  
+
+
+   std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
+   QGLikelihoodCalculator *qglikeli = new QGLikelihoodCalculator( qglFileName );
 
 
    float allPairs = 0.;
@@ -293,8 +311,11 @@ void RedNtpFinalizer_VHgg::finalize()
        jet1.SetPtEtaPhiE( ptcorrjet[indexjet1], etajet[indexjet1], phijet[indexjet1], ecorrjet[indexjet1] );
        AnalysisJet dijet = jet0 + jet1;
 
-       if( (partMomPdgIDjet[indexjet0] == 23 || abs( partMomPdgIDjet[indexjet0] ) == 24)
-       && ( partMomPdgIDjet[indexjet1] == 23 || abs( partMomPdgIDjet[indexjet1] ) == 24) ) {
+       bool chose_correctPair = (partMomPdgIDjet[indexjet0] == 23 || abs( partMomPdgIDjet[indexjet0] ) == 24)
+                             && (partMomPdgIDjet[indexjet1] == 23 || abs( partMomPdgIDjet[indexjet1] ) == 24);
+
+
+       if( chose_correctPair ) {
 
          correctPairs_fancy += eventWeight;
          h1_mjj_correct->Fill( dijet.M(), eventWeight );
@@ -307,6 +328,21 @@ void RedNtpFinalizer_VHgg::finalize()
 
        
        if( dijet.M()<60. || dijet.M()>120. ) continue;
+
+
+       float qgljet0 = qglikeli->computeQGLikelihoodPU( jet0.Pt(), rhoPF, ntrkjet[indexjet0], nneutjet[indexjet0], ptDjet[indexjet0] );
+       float qgljet1 = qglikeli->computeQGLikelihoodPU( jet1.Pt(), rhoPF, ntrkjet[indexjet1], nneutjet[indexjet1], ptDjet[indexjet1] );
+
+
+       h1_qgljet0->Fill( qgljet0, eventWeight );
+       h1_qgljet1->Fill( qgljet1, eventWeight );
+       if( chose_correctPair ) {
+         h1_qgljet0_correct->Fill( qgljet0, eventWeight );
+         h1_qgljet1_correct->Fill( qgljet1, eventWeight );
+       } else {
+         h1_qgljet0_incorrect->Fill( qgljet0, eventWeight );
+         h1_qgljet1_incorrect->Fill( qgljet1, eventWeight );
+       }
 
        if( njets_selected_btagloose==0 ) {
          h1_mgg_0btag->Fill( massggnewvtx, eventWeight );
@@ -346,6 +382,14 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_mgg_0btag->Write();
    h1_mgg_1btag->Write();
    h1_mgg_2btag->Write();
+   h1_qgljet0->Write();
+   h1_qgljet1->Write();
+   h1_qgljet0_correct->Write();
+   h1_qgljet1_correct->Write();
+   h1_qgljet0_incorrect->Write();
+   h1_qgljet1_incorrect->Write();
+
+
 
 } //finalize
 
