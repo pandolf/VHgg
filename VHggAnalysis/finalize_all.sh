@@ -1,6 +1,8 @@
 # usage: source finalize_all.sh [selectionType]
 
 
+ ./finalize_VHgg  GluGluToHToGG_M-125_8TeV-powheg-pythia6 $1
+ ./finalize_VHgg  WH_ZH_HToGG_M-125_8TeV-pythia6 $1
  ./finalize_VHgg  DiPhotonBox_8TeV-pythia6 $1
  ./finalize_VHgg  V_8TeV $1
  ./finalize_VHgg  GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6 $1
