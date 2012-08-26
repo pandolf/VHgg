@@ -16,6 +16,10 @@ RedNtpFinalizer_VHgg::RedNtpFinalizer_VHgg( const std::string& dataset, const st
 
 RedNtpFinalizer_VHgg::~RedNtpFinalizer_VHgg()
 {
+
+   outFile_->Close();
+
+
    if (!tree_) return;
    delete tree_->GetCurrentFile();
 }
@@ -124,7 +128,7 @@ void RedNtpFinalizer_VHgg::finalize()
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
 
-      if( ientry % 10000 == 0 ) std::cout << "-> Entry " << ientry << " / " << nentries << std::endl;
+      if( ientry % 20000 == 0 ) std::cout << "-> Entry " << ientry << " / " << nentries << std::endl;
 
       nb = tree_->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
