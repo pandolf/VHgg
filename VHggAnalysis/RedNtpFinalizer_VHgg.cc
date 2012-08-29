@@ -93,6 +93,18 @@ void RedNtpFinalizer_VHgg::finalize()
    TH1D* h1_mgg_2btag = new TH1D("mgg_2btag", "", 80, 100., 180.);
    h1_mgg_2btag->Sumw2();
 
+   TH1D*  h1_deltaPhi = new TH1D("deltaPhi", "", 100, 0., 3.1416);
+   h1_deltaPhi->Sumw2();
+   TH1D*  h1_ptDijet = new TH1D("ptDijet", "", 100, 0., 500.);
+   h1_ptDijet->Sumw2();
+   TH1D*  h1_ptDiphot = new TH1D("ptDiphot", "", 100, 0., 200.);
+   h1_ptDiphot->Sumw2();
+   TH1D*  h1_ptRatio = new TH1D("ptRatio", "", 100, 0., 3.);
+   h1_ptRatio->Sumw2();
+   TH1D*  h1_ptDifference = new TH1D("ptDifference", "", 200, -200., 200.);
+   h1_ptDifference->Sumw2();
+
+
    TH1D* h1_qgljet0 = new TH1D("qgljet0", "", 100, 0., 1.0001);
    h1_qgljet0->Sumw2();
    TH1D* h1_qgljet1 = new TH1D("qgljet1", "", 100, 0., 1.0001);
@@ -166,13 +178,16 @@ void RedNtpFinalizer_VHgg::finalize()
       }
 
 
+      TLorentzVector diphot;
+      diphot.SetPtEtaPhiM( ptggnewvtx, etagg, phigg, massggnewvtx);
+
 
       // analysis cuts:
 
       //if(npu>=30) continue;
 
       // if(massggnewvtx<90 || massggnewvtx>190) continue;
-      if(massggnewvtx<100 || massggnewvtx>180) continue;
+      if(diphot.M()<100 || diphot.M()>180) continue;
 
       if((TMath::Abs(etascphot1)>1.4442&&TMath::Abs(etascphot1)<1.566)||(TMath::Abs(etascphot2)>1.4442&&TMath::Abs(etascphot2)<1.566)
          || TMath::Abs(etascphot1)>2.5 || TMath::Abs(etascphot2)>2.5) continue;  // acceptance
@@ -184,8 +199,8 @@ void RedNtpFinalizer_VHgg::finalize()
       if(ptphot2 < ptphot2cut_) continue; //pt second photon
 //       if(ptphot2<ptphot2cut* massggnewvtx/120.) continue; //pt second photon
 
-      if(pthiggsmincut_>0 && ptgg< pthiggsmincut_) continue; //pt higgs min
-      if(pthiggsmaxcut_>0 && ptgg>=pthiggsmaxcut_) continue; //pt higgs max
+      if(pthiggsmincut_>0 && diphot.Pt()< pthiggsmincut_) continue; //pt higgs min
+      if(pthiggsmaxcut_>0 && diphot.Pt()>=pthiggsmaxcut_) continue; //pt higgs max
 
 
 //    if(ptjet1cut>0 && (ptcorrjet1<ptjet1cut_ || TMath::Abs(etajet1)>4.7)) continue; //pt first jet
@@ -370,6 +385,14 @@ void RedNtpFinalizer_VHgg::finalize()
          h1_qgljet1_incorrect->Fill( qgljet1, eventWeight );
        }
 
+       float deltaphi = fabs(dijet.DeltaPhi(diphot));
+
+       h1_deltaPhi->Fill( deltaphi, eventWeight );
+       h1_ptDiphot->Fill( diphot.Pt(), eventWeight );
+       h1_ptDijet->Fill( dijet.Pt(), eventWeight );
+       h1_ptRatio->Fill( dijet.Pt()/diphot.Pt(), eventWeight );
+       h1_ptDifference->Fill( dijet.Pt()-diphot.Pt(), eventWeight );
+
        if( njets_selected_btagloose==0 ) {
          h1_mgg_0btag->Fill( massggnewvtx, eventWeight );
        } else if( njets_selected_btagloose==1 ) {
@@ -403,16 +426,25 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_ptMatchedJet->Write();
    h1_etaMatchedJet->Write();
    h1_phiMatchedJet->Write();
+
    h1_mjj->Write();
    h1_mjj_0btag->Write();
    h1_mjj_1btag->Write();
    h1_mjj_2btag->Write();
    h1_mjj_correct->Write();
    h1_mjj_incorrect->Write();
+
+   h1_deltaPhi->Write();
+   h1_ptDijet->Write();
+   h1_ptDiphot->Write();
+   h1_ptRatio->Write();
+   h1_ptDifference->Write();
+
    h1_mgg_presel->Write();
    h1_mgg_0btag->Write();
    h1_mgg_1btag->Write();
    h1_mgg_2btag->Write();
+
    h1_qgljet0->Write();
    h1_qgljet1->Write();
    h1_qgljet0_correct->Write();

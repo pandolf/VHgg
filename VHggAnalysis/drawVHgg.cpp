@@ -127,6 +127,12 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto("qgljet0");
   db_nostack->drawHisto("qgljet1");
 
+  db_nostack->drawHisto("deltaPhi");
+  db_nostack->drawHisto("ptDijet");
+  db_nostack->drawHisto("ptDiphot");
+  db_nostack->drawHisto("ptRatio");
+  db_nostack->drawHisto("ptDifference");
+
 
 
 
@@ -134,8 +140,11 @@ int main(int argc, char* argv[]) {
 
   db_stack->drawHisto("mgg_presel", "DiPhoton Invariant Mass", "GeV");
 
+  db_stack->set_legendTitle( "0 b-tag Category" );
   db_stack->drawHisto("mgg_0btag", "DiPhoton Invariant Mass", "GeV");
+  db_stack->set_legendTitle( "1 b-tag Category" );
   db_stack->drawHisto("mgg_1btag", "DiPhoton Invariant Mass", "GeV");
+  db_stack->set_legendTitle( "2 b-tag Category" );
   db_stack->drawHisto("mgg_2btag", "DiPhoton Invariant Mass", "GeV");
 
 
