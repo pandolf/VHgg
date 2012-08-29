@@ -84,6 +84,8 @@ void RedNtpFinalizer_VHgg::finalize()
    TH1D* h1_mjj_incorrect = new TH1D("mjj_incorrect", "", 50, 0., 500.);
    h1_mjj_incorrect->Sumw2();
 
+   TH1D* h1_mgg_presel = new TH1D("mgg_presel", "", 80, 100., 180.);
+   h1_mgg_presel->Sumw2();
    TH1D* h1_mgg_0btag = new TH1D("mgg_0btag", "", 80, 100., 180.);
    h1_mgg_0btag->Sumw2();
    TH1D* h1_mgg_1btag = new TH1D("mgg_1btag", "", 80, 100., 180.);
@@ -167,7 +169,7 @@ void RedNtpFinalizer_VHgg::finalize()
 
       // analysis cuts:
 
-      if(npu>=30) continue;
+      //if(npu>=30) continue;
 
       // if(massggnewvtx<90 || massggnewvtx>190) continue;
       if(massggnewvtx<100 || massggnewvtx>180) continue;
@@ -176,10 +178,10 @@ void RedNtpFinalizer_VHgg::finalize()
          || TMath::Abs(etascphot1)>2.5 || TMath::Abs(etascphot2)>2.5) continue;  // acceptance
 
       //     if(ptphot1<ptphot1cut) continue; //pt first photon
-      if(ptphot2<ptphot2cut_) continue; //pt second photon
 
 
-      if(ptphot1<ptphot1cut_* massggnewvtx/120.) continue; //pt first photon
+      if(ptphot1 < ptphot1cut_) continue; //pt first photon
+      if(ptphot2 < ptphot2cut_) continue; //pt second photon
 //       if(ptphot2<ptphot2cut* massggnewvtx/120.) continue; //pt second photon
 
       if(pthiggsmincut_>0 && ptgg< pthiggsmincut_) continue; //pt higgs min
@@ -214,12 +216,12 @@ void RedNtpFinalizer_VHgg::finalize()
  // 	pxlphot2 = !pid_haspixelseedphot2;
  //       }
        
-       idphot1 = (idcicphot1 >= cicselection_);
-       idphot2 = (idcicphot2 >= cicselection_);
+       idphot1 = (idcicpfphot1 >= photonID_thresh_);
+       idphot2 = (idcicpfphot2 >= photonID_thresh_);
  
        if(!cs_){ // photon id no control sample
  
-       if(cicselection_>0) {
+       if(photonID_thresh_>0) {
          if(!(idphot1)) continue;
          if(!(idphot2)) continue;
        }else{
@@ -229,14 +231,16 @@ void RedNtpFinalizer_VHgg::finalize()
        
        }else{ // photon id for control sample
         
-         looseidphot1 = (idcicphot1 > 0 );
-         looseidphot2 = (idcicphot2 > 0 );
+         looseidphot1 = (idcicpfphot1 > 0 );
+         looseidphot2 = (idcicpfphot2 > 0 );
          //	  if( !( (idphot1 && looseidphot2 && !idphot2) || (idphot2 && looseidphot1 && !idphot1) ) ) continue; 
          // Not perfect should be using the same electronVeto wrt CiC selection (now using matchedPromptEle veto)
          if( !( (idphot1 && !idphot2 && !pid_hasMatchedPromptElephot2) || (idphot2 && !idphot1 && !pid_hasMatchedPromptElephot1) ) ) continue; 
  
        }
 
+
+       h1_mgg_presel->Fill( massggnewvtx, eventWeight );
 
 
        // jets
@@ -405,6 +409,7 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_mjj_2btag->Write();
    h1_mjj_correct->Write();
    h1_mjj_incorrect->Write();
+   h1_mgg_presel->Write();
    h1_mgg_0btag->Write();
    h1_mgg_1btag->Write();
    h1_mgg_2btag->Write();
@@ -873,10 +878,10 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
    dopureeventWeight_ = true;
    doptreeventWeight_ = true;
    r9cat_ = 1;
-   cicselection_ = 4;
+   photonID_thresh_ = 4;
    cs_ = false;
-   ptphot1cut_ = 50.;
-   ptphot2cut_ = 30.;
+   ptphot1cut_ = 60.;
+   ptphot2cut_ = 25.;
    pthiggsmincut_ = 0.;
    pthiggsmaxcut_ = 10000.;
 
