@@ -43,6 +43,10 @@ void RedNtpFinalizer_VHgg::finalize()
 
 
 
+   TH1D*  h1_nvertex = new TH1D("nvertex", "", 51, -0.5, 50.5);
+   h1_nvertex->Sumw2();
+   TH1D*  h1_nvertex_PUW = new TH1D("nvertex_PUW", "", 51, -0.5, 50.5);
+   h1_nvertex_PUW->Sumw2();
 
    TH1D*  h1_njets = new TH1D("njets", "", 11, -0.5, 10.5);
    h1_njets->Sumw2();
@@ -71,6 +75,17 @@ void RedNtpFinalizer_VHgg::finalize()
    TH1D*  h1_phiMatchedJet = new TH1D("phiMatchedJet", "", 100, -3.1416, 3.1416);
    h1_phiMatchedJet->Sumw2();
 
+
+   TH1D* h1_ptphot0 = new TH1D("ptphot0", "", 100, 0., 200.);
+   h1_ptphot0->Sumw2();
+   TH1D* h1_ptphot1 = new TH1D("ptphot1", "", 100, 0., 200.);
+   h1_ptphot1->Sumw2();
+   TH1D* h1_ptjet0 = new TH1D("ptjet0", "", 100, 0., 200.);
+   h1_ptjet0->Sumw2();
+   TH1D* h1_ptjet1 = new TH1D("ptjet1", "", 100, 0., 200.);
+   h1_ptjet1->Sumw2();
+
+
    TH1D* h1_mjj = new TH1D("mjj", "", 50, 0., 500.);
    h1_mjj->Sumw2();
    TH1D* h1_mjj_0btag = new TH1D("mjj_0btag", "", 50, 0., 500.);
@@ -97,11 +112,11 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_deltaPhi->Sumw2();
    TH1D*  h1_ptDijet = new TH1D("ptDijet", "", 100, 0., 500.);
    h1_ptDijet->Sumw2();
-   TH1D*  h1_ptDiphot = new TH1D("ptDiphot", "", 100, 0., 200.);
+   TH1D*  h1_ptDiphot = new TH1D("ptDiphot", "", 100, 0., 500.);
    h1_ptDiphot->Sumw2();
    TH1D*  h1_ptRatio = new TH1D("ptRatio", "", 100, 0., 3.);
    h1_ptRatio->Sumw2();
-   TH1D*  h1_ptDifference = new TH1D("ptDifference", "", 200, -200., 200.);
+   TH1D*  h1_ptDifference = new TH1D("ptDifference", "", 100, -200., 200.);
    h1_ptDifference->Sumw2();
 
 
@@ -171,11 +186,15 @@ void RedNtpFinalizer_VHgg::finalize()
 
         eventWeight = xSection_ / nGenEvents_ ;
  
+        h1_nvertex->Fill( nvtx, eventWeight );
+
         // pu/pt reeventWeighting
         if(dopureeventWeight_) eventWeight *= pu_weight; 
         if(doptreeventWeight_) eventWeight *= pt_weight; 
 
       }
+
+      h1_nvertex_PUW->Fill( nvtx, eventWeight );
 
 
       TLorentzVector diphot;
@@ -194,6 +213,9 @@ void RedNtpFinalizer_VHgg::finalize()
 
       //     if(ptphot1<ptphot1cut) continue; //pt first photon
 
+
+      h1_ptphot0->Fill(ptphot1, eventWeight);
+      h1_ptphot1->Fill(ptphot2, eventWeight);
 
       if(ptphot1 < ptphot1cut_) continue; //pt first photon
       if(ptphot2 < ptphot2cut_) continue; //pt second photon
@@ -342,6 +364,9 @@ void RedNtpFinalizer_VHgg::finalize()
        jet1.SetPtEtaPhiE( ptcorrjet[indexjet1], etajet[indexjet1], phijet[indexjet1], ecorrjet[indexjet1] );
        AnalysisJet dijet = jet0 + jet1;
 
+       h1_ptjet0->Fill( jet0.Pt(), eventWeight );
+       h1_ptjet1->Fill( jet1.Pt(), eventWeight );
+
        bool chose_correctPair = (partMomPdgIDjet[indexjet0] == 23 || abs( partMomPdgIDjet[indexjet0] ) == 24)
                              && (partMomPdgIDjet[indexjet1] == 23 || abs( partMomPdgIDjet[indexjet1] ) == 24);
 
@@ -368,7 +393,12 @@ void RedNtpFinalizer_VHgg::finalize()
          h1_mjj_2btag->Fill( dijet.M(), eventWeight );
        }
        
-       if( dijet.M()<60. || dijet.M()>120. ) continue;
+       if( njets_selected_btagloose==2 ) {
+         if( jet0.Pt() < ptjetleadthresh_ ) continue;
+         if( dijet.M()<50. || dijet.M()>150. ) continue;
+       } else {
+         if( dijet.M()<60. || dijet.M()>120. ) continue;
+       }
 
 
        float qgljet0 = qglikeli->computeQGLikelihoodPU( jet0.Pt(), rhoPF, ntrkjet[indexjet0], nneutjet[indexjet0], ptDjet[indexjet0] );
@@ -414,6 +444,9 @@ void RedNtpFinalizer_VHgg::finalize()
 
    outFile_->cd();
 
+   h1_nvertex->Write();
+   h1_nvertex_PUW->Write();
+
    h1_njets->Write();
    h1_nbjets_loose->Write();
    h1_nbjets_medium->Write();
@@ -426,6 +459,11 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_ptMatchedJet->Write();
    h1_etaMatchedJet->Write();
    h1_phiMatchedJet->Write();
+
+   h1_ptphot0->Write();
+   h1_ptphot1->Write();
+   h1_ptjet0->Write();
+   h1_ptjet1->Write();
 
    h1_mjj->Write();
    h1_mjj_0btag->Write();
@@ -917,7 +955,24 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
    pthiggsmincut_ = 0.;
    pthiggsmaxcut_ = 10000.;
 
-   ptjetthresh_ = 30.;
+   ptjetthresh_ = 20.;
+   ptjetleadthresh_ = 20.;
+   etajetthresh_ = 2.4;
+
+  } else if( selectionType=="sel1" ) {
+
+   dopureeventWeight_ = true;
+   doptreeventWeight_ = true;
+   r9cat_ = 1;
+   photonID_thresh_ = 4;
+   cs_ = false;
+   ptphot1cut_ = 60.;
+   ptphot2cut_ = 25.;
+   pthiggsmincut_ = 70.;
+   pthiggsmaxcut_ = 10000.;
+
+   ptjetthresh_ = 20.;
+   ptjetleadthresh_ = 40.;
    etajetthresh_ = 2.4;
 
   } else {
