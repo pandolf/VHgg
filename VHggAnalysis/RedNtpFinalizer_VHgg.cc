@@ -71,6 +71,14 @@ void RedNtpFinalizer_VHgg::finalize()
    TH1D*  h1_phiMatchedJet = new TH1D("phiMatchedJet", "", 100, -3.1416, 3.1416);
    h1_phiMatchedJet->Sumw2();
 
+   TH1D* h1_mjj = new TH1D("mjj", "", 50, 0., 500.);
+   h1_mjj->Sumw2();
+   TH1D* h1_mjj_0btag = new TH1D("mjj_0btag", "", 50, 0., 500.);
+   h1_mjj_0btag->Sumw2();
+   TH1D* h1_mjj_1btag = new TH1D("mjj_1btag", "", 50, 0., 500.);
+   h1_mjj_1btag->Sumw2();
+   TH1D* h1_mjj_2btag = new TH1D("mjj_2btag", "", 50, 0., 500.);
+   h1_mjj_2btag->Sumw2();
    TH1D* h1_mjj_correct = new TH1D("mjj_correct", "", 50, 0., 500.);
    h1_mjj_correct->Sumw2();
    TH1D* h1_mjj_incorrect = new TH1D("mjj_incorrect", "", 50, 0., 500.);
@@ -298,7 +306,7 @@ void RedNtpFinalizer_VHgg::finalize()
        
 
 
-       // choose jets as two leading jets, OR jets with btags
+       // choose jets as two btagged jets, OR leading ones
        int indexjet0 = 0;
        int indexjet1 = 1;
        if( index_selected_btagloose.size()==1 ) {
@@ -319,6 +327,8 @@ void RedNtpFinalizer_VHgg::finalize()
                              && (partMomPdgIDjet[indexjet1] == 23 || abs( partMomPdgIDjet[indexjet1] ) == 24);
 
 
+       h1_mjj->Fill( dijet.M(), eventWeight );
+
        if( chose_correctPair ) {
 
          correctPairs_fancy += eventWeight;
@@ -330,6 +340,14 @@ void RedNtpFinalizer_VHgg::finalize()
 
        }
 
+
+       if( njets_selected_btagloose==0 ) {
+         h1_mjj_0btag->Fill( dijet.M(), eventWeight );
+       } else if( njets_selected_btagloose==1 ) {
+         h1_mjj_1btag->Fill( dijet.M(), eventWeight );
+       } else {
+         h1_mjj_2btag->Fill( dijet.M(), eventWeight );
+       }
        
        if( dijet.M()<60. || dijet.M()>120. ) continue;
 
@@ -381,6 +399,10 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_ptMatchedJet->Write();
    h1_etaMatchedJet->Write();
    h1_phiMatchedJet->Write();
+   h1_mjj->Write();
+   h1_mjj_0btag->Write();
+   h1_mjj_1btag->Write();
+   h1_mjj_2btag->Write();
    h1_mjj_correct->Write();
    h1_mjj_incorrect->Write();
    h1_mgg_0btag->Write();
