@@ -29,35 +29,54 @@ int main(int argc, char* argv[]) {
 
 
 
-  DrawBase* db = new DrawBase("VHgg");
+  DrawBase* db_nostack = new DrawBase("VHgg_nostack");
+  DrawBase* db_stack = new DrawBase("VHgg_stack");
 
-  db->set_lumiOnRightSide();
+  db_nostack->set_lumiOnRightSide();
+  db_stack->set_lumiOnRightSide();
+
+  db_nostack->set_shapeNormalization();
+
+  db_stack->set_lumiNormalization(30000.);
+  db_stack->set_noStack(false);
 
   std::string outputdir_str = "VHggPlots_MConly_" + selType + "_" + bTaggerType;
-  db->set_outputdir(outputdir_str);
+  db_nostack->set_outputdir(outputdir_str);
+  db_stack->set_outputdir(outputdir_str);
 
   int signalFillColor = 46;
 
+  // inclusive signal file for stack plot
   std::string HToGGFileName = "VHgg_HToGG_M-125_8TeV-pythia6";
   HToGGFileName += "_" + selType;
   HToGGFileName += "_" + bTaggerType;
   HToGGFileName += ".root";
   TFile* HToGGFile = TFile::Open(HToGGFileName.c_str());
-  db->add_mcFile( HToGGFile, "HToGG", "H (125)", signalFillColor, 0);
+  db_stack->add_mcFile( HToGGFile, "HToGG", "H (125)", signalFillColor, 0);
+
+  // VH only for shape comparisons
+  std::string VHFileName = "VHgg_WH_ZH_HToGG_M-125_8TeV-pythia6";
+  VHFileName += "_" + selType;
+  VHFileName += "_" + bTaggerType;
+  VHFileName += ".root";
+  TFile* VHFile = TFile::Open(VHFileName.c_str());
+  db_nostack->add_mcFile( VHFile, "VH", "VH (125)", signalFillColor, 0);
 
   std::string DiPhotonFileName = "VHgg_DiPhoton_8TeV-pythia6";
   DiPhotonFileName += "_" + selType;
   DiPhotonFileName += "_" + bTaggerType;
   DiPhotonFileName += ".root";
   TFile* DiPhotonFile = TFile::Open(DiPhotonFileName.c_str());
-  db->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
+  db_nostack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
+  db_stack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
 
   std::string GammaJetFileName = "VHgg_GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6";
   GammaJetFileName += "_" + selType;
   GammaJetFileName += "_" + bTaggerType;
   GammaJetFileName += ".root";
   TFile* GammaJetFile = TFile::Open(GammaJetFileName.c_str());
-  db->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", kBlue);
+  db_nostack->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
+  db_stack->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
 
 
   std::string DiBosonFileName = "VHgg_VV_8TeV";
@@ -65,32 +84,31 @@ int main(int argc, char* argv[]) {
   DiBosonFileName += "_" + bTaggerType;
   DiBosonFileName += ".root";
   TFile* DiBosonFile = TFile::Open(DiBosonFileName.c_str());
-  db->add_mcFile( DiBosonFile, "DiBoson", "Di Boson", 40);
+  db_stack->add_mcFile( DiBosonFile, "DiBoson", "Diboson", 39);
 
   std::string TriBosonFileName = "VHgg_VGG_8TeV";
   TriBosonFileName += "_" + selType;
   TriBosonFileName += "_" + bTaggerType;
   TriBosonFileName += ".root";
   TFile* TriBosonFile = TFile::Open(TriBosonFileName.c_str());
-  db->add_mcFile( TriBosonFile, "TriBoson", "V + #gamma#gamma", 50);
+  db_stack->add_mcFile( TriBosonFile, "TriBoson", "V + #gamma#gamma", 40);
 
   std::string TTFileName = "VHgg_TT_8TeV";
   TTFileName += "_" + selType;
   TTFileName += "_" + bTaggerType;
   TTFileName += ".root";
   TFile* TTFile = TFile::Open(TTFileName.c_str());
-  db->add_mcFile( TTFile, "TT", "Top", kYellow+1);
+  db_stack->add_mcFile( TTFile, "TT", "Top", 44);
 
   std::string QCDFileName = "VHgg_QCD_doubleEMEnriched_TuneZ2star_8TeV-pythia6";
   QCDFileName += "_" + selType;
   QCDFileName += "_" + bTaggerType;
   QCDFileName += ".root";
   TFile* QCDFile = TFile::Open(QCDFileName.c_str());
-  db->add_mcFile( QCDFile, "QCD", "QCD", kGreen);
+  db_stack->add_mcFile( QCDFile, "QCD", "QCD", 41);
 
 
 
-  db->set_shapeNormalization();
 
 
 
@@ -98,23 +116,27 @@ int main(int argc, char* argv[]) {
   bool log = true;
 
 
-  db->drawHisto("njets", "Number of Jets", "", "Events", true );
-  db->drawHisto("nbjets_loose", "Number of b-Jets (Loose)", "", "Events", true );
-  db->drawHisto("nbjets_medium", "Number of b-Jets (Medium)", "", "Events", true );
+  db_nostack->drawHisto("njets", "Number of Jets", "", "Events");
+  db_nostack->drawHisto("nbjets_loose", "Number of b-Jets (Loose)", "", "Events");
+  db_nostack->drawHisto("nbjets_medium", "Number of b-Jets (Medium)", "", "Events");
 
-  db->drawHisto("mjj");
-  db->drawHisto("mjj_0btag");
-  db->drawHisto("mjj_1btag");
-  db->drawHisto("mjj_2btag");
-  db->drawHisto("qgljet0");
-  db->drawHisto("qgljet1");
+  db_nostack->drawHisto("mjj");
+  db_nostack->drawHisto("mjj_0btag");
+  db_nostack->drawHisto("mjj_1btag");
+  db_nostack->drawHisto("mjj_2btag");
+  db_nostack->drawHisto("qgljet0");
+  db_nostack->drawHisto("qgljet1");
 
-  db->set_lumiNormalization(30000.);
-  db->set_rebin(10);
 
-  db->drawHisto("mgg_0btag");
-  db->drawHisto("mgg_1btag");
-  db->drawHisto("mgg_2btag");
+
+
+  db_stack->set_rebin(5);
+
+  db_stack->drawHisto("mgg_presel", "DiPhoton Invariant Mass", "GeV");
+
+  db_stack->drawHisto("mgg_0btag", "DiPhoton Invariant Mass", "GeV");
+  db_stack->drawHisto("mgg_1btag", "DiPhoton Invariant Mass", "GeV");
+  db_stack->drawHisto("mgg_2btag", "DiPhoton Invariant Mass", "GeV");
 
 
 
