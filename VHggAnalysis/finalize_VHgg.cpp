@@ -48,6 +48,13 @@ int main( int argc, char* argv[] ) {
     finalize_oneDataset("DiPhotonBox_Pt-250ToInf_8TeV-pythia6", selectionType, bTaggerType, datasets);
     finalize_oneDataset("DiPhotonBox_Pt-25To250_8TeV-pythia6", selectionType, bTaggerType, datasets);
 
+  } else if( dataset=="DiPhoton_8TeV-pythia6" ) {
+
+    finalize_oneDataset("DiPhotonBox_Pt-10To25_8TeV-pythia6", selectionType, bTaggerType, datasets);
+    finalize_oneDataset("DiPhotonBox_Pt-250ToInf_8TeV-pythia6", selectionType, bTaggerType, datasets);
+    finalize_oneDataset("DiPhotonBox_Pt-25To250_8TeV-pythia6", selectionType, bTaggerType, datasets);
+    finalize_oneDataset("DiPhotonJets_8TeV-madgraph-tarball-v2", selectionType, bTaggerType, datasets);
+
   } else if( dataset=="V_8TeV") {
   //} else if( dataset=="DYJetsToLL_8TeV-madgraph" ) {
 
@@ -68,16 +75,10 @@ int main( int argc, char* argv[] ) {
   } else if( dataset=="TT_8TeV" ) {
 
     finalize_oneDataset("TTbarGG_0Jet_S1-cmkuo-TTGG_525_RECO_s46_v1" , selectionType, bTaggerType, datasets);
-    finalize_oneDataset("TTGJets_8TeV-madgraph.root redntp_TTGJets_8TeV-madgraph_00", selectionType, bTaggerType, datasets);
+    finalize_oneDataset("TTGJets_8TeV-madgraph", selectionType, bTaggerType, datasets);
     finalize_oneDataset("TTJets_TuneZ2star_8TeV-madgraph-tauola", selectionType, bTaggerType, datasets);
 
-  } else if( dataset=="VG_8TeV" ) {
-
-    //finalize_oneDataset("WGstarToLNu2E_TuneZ2star_8TeV-madgraph-tauola");
-    //finalize_oneDataset("WGstarToLNu2Mu_TuneZ2star_7TeV-madgraph-tauola");
-    //finalize_oneDataset("WGstarToLNu2Tau_TuneZ2star_7TeV-madgraph-tauola");
-    finalize_oneDataset("WGToLNuG_TuneZ2star_8TeV-madgraph-tauola", selectionType, bTaggerType, datasets);
-    finalize_oneDataset("ZGToLLG_8TeV-madgraph", selectionType, bTaggerType, datasets);
+  //} else if( dataset=="VG_8TeV" ) {
 
   } else if( dataset=="VV_8TeV" ) {
 
@@ -85,12 +86,19 @@ int main( int argc, char* argv[] ) {
     finalize_oneDataset("WW_TuneZ2star_8TeV_pythia6_tauola", selectionType, bTaggerType, datasets);
     finalize_oneDataset("ZZ_TuneZ2star_8TeV_pythia6_tauola", selectionType, bTaggerType, datasets);
     finalize_oneDataset("WZ_TuneZ2star_8TeV_pythia6_tauola", selectionType, bTaggerType, datasets);
+    finalize_oneDataset("WGToLNuG_TuneZ2star_8TeV-madgraph-tauola", selectionType, bTaggerType, datasets);
+    finalize_oneDataset("ZGToLLG_8TeV-madgraph", selectionType, bTaggerType, datasets);
 
   } else if( dataset=="VGG_8TeV" ) {
 
     finalize_oneDataset("WmGG_cmkuo", selectionType, bTaggerType, datasets);
     finalize_oneDataset("WpGG-cmkuo", selectionType, bTaggerType, datasets);
     finalize_oneDataset("ZGG-cmkuo", selectionType, bTaggerType, datasets);
+
+  } else if( dataset=="HToGG_M-125_8TeV-pythia6" ) {
+
+    finalize_oneDataset("WH_ZH_HToGG_M-125_8TeV-pythia6", selectionType, bTaggerType, datasets);
+    finalize_oneDataset("GluGluToHToGG_M-125_8TeV-powheg-pythia6", selectionType, bTaggerType, datasets);
 
   } else {
   
