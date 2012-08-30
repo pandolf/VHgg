@@ -4,10 +4,12 @@
 #include <string>
 #include "CommonTools/DrawBase.h"
 #include "CommonTools/fitTools.h"
+#include "cl95cms.C"
+
+bool separate_signals = false;
 
 
-
-void printYields( DrawBase* db );
+void printYields( DrawBase* db, const std::string& suffix, bool doUL=false );
 
 
 int main(int argc, char* argv[]) {
@@ -47,13 +49,6 @@ int main(int argc, char* argv[]) {
 
   int signalFillColor = 46;
 
-  // inclusive signal file for stack plot
-  std::string HToGGFileName = "VHgg_HToGG_M-125_8TeV-pythia6";
-  HToGGFileName += "_" + selType;
-  HToGGFileName += "_" + bTaggerType;
-  HToGGFileName += ".root";
-  TFile* HToGGFile = TFile::Open(HToGGFileName.c_str());
-  db_stack->add_mcFile( HToGGFile, "HToGG", "H (125)", signalFillColor, 0);
 
   // VH only for shape comparisons
   std::string VHFileName = "VHgg_WH_ZH_HToGG_M-125_8TeV-pythia6";
@@ -62,6 +57,37 @@ int main(int argc, char* argv[]) {
   VHFileName += ".root";
   TFile* VHFile = TFile::Open(VHFileName.c_str());
   db_nostack->add_mcFile( VHFile, "VH", "VH (125)", signalFillColor, 0);
+
+  if( separate_signals ) {
+
+    db_stack->add_mcFile( VHFile, "VH", "VH (125)", signalFillColor, 0);
+
+    std::string GluGluHFileName = "VHgg_GluGluToHToGG_M-125_8TeV-powheg-pythia6";
+    GluGluHFileName += "_" + selType;
+    GluGluHFileName += "_" + bTaggerType;
+    GluGluHFileName += ".root";
+    TFile* GluGluHFile = TFile::Open(GluGluHFileName.c_str());
+    db_stack->add_mcFile( GluGluHFile, "GluGluH", "H (125)", signalFillColor+1, 0);
+
+    std::string VBFHFileName = "VHgg_VBF_HToGG_M-125_8TeV-powheg-pythia6";
+    VBFHFileName += "_" + selType;
+    VBFHFileName += "_" + bTaggerType;
+    VBFHFileName += ".root";
+    TFile* VBFHFile = TFile::Open(VBFHFileName.c_str());
+    db_stack->add_mcFile( VBFHFile, "VBFH", "H (125)", signalFillColor+2, 0);
+
+  } else {
+
+    // inclusive signal file for stack plot
+    std::string HToGGFileName = "VHgg_HToGG_M-125_8TeV-pythia6";
+    HToGGFileName += "_" + selType;
+    HToGGFileName += "_" + bTaggerType;
+    HToGGFileName += ".root";
+    TFile* HToGGFile = TFile::Open(HToGGFileName.c_str());
+    db_stack->add_mcFile( HToGGFile, "HToGG", "H (125)", signalFillColor, 0);
+
+  }
+
 
   std::string DiPhotonFileName = "VHgg_DiPhoton_8TeV-pythia6";
   DiPhotonFileName += "_" + selType;
@@ -124,47 +150,47 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto("nbjets_loose", "Number of b-Jets (Loose)", "", "Events");
   db_nostack->drawHisto("nbjets_medium", "Number of b-Jets (Medium)", "", "Events");
 
-  db_nostack->drawHisto("mjj");
-  db_nostack->drawHisto("mjj_0btag");
-  db_nostack->drawHisto("mjj_1btag");
-  db_nostack->drawHisto("mjj_2btag");
-  db_nostack->drawHisto("qgljet0");
-  db_nostack->drawHisto("qgljet1");
+  db_nostack->drawHisto("mjj", "Dijet Mass", "GeV");
+  db_nostack->drawHisto("mjj_0btag", "Dijet Mass", "GeV");
+  db_nostack->drawHisto("mjj_1btag", "Dijet Mass", "GeV");
+  db_nostack->drawHisto("mjj_2btag", "Dijet Mass", "GeV");
+  db_nostack->drawHisto("qgljet0", "Lead Jet Q-G LD");
+  db_nostack->drawHisto("qgljet1", "Sublead Jet Q-G LD");
 
-  db_nostack->drawHisto("ptphot0");
-  db_nostack->drawHisto("ptphot1");
-  db_nostack->drawHisto("ptjet0");
-  db_nostack->drawHisto("ptjet1");
+  db_nostack->drawHisto("ptphot0", "Lead Photon p_{T}", "GeV");
+  db_nostack->drawHisto("ptphot1", "Sublead Photon p_{T}", "GeV");
+  db_nostack->drawHisto("ptjet0", "Lead Jet p_{T}", "GeV");
+  db_nostack->drawHisto("ptjet1", "Sublead Jet p_{T}", "GeV");
 
   db_nostack->set_rebin(2);
-  db_nostack->drawHisto("deltaPhi");
-  db_nostack->drawHisto("ptDijet");
-  db_nostack->drawHisto("ptDiphot");
-  db_nostack->drawHisto("ptRatio");
-  db_nostack->drawHisto("ptDifference");
+  db_nostack->drawHisto("deltaPhi", "#Delta#Phi(dijet-diphoton)", "rad");
+  db_nostack->drawHisto("ptDijet", "Dijet p_{T}", "GeV");
+  db_nostack->drawHisto("ptDiphot" "Diphoton p_{T}", "GeV");
+  db_nostack->drawHisto("ptRatio", "Dijet p_{T}) / Diphoton p_{T}");
+  db_nostack->drawHisto("ptDifference", "Dijet p_{T}) - Diphoton p_{T}", "GeV");
 
-  db_nostack->drawHisto("deltaEtaJets");
-  db_nostack->drawHisto("deltaFabsEtaJets");
-  db_nostack->drawHisto("zeppen");
+  db_nostack->drawHisto("deltaEtaJets", "Jet-Jet #Delta#eta");
+  db_nostack->drawHisto("deltaFabsEtaJets", "Jet-Jet #Delta|#eta|");
+  db_nostack->drawHisto("zeppen", "Zeppenfeld Variable");
 
 
 
   db_stack->set_rebin(5);
 
   db_stack->drawHisto("mgg_prepresel", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack );
+  printYields( db_stack, "prepresel" );
   db_stack->drawHisto("mgg_presel", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack );
+  printYields( db_stack, "presel");
 
   db_stack->set_legendTitle( "0 b-tag Category" );
   db_stack->drawHisto("mgg_0btag", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack );
+  printYields( db_stack, "0tag", true );
   db_stack->set_legendTitle( "1 b-tag Category" );
   db_stack->drawHisto("mgg_1btag", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack );
+  printYields( db_stack, "1tag", true );
   db_stack->set_legendTitle( "2 b-tag Category" );
   db_stack->drawHisto("mgg_2btag", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack );
+  printYields( db_stack, "2tag", true );
 
 
 
@@ -176,7 +202,11 @@ int main(int argc, char* argv[]) {
 
 
 
-void printYields( DrawBase* db ) {
+void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
+
+  std::string yieldsFileName = db->get_outputdir() + "/yields_" + suffix + ".txt";
+  ofstream yieldsFile(yieldsFileName.c_str());
+
 
   float xMin = 120.;
   float xMax = 130.;
@@ -188,19 +218,44 @@ void printYields( DrawBase* db ) {
 
   bool foundSignal = false;
   float totalBG = 0.;
+  float signal = 0.;
 
-  std::cout << std::endl << "Yields (@ 30 fb-1): " << std::endl;
+  yieldsFile << std::endl << "Yields (@ 30 fb-1): " << std::endl;
   for( unsigned int ii=0; ii<histos.size(); ++ii ) {
-    std::cout << db->get_mcFile(ii).datasetName << " " << histos[ii]->Integral(binXmin, binXmax) << std::endl;
+    yieldsFile << db->get_mcFile(ii).datasetName << " " << histos[ii]->Integral(binXmin, binXmax) << std::endl;
     if( db->get_mcFile(ii).datasetName != "HToGG" ) 
       totalBG += histos[ii]->Integral(binXmin, binXmax);
-    else
+    else {
       foundSignal = true;
+      signal = histos[ii]->Integral(binXmin, binXmax);
+    }
   }
 
-  std::cout << "Total BG: " << totalBG << std::endl;
+
+  yieldsFile << "Total BG: " << totalBG << std::endl;
+
+  float signal_xsec = 2.28E-03*(19.37 + 1.573 + 0.6966 + 0.3943); // ttH missing for now
+  float total_signal = signal_xsec*db->get_lumi();
+  float effS = signal/total_signal;
+  yieldsFile << "Signal efficiency: " << effS << std::endl;
 
   if( !foundSignal ) std::cout << "WARNING!!! DIDN'T FIND SIGNAL HToGG!" << std::endl; 
+
+  
+  if( doUL ) {
+
+    float ul = CLA( db->get_lumi(), 0., effS, 0., totalBG, 0. );
+    yieldsFile << std::endl << "No error on BG:" << std::endl;
+    yieldsFile << "UL: " << ul << std::endl;
+    yieldsFile << "UL/SM: " << ul/signal_xsec << std::endl;
+    float ul_bgerr = CLA( db->get_lumi(), 0., effS, 0., totalBG, 0.05*totalBG );
+    yieldsFile << std::endl << "5\% error on BG:" << std::endl;
+    yieldsFile << "UL: " << ul_bgerr << std::endl;
+    yieldsFile << "UL/SM: " << ul_bgerr/signal_xsec << std::endl;
+
+  }
+
+
 
 }
 
