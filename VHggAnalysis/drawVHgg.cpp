@@ -152,6 +152,7 @@ int main(int argc, char* argv[]) {
   db_stack->set_rebin(5);
 
   db_stack->drawHisto("mgg_prepresel", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack );
   db_stack->drawHisto("mgg_presel", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack );
 
@@ -185,10 +186,21 @@ void printYields( DrawBase* db ) {
   int binXmin = histos[0]->FindBin(xMin);
   int binXmax = histos[0]->FindBin(xMax) -1;
 
-  std::cout << std::endl << "Yields (@ 30 fb-1): " << std::endl;
-  for( unsigned int ii=0; ii<histos.size(); ++ii )
-    std::cout << db->get_mcFile(ii).datasetName << " " << histos[ii]->Integral(binXmin, binXmax) << std::endl;
+  bool foundSignal = false;
+  float totalBG = 0.;
 
+  std::cout << std::endl << "Yields (@ 30 fb-1): " << std::endl;
+  for( unsigned int ii=0; ii<histos.size(); ++ii ) {
+    std::cout << db->get_mcFile(ii).datasetName << " " << histos[ii]->Integral(binXmin, binXmax) << std::endl;
+    if( db->get_mcFile(ii).datasetName != "HToGG" ) 
+      totalBG += histos[ii]->Integral(binXmin, binXmax);
+    else
+      foundSignal = true;
+  }
+
+  std::cout << "Total BG: " << totalBG << std::endl;
+
+  if( !foundSignal ) std::cout << "WARNING!!! DIDN'T FIND SIGNAL HToGG!" << std::endl; 
 
 }
 
