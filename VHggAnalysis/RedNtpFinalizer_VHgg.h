@@ -822,7 +822,7 @@ public :
    bool dopureeventWeight_;
    bool doptreeventWeight_;
    int r9cat_;
-   int cicselection_;
+   int photonID_thresh_;
    bool cs_;
    float ptphot2cut_;
    float ptphot1cut_;
@@ -830,8 +830,13 @@ public :
    float pthiggsmaxcut_;
 
    float ptjetthresh_;
+   float ptjetleadthresh_;
    float etajetthresh_;
 
+   float mjj_min_thresh_;
+   float mjj_max_thresh_;
+   float mjj_min_2btag_thresh_;
+   float mjj_max_2btag_thresh_;
 
 
 };
