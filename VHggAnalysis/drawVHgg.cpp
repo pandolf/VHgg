@@ -7,6 +7,7 @@
 
 
 
+void printYields( DrawBase* db );
 
 
 int main(int argc, char* argv[]) {
@@ -116,6 +117,9 @@ int main(int argc, char* argv[]) {
   bool log = true;
 
 
+  db_nostack->drawHisto("nvertex");
+  db_nostack->drawHisto("nvertex_PUW");
+
   db_nostack->drawHisto("njets", "Number of Jets", "", "Events");
   db_nostack->drawHisto("nbjets_loose", "Number of b-Jets (Loose)", "", "Events");
   db_nostack->drawHisto("nbjets_medium", "Number of b-Jets (Medium)", "", "Events");
@@ -127,25 +131,39 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto("qgljet0");
   db_nostack->drawHisto("qgljet1");
 
+  db_nostack->drawHisto("ptphot0");
+  db_nostack->drawHisto("ptphot1");
+  db_nostack->drawHisto("ptjet0");
+  db_nostack->drawHisto("ptjet1");
+
+  db_nostack->set_rebin(2);
   db_nostack->drawHisto("deltaPhi");
   db_nostack->drawHisto("ptDijet");
   db_nostack->drawHisto("ptDiphot");
   db_nostack->drawHisto("ptRatio");
   db_nostack->drawHisto("ptDifference");
 
+  db_nostack->drawHisto("deltaEtaJets");
+  db_nostack->drawHisto("deltaFabsEtaJets");
+  db_nostack->drawHisto("zeppen");
 
 
 
   db_stack->set_rebin(5);
 
+  db_stack->drawHisto("mgg_prepresel", "DiPhoton Invariant Mass", "GeV");
   db_stack->drawHisto("mgg_presel", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack );
 
   db_stack->set_legendTitle( "0 b-tag Category" );
   db_stack->drawHisto("mgg_0btag", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack );
   db_stack->set_legendTitle( "1 b-tag Category" );
   db_stack->drawHisto("mgg_1btag", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack );
   db_stack->set_legendTitle( "2 b-tag Category" );
   db_stack->drawHisto("mgg_2btag", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack );
 
 
 
@@ -153,3 +171,24 @@ int main(int argc, char* argv[]) {
   return 0;
 
 }
+
+
+
+
+void printYields( DrawBase* db ) {
+
+  float xMin = 120.;
+  float xMax = 130.;
+
+  std::vector<TH1D*> histos = db->get_lastHistos_mc();
+
+  int binXmin = histos[0]->FindBin(xMin);
+  int binXmax = histos[0]->FindBin(xMax) -1;
+
+  std::cout << std::endl << "Yields (@ 30 fb-1): " << std::endl;
+  for( unsigned int ii=0; ii<histos.size(); ++ii )
+    std::cout << db->get_mcFile(ii).datasetName << " " << histos[ii]->Integral(binXmin, binXmax) << std::endl;
+
+
+}
+
