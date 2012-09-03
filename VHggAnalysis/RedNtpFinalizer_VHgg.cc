@@ -112,6 +112,9 @@ void RedNtpFinalizer_VHgg::finalize()
    TH1D* h1_mgg_presel = new TH1D("mgg_presel", "", 80, 100., 180.);
    h1_mgg_presel->Sumw2();
 
+   TH1D* h1_mgg= new TH1D("mgg", "", 80, 100., 180.);
+   h1_mgg->Sumw2();
+
    TH1D* h1_mgg_0btag = new TH1D("mgg_0btag", "", 80, 100., 180.);
    h1_mgg_0btag->Sumw2();
    TH1D* h1_mgg_1btag = new TH1D("mgg_1btag", "", 80, 100., 180.);
@@ -490,6 +493,7 @@ void RedNtpFinalizer_VHgg::finalize()
        h1_deltaFabsEtaJets->Fill( fabs(jet0.Eta())-fabs(jet1.Eta()), eventWeight );
 
 
+       h1_mgg->Fill( massggnewvtx, eventWeight );
        if( njets_selected_btagloose==0 ) {
          h1_mgg_0btag->Fill( massggnewvtx, eventWeight );
          if( ebeb ) h1_mgg_0btag_ebeb->Fill( massggnewvtx, eventWeight );
@@ -563,6 +567,7 @@ void RedNtpFinalizer_VHgg::finalize()
 
    h1_mgg_prepresel->Write();
    h1_mgg_presel->Write();
+   h1_mgg->Write();
    h1_mgg_0btag->Write();
    h1_mgg_1btag->Write();
    h1_mgg_2btag->Write();

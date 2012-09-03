@@ -154,8 +154,10 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto("mjj_0btag", "Dijet Mass", "GeV");
   db_nostack->drawHisto("mjj_1btag", "Dijet Mass", "GeV");
   db_nostack->drawHisto("mjj_2btag", "Dijet Mass", "GeV");
+  db_nostack->set_rebin(2);
   db_nostack->drawHisto("qgljet0", "Lead Jet Q-G LD");
   db_nostack->drawHisto("qgljet1", "Sublead Jet Q-G LD");
+  db_nostack->set_rebin();
 
   db_nostack->drawHisto("ptphot0", "Lead Photon p_{T}", "GeV");
   db_nostack->drawHisto("ptphot1", "Sublead Photon p_{T}", "GeV");
@@ -166,8 +168,8 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto("deltaPhi", "#Delta#Phi(dijet-diphoton)", "rad");
   db_nostack->drawHisto("ptDijet", "Dijet p_{T}", "GeV");
   db_nostack->drawHisto("ptDiphot", "Diphoton p_{T}", "GeV");
-  db_nostack->drawHisto("ptRatio", "Dijet p_{T}) / Diphoton p_{T}");
-  db_nostack->drawHisto("ptDifference", "Dijet p_{T}) - Diphoton p_{T}", "GeV");
+  db_nostack->drawHisto("ptRatio", "Dijet p_{T} / Diphoton p_{T}");
+  db_nostack->drawHisto("ptDifference", "Dijet p_{T} - Diphoton p_{T}", "GeV");
 
   db_nostack->drawHisto("deltaEtaJets", "Jet-Jet #Delta#eta");
   db_nostack->drawHisto("deltaFabsEtaJets", "Jet-Jet #Delta|#eta|");
@@ -182,15 +184,20 @@ int main(int argc, char* argv[]) {
   db_stack->drawHisto("mgg_presel", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "presel");
 
+  bool doUL = (selType != "presel" );
+
+  db_stack->drawHisto("mgg", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "incl", doUL );
+
   db_stack->set_legendTitle( "0 b-tag Category" );
   db_stack->drawHisto("mgg_0btag", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack, "0tag", true );
+  printYields( db_stack, "0tag", doUL );
   db_stack->set_legendTitle( "1 b-tag Category" );
   db_stack->drawHisto("mgg_1btag", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack, "1tag", true );
+  printYields( db_stack, "1tag", doUL );
   db_stack->set_legendTitle( "2 b-tag Category" );
   db_stack->drawHisto("mgg_2btag", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack, "2tag", true );
+  printYields( db_stack, "2tag", doUL );
 
 
 
@@ -242,7 +249,7 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
   if( !foundSignal ) std::cout << "WARNING!!! DIDN'T FIND SIGNAL HToGG!" << std::endl; 
 
   
-  if( doUL ) {
+  if( doUL && foundSignal ) {
 
     float ul = CLA( db->get_lumi(), 0., effS, 0., totalBG, 0. );
     yieldsFile << std::endl << "No error on BG:" << std::endl;
