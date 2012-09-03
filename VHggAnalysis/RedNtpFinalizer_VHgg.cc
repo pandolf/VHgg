@@ -54,6 +54,10 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_nbjets_loose->Sumw2();
    TH1D*  h1_nbjets_medium = new TH1D("nbjets_medium", "", 11, -0.5, 10.5);
    h1_nbjets_medium->Sumw2();
+   TH1D*  h1_nbjets_loose_2jets = new TH1D("nbjets_loose_2jets", "", 11, -0.5, 10.5);
+   h1_nbjets_loose_2jets->Sumw2();
+   TH1D*  h1_nbjets_medium_2jets = new TH1D("nbjets_medium_2jets", "", 11, -0.5, 10.5);
+   h1_nbjets_medium_2jets->Sumw2();
 
    TH1D*  h1_njets_ZbbHgg = new TH1D("njets_ZbbHgg", "", 11, -0.5, 10.5);
    h1_njets_ZbbHgg->Sumw2();
@@ -84,6 +88,10 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_ptjet0->Sumw2();
    TH1D* h1_ptjet1 = new TH1D("ptjet1", "", 100, 0., 200.);
    h1_ptjet1->Sumw2();
+   TH1D* h1_etajet0 = new TH1D("etajet0", "", 100, -5., 5.);
+   h1_etajet0->Sumw2();
+   TH1D* h1_etajet1 = new TH1D("etajet1", "", 100, -5., 5.);
+   h1_etajet1->Sumw2();
 
 
    TH1D* h1_mjj = new TH1D("mjj", "", 50, 0., 500.);
@@ -103,12 +111,27 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_mgg_prepresel->Sumw2();
    TH1D* h1_mgg_presel = new TH1D("mgg_presel", "", 80, 100., 180.);
    h1_mgg_presel->Sumw2();
+
    TH1D* h1_mgg_0btag = new TH1D("mgg_0btag", "", 80, 100., 180.);
    h1_mgg_0btag->Sumw2();
    TH1D* h1_mgg_1btag = new TH1D("mgg_1btag", "", 80, 100., 180.);
    h1_mgg_1btag->Sumw2();
    TH1D* h1_mgg_2btag = new TH1D("mgg_2btag", "", 80, 100., 180.);
    h1_mgg_2btag->Sumw2();
+
+   TH1D* h1_mgg_0btag_ebeb = new TH1D("mgg_0btag_ebeb", "", 80, 100., 180.);
+   h1_mgg_0btag_ebeb->Sumw2();
+   TH1D* h1_mgg_1btag_ebeb = new TH1D("mgg_1btag_ebeb", "", 80, 100., 180.);
+   h1_mgg_1btag_ebeb->Sumw2();
+   TH1D* h1_mgg_2btag_ebeb = new TH1D("mgg_2btag_ebeb", "", 80, 100., 180.);
+   h1_mgg_2btag_ebeb->Sumw2();
+
+   TH1D* h1_mgg_0btag_nebeb = new TH1D("mgg_0btag_nebeb", "", 80, 100., 180.);
+   h1_mgg_0btag_nebeb->Sumw2();
+   TH1D* h1_mgg_1btag_nebeb = new TH1D("mgg_1btag_nebeb", "", 80, 100., 180.);
+   h1_mgg_1btag_nebeb->Sumw2();
+   TH1D* h1_mgg_2btag_nebeb = new TH1D("mgg_2btag_nebeb", "", 80, 100., 180.);
+   h1_mgg_2btag_nebeb->Sumw2();
 
    TH1D*  h1_deltaPhi = new TH1D("deltaPhi", "", 100, 0., 3.1416);
    h1_deltaPhi->Sumw2();
@@ -221,6 +244,7 @@ void RedNtpFinalizer_VHgg::finalize()
 
       //     if(ptphot1<ptphot1cut) continue; //pt first photon
 
+      bool ebeb = TMath::Abs(etascphot1)<1.4442 && TMath::Abs(etascphot2)<1.4442;
 
       h1_ptphot0->Fill(ptphot1, eventWeight);
       h1_ptphot1->Fill(ptphot2, eventWeight);
@@ -304,6 +328,19 @@ void RedNtpFinalizer_VHgg::finalize()
          if( ptcorrjet[ijet] < ptjetthresh_ ) continue;
          if( fabs(etajet[ijet]) > etajetthresh_ ) continue;
 
+         //jet PU ID:
+         bool passedPUID = true;
+         if(TMath::Abs(etajet[ijet]) < 2.5) {
+           if(betastarjet[ijet] > 0.2 * log( nvtx - 0.67 ) ) passedPUID = false;
+           if(rmsjet[ijet] > 0.06) passedPUID = false;
+         } else if(TMath::Abs(etajet[ijet]) < 3.){
+           if(rmsjet[ijet] > 0.05) passedPUID = false;
+         } else {
+           if(rmsjet[ijet] > 0.055) passedPUID = false;
+         }
+         if( !passedPUID ) continue;
+
+
          if( isMC ) {
            if( partMomPdgIDjet[ijet] == 23 || abs( partMomPdgIDjet[ijet] ) == 24 ) {
              h1_posMatchedJet->Fill( ijet, eventWeight );
@@ -335,6 +372,12 @@ void RedNtpFinalizer_VHgg::finalize()
        h1_njets->Fill( njets_selected, eventWeight );
        h1_nbjets_loose->Fill( njets_selected_btagloose, eventWeight );
        h1_nbjets_medium->Fill( njets_selected_btagmedium, eventWeight );
+
+       if( njets_selected>=2 ) {
+         h1_nbjets_loose_2jets->Fill( njets_selected_btagloose, eventWeight );
+         h1_nbjets_medium_2jets->Fill( njets_selected_btagmedium, eventWeight );
+       }
+
        if( H_event && V_event && Zbb_event ) {
          h1_njets_ZbbHgg->Fill( njets_selected, eventWeight );
          h1_nbjets_loose_ZbbHgg->Fill( njets_selected_btagloose, eventWeight );
@@ -378,6 +421,9 @@ void RedNtpFinalizer_VHgg::finalize()
        h1_ptjet0->Fill( jet0.Pt(), eventWeight );
        h1_ptjet1->Fill( jet1.Pt(), eventWeight );
 
+       h1_etajet0->Fill( jet0.Eta(), eventWeight );
+       h1_etajet1->Fill( jet1.Eta(), eventWeight );
+
        bool chose_correctPair = (partMomPdgIDjet[indexjet0] == 23 || abs( partMomPdgIDjet[indexjet0] ) == 24)
                              && (partMomPdgIDjet[indexjet1] == 23 || abs( partMomPdgIDjet[indexjet1] ) == 24);
 
@@ -411,6 +457,12 @@ void RedNtpFinalizer_VHgg::finalize()
          if( dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_ ) continue;
        }
 
+       float zeppen = diphot.Eta() - 0.5*( jet0.Eta() + jet1.Eta() );
+       if( fabs(zeppen)>zeppenfeld_thresh_ ) continue;
+
+
+       h1_zeppen->Fill( zeppen, eventWeight);
+
 
        float qgljet0 = qglikeli->computeQGLikelihoodPU( jet0.Pt(), rhoPF, ntrkjet[indexjet0], nneutjet[indexjet0], ptDjet[indexjet0] );
        float qgljet1 = qglikeli->computeQGLikelihoodPU( jet1.Pt(), rhoPF, ntrkjet[indexjet1], nneutjet[indexjet1], ptDjet[indexjet1] );
@@ -437,15 +489,19 @@ void RedNtpFinalizer_VHgg::finalize()
        h1_deltaEtaJets->Fill( jet0.Eta()-jet1.Eta(), eventWeight );
        h1_deltaFabsEtaJets->Fill( fabs(jet0.Eta())-fabs(jet1.Eta()), eventWeight );
 
-       float zeppen = diphot.Eta() - 0.5*( jet0.Eta() + jet1.Eta() );
-       h1_zeppen->Fill( zeppen, eventWeight);
 
        if( njets_selected_btagloose==0 ) {
          h1_mgg_0btag->Fill( massggnewvtx, eventWeight );
+         if( ebeb ) h1_mgg_0btag_ebeb->Fill( massggnewvtx, eventWeight );
+         else  h1_mgg_0btag_nebeb->Fill( massggnewvtx, eventWeight );
        } else if( njets_selected_btagloose==1 ) {
          h1_mgg_1btag->Fill( massggnewvtx, eventWeight );
+         if( ebeb ) h1_mgg_1btag_ebeb->Fill( massggnewvtx, eventWeight );
+         else  h1_mgg_1btag_nebeb->Fill( massggnewvtx, eventWeight );
        } else {
          h1_mgg_2btag->Fill( massggnewvtx, eventWeight );
+         if( ebeb ) h1_mgg_2btag_ebeb->Fill( massggnewvtx, eventWeight );
+         else  h1_mgg_2btag_nebeb->Fill( massggnewvtx, eventWeight );
        }
 
 
@@ -467,6 +523,8 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_njets->Write();
    h1_nbjets_loose->Write();
    h1_nbjets_medium->Write();
+   h1_nbjets_loose_2jets->Write();
+   h1_nbjets_medium_2jets->Write();
    h1_njets_ZbbHgg->Write();
    h1_nbjets_loose_ZbbHgg->Write();
    h1_nbjets_medium_ZbbHgg->Write();
@@ -481,11 +539,15 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_ptphot1->Write();
    h1_ptjet0->Write();
    h1_ptjet1->Write();
+   h1_etajet0->Write();
+   h1_etajet1->Write();
 
    h1_mjj->Write();
+
    h1_mjj_0btag->Write();
    h1_mjj_1btag->Write();
    h1_mjj_2btag->Write();
+
    h1_mjj_correct->Write();
    h1_mjj_incorrect->Write();
 
@@ -504,6 +566,14 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_mgg_0btag->Write();
    h1_mgg_1btag->Write();
    h1_mgg_2btag->Write();
+
+   h1_mgg_0btag_ebeb->Write();
+   h1_mgg_1btag_ebeb->Write();
+   h1_mgg_2btag_ebeb->Write();
+
+   h1_mgg_0btag_nebeb->Write();
+   h1_mgg_1btag_nebeb->Write();
+   h1_mgg_2btag_nebeb->Write();
 
    h1_qgljet0->Write();
    h1_qgljet1->Write();
@@ -965,42 +1035,40 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
   selectionType_ = selectionType;
 
 
+  // default values 
+  
+  dopureeventWeight_ = true;
+  doptreeventWeight_ = true;
+  r9cat_ = 1;
+  photonID_thresh_ = 4;
+  cs_ = false;
+  ptphot1cut_ = 30.;
+  ptphot2cut_ = 20.;
+  pthiggsmincut_ = 0.;
+  pthiggsmaxcut_ = 10000.;
+
+  ptjetthresh_ = 20.;
+  ptjetleadthresh_ = 20.;
+  etajetthresh_ = 2.4;
+
+  zeppenfeld_thresh_ = 1000.;
+
+  mjj_min_thresh_ = 0.;
+  mjj_max_thresh_ = 10000.;
+  mjj_min_2btag_thresh_ = 0.;
+  mjj_max_2btag_thresh_ = 10000.;
+
+
+
+
   if( selectionType=="presel" ) {
 
-   dopureeventWeight_ = true;
-   doptreeventWeight_ = true;
-   r9cat_ = 1;
-   photonID_thresh_ = 4;
-   cs_ = false;
-   ptphot1cut_ = 30.;
-   ptphot2cut_ = 20.;
-   pthiggsmincut_ = 0.;
-   pthiggsmaxcut_ = 10000.;
-
-   ptjetthresh_ = 20.;
-   ptjetleadthresh_ = 20.;
-   etajetthresh_ = 2.4;
-
-   mjj_min_thresh_ = 0.;
-   mjj_max_thresh_ = 10000.;
-   mjj_min_2btag_thresh_ = 0.;
-   mjj_max_2btag_thresh_ = 10000.;
+    // leave all cuts to default
 
   } else if( selectionType=="sel0" ) {
 
-   dopureeventWeight_ = true;
-   doptreeventWeight_ = true;
-   r9cat_ = 1;
-   photonID_thresh_ = 4;
-   cs_ = false;
    ptphot1cut_ = 60.;
    ptphot2cut_ = 25.;
-   pthiggsmincut_ = 0.;
-   pthiggsmaxcut_ = 10000.;
-
-   ptjetthresh_ = 20.;
-   ptjetleadthresh_ = 20.;
-   etajetthresh_ = 2.4;
 
    mjj_min_thresh_ = 60.;
    mjj_max_thresh_ = 120.;
@@ -1009,24 +1077,31 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
 
   } else if( selectionType=="sel1" ) {
 
-   dopureeventWeight_ = true;
-   doptreeventWeight_ = true;
-   r9cat_ = 1;
-   photonID_thresh_ = 4;
-   cs_ = false;
    ptphot1cut_ = 60.;
    ptphot2cut_ = 25.;
-   pthiggsmincut_ = 70.;
-   pthiggsmaxcut_ = 10000.;
+   pthiggsmincut_ = 50.;
 
-   ptjetthresh_ = 20.;
    ptjetleadthresh_ = 40.;
-   etajetthresh_ = 2.4;
 
    mjj_min_thresh_ = 60.;
    mjj_max_thresh_ = 120.;
    mjj_min_2btag_thresh_ = 50.;
    mjj_max_2btag_thresh_ = 150.;
+
+  } else if( selectionType=="ddrsel" ) {
+
+   ptphot1cut_ = 62.5;
+   ptphot2cut_ = 40.;
+
+   ptjetthresh_ = 25.;
+   ptjetleadthresh_ = 40.;
+
+   zeppenfeld_thresh_ = 1.5;
+
+   mjj_min_thresh_ = 55.;
+   mjj_max_thresh_ = 115.;
+   mjj_min_2btag_thresh_ = 55.;
+   mjj_max_2btag_thresh_ = 115.;
 
   } else {
 

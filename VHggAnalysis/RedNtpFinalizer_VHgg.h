@@ -833,6 +833,8 @@ public :
    float ptjetleadthresh_;
    float etajetthresh_;
 
+   float zeppenfeld_thresh_;
+
    float mjj_min_thresh_;
    float mjj_max_thresh_;
    float mjj_min_2btag_thresh_;
