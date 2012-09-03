@@ -42,6 +42,11 @@
 #include "TH1.h"
 #include "TArrow.h"
 #include "TCanvas.h"
+
+
+bool VERBOSE = false;
+
+
 using namespace std;
 
 static Double_t A0, sA, B0, sB, epsilon, MaxSig = 100.;
@@ -450,7 +455,7 @@ Double_t CLA(Double_t ilum, Double_t slum, Double_t eff, Double_t seff, Double_t
 		Double_t s95 = CL95(ilum, slum, eff, seff, bck, sbck, i, kFALSE, bckint);
 		Double_t s95w =s95*Poisson(bck,i);
 		CL95A += s95w;
-		cout << "n = " << i << "; 95% C.L. = " << s95 << " pb; weighted 95% C.L. = " << s95w << " pb; running <s95> = " << CL95A << " pb" << endl;
+		if( VERBOSE && i % 10 == 0 ) cout << "n = " << i << "; 95% C.L. = " << s95 << " pb; weighted 95% C.L. = " << s95w << " pb; running <s95> = " << CL95A << " pb" << endl;
 		//
 		if (s95w < CL95A*precision) break;
 	}
@@ -461,7 +466,7 @@ Double_t CLA(Double_t ilum, Double_t slum, Double_t eff, Double_t seff, Double_t
 		Double_t s95 = CL95(ilum, slum, eff, seff, bck, sbck, i, kFALSE, bckint);
 		Double_t s95w =s95*Poisson(bck,i);
 		CL95A += s95w;
-		cout << "n = " << i << "; 95% C.L. = " << s95 << " pb; weighted 95% C.L. = " << s95w << " pb; running <s95> = " << CL95A << " pb" << endl;
+		if( VERBOSE && i % 10 == 0 ) cout << "n = " << i << "; 95% C.L. = " << s95 << " pb; weighted 95% C.L. = " << s95w << " pb; running <s95> = " << CL95A << " pb" << endl;
 		//
 		if (s95w < CL95A*precision) break;
 	}
