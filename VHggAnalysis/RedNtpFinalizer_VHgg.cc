@@ -167,15 +167,47 @@ void RedNtpFinalizer_VHgg::finalize()
    TH1D* h1_qgljet1_incorrect = new TH1D("qgljet1_incorrect", "", 100, 0., 1.0001);
    h1_qgljet1_incorrect->Sumw2();
   
+   int njets_t;
+   int nbjets_loose_t;
+   int nbjets_medium_t;
+   float ptPhot1_t;
+   float ptPhot2_t;
+   float etaPhot1_t;
+   float etaPhot2_t;
+   float mgg_t;
+   float ptgg_t;
+   float ptJet1_t;
+   float ptJet2_t;
+   float etaJet1_t;
+   float etaJet2_t;
+   float mjj_t;
+   float ptjj_t;
+   float zeppen_t;
 
-// TTree* tree_passedEvents = new TTree("tree_passedEvents");
-// tree_passedEvents->Branch( "run", &run, "run/I" );
-// tree_passedEvents->Branch( "LS", &LS, "LS/I" );
-// tree_passedEvents->Branch( "event", &event, "event/I" );
-// tree_passedEvents->Branch( "eventWeight", &eventWeight, "eventWeight/F" );
-// tree_passedEvents->Branch( "njets", &njets_t, "njets_t/F" );
-// tree_passedEvents->Branch( "nbjets_loose", &nbjets_loose_t, "nbjets_loose_t/F" );
-// tree_passedEvents->Branch( "nbjets_medium", &nbjets_medium_t, "nbjets_medium_t/F" );
+   float eventWeight = 1.;
+
+   TTree* tree_passedEvents = new TTree();
+   tree_passedEvents->SetName("tree_passedEvents");
+   tree_passedEvents->Branch( "run", &run, "run/I" );
+   tree_passedEvents->Branch( "lumi", &lumi, "lumi/I" );
+   tree_passedEvents->Branch( "event", &event, "event/I" );
+   tree_passedEvents->Branch( "eventWeight", &eventWeight, "eventWeight/F" );
+   tree_passedEvents->Branch( "njets", &njets_t, "njets_t/I" );
+   tree_passedEvents->Branch( "nbjets_loose", &nbjets_loose_t, "nbjets_loose_t/I" );
+   tree_passedEvents->Branch( "nbjets_medium", &nbjets_medium_t, "nbjets_medium_t/I" );
+   tree_passedEvents->Branch( "ptPhot1", &ptPhot1_t, "ptPhot1_t/F" );
+   tree_passedEvents->Branch( "ptPhot2", &ptPhot2_t, "ptPhot2_t/F" );
+   tree_passedEvents->Branch( "etaPhot1", &etaPhot1_t, "etaPhot1_t/F" );
+   tree_passedEvents->Branch( "etaPhot2", &etaPhot2_t, "etaPhot2_t/F" );
+   tree_passedEvents->Branch( "mgg", &mgg_t, "mgg_t/F" );
+   tree_passedEvents->Branch( "ptgg", &ptgg_t, "ptgg_t/F" );
+   tree_passedEvents->Branch( "ptJet1", &ptJet1_t, "ptJet1_t/F" );
+   tree_passedEvents->Branch( "ptJet2", &ptJet2_t, "ptJet2_t/F" );
+   tree_passedEvents->Branch( "etaJet1", &etaJet1_t, "etaJet1_t/F" );
+   tree_passedEvents->Branch( "etaJet2", &etaJet2_t, "etaJet2_t/F" );
+   tree_passedEvents->Branch( "mjj", &mjj_t, "mjj_t/F" );
+   tree_passedEvents->Branch( "ptjj", &ptjj_t, "ptjj_t/F" );
+   tree_passedEvents->Branch( "zeppen", &zeppen_t, "zeppen_t/F" );
  
 
 
@@ -208,7 +240,6 @@ void RedNtpFinalizer_VHgg::finalize()
       bool isMC = ( run<5 );
 
       
-      float eventWeight = 1.;
 
 
       if( isMC ) {
@@ -509,8 +540,26 @@ void RedNtpFinalizer_VHgg::finalize()
        }
 
 
+       // set tree vars:
+       njets_t  = njets_selected;
+       nbjets_loose_t = njets_selected_btagloose;
+       nbjets_medium_t = njets_selected_btagmedium;
+       ptPhot1_t = ptphot1;
+       ptPhot2_t = ptphot2;
+       etaPhot1_t = etaphot1;
+       etaPhot2_t = etaphot2;
+       mgg_t = diphot.M();
+       ptgg_t = diphot.Pt();
+       ptJet1_t = jet0.Pt();
+       ptJet2_t = jet1.Pt();
+       etaJet1_t = jet0.Eta();
+       etaJet2_t = jet1.Eta();
+       mjj_t = dijet.M();
+       ptjj_t = dijet.Pt();
+       zeppen_t = zeppen;
 
-       //tree_passedEvents->Fill();
+
+       tree_passedEvents->Fill();
 
 
    } //for entries
@@ -520,6 +569,8 @@ void RedNtpFinalizer_VHgg::finalize()
    std::cout << "-> Fancy jets: Chose correct jet pair in " << correctPairs_fancy/allPairs*100. << "%% of the cases." << std::endl;
 
    outFile_->cd();
+
+   tree_passedEvents->Write();
 
    h1_nvertex->Write();
    h1_nvertex_PUW->Write();
