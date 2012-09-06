@@ -99,6 +99,8 @@ int main( int argc, char* argv[] ) {
 
     finalize_oneDataset("WH_ZH_HToGG_M-125_8TeV-pythia6", selectionType, bTaggerType, datasets);
     finalize_oneDataset("GluGluToHToGG_M-125_8TeV-powheg-pythia6", selectionType, bTaggerType, datasets);
+    finalize_oneDataset("VBF_HToGG_M-125_8TeV-powheg-pythia6", selectionType, bTaggerType, datasets);
+    finalize_oneDataset("TTH_HToGG_M-125_8TeV-pythia6", selectionType, bTaggerType, datasets);
 
   } else {
   
@@ -147,7 +149,8 @@ void do_haddCommand( const std::string& dataset, std::vector<std::string> *datas
   hadd_command += suffix;
   std::string rm_command = "rm " + suffix;
   system(hadd_command.c_str());
-  system(rm_command.c_str());
+  if( dataset!="HToGG_M-125_8TeV-pythia6" ) //keep also separate signal processes:
+    system(rm_command.c_str());
 
 }
 
