@@ -836,8 +836,6 @@ public :
  
    float zeppenfeld_thresh_;
 
-   float zeppenfeld_thresh_;
-
    float mjj_min_thresh_;
    float mjj_max_thresh_;
 
