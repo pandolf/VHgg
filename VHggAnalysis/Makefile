@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2012/08/20 12:59:13 pandolf Exp $
+# $Id: Makefile,v 1.5 2012/08/25 16:32:27 pandolf Exp $
 ROOTLIBS      = $(shell $(ROOTSYS)/bin/root-config --libs)
 ROOTGLIBS     = $(shell $(ROOTSYS)/bin/root-config --glibs)
 
@@ -34,6 +34,9 @@ CCFILES=$(filter-out $(BINFILES),$(wildcard *.cc))
 
 # List of all object files to build
 OLIST = $(OBJDIR)/RedNtpFinalizer.o $(OBJDIR)/AnalysisJet.o $(OBJDIR)/BTagSFUtil.o $(OBJDIR)/SFlightFuncs.o $(OBJDIR)/MistagFuncs.o $(OBJDIR)/QGLikelihoodCalculator.o
+OLIST += $(OBJDIR)/DrawBase.o $(OBJDIR)/fitTools.o
+OLIST += $(OBJDIR)/TAbsFitParticle.o $(OBJDIR)/TAbsFitConstraint.o $(OBJDIR)/TFitConstraintM.o $(OBJDIR)/TFitParticleEtEtaPhi.o $(OBJDIR)/TKinFitter.o $(OBJDIR)/DiJetKinFitter.o
+OLIST += $(OBJDIR)/HelicityLikelihoodDiscriminant.o $(OBJDIR)/RooPentaSpinTwo.o $(OBJDIR)/RooBphione.o $(OBJDIR)/RooBtheta.o $(OBJDIR)/RooBkg2l2jHL.o $(OBJDIR)/RooSpinZero5DV2.o $(OBJDIR)/RooBkgd2L2JV2.o 
 OLIST +=$(patsubst %.cc,$(OBJDIR)/%.o,$(notdir $(CCFILES)))
 
 $(OBJDIR)/RedNtpFinalizer.o: $(CMSSW_BASE)/src/UserCode/pandolf/CommonTools/RedNtpFinalizer.cc
@@ -65,6 +68,81 @@ $(OBJDIR)/QGLikelihoodCalculator.o: $(CMSSW_BASE)/src/UserCode/pandolf/QGLikelih
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/DrawBase.o: $(CMSSW_BASE)/src/UserCode/pandolf/CommonTools/DrawBase.C
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/fitTools.o: $(CMSSW_BASE)/src/UserCode/pandolf/CommonTools/fitTools.C
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+
+$(OBJDIR)/DiJetKinFitter.o: $(CMSSW_BASE)/src/UserCode/pandolf/KinematicFit/DiJetKinFitter.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/TAbsFitParticle.o: $(CMSSW_BASE)/src/UserCode/pandolf/KinematicFit/TAbsFitParticle.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/TAbsFitConstraint.o: $(CMSSW_BASE)/src/UserCode/pandolf/KinematicFit/TAbsFitConstraint.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/TFitConstraintM.o: $(CMSSW_BASE)/src/UserCode/pandolf/KinematicFit/TFitConstraintM.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/TFitParticleEtEtaPhi.o: $(CMSSW_BASE)/src/UserCode/pandolf/KinematicFit/TFitParticleEtEtaPhi.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/HelicityLikelihoodDiscriminant.o: $(CMSSW_BASE)/src/UserCode/pandolf/HelicityLikelihoodDiscriminant/HelicityLikelihoodDiscriminant.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/RooPentaSpinTwo.o: $(CMSSW_BASE)/src/UserCode/pandolf/HelicityLikelihoodDiscriminant/PDFs/RooPentaSpinTwo.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/RooBphione.o: $(CMSSW_BASE)/src/UserCode/pandolf/HelicityLikelihoodDiscriminant/PDFs/RooBphione.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/RooBtheta.o: $(CMSSW_BASE)/src/UserCode/pandolf/HelicityLikelihoodDiscriminant/PDFs/RooBtheta.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/RooBkg2l2jHL.o: $(CMSSW_BASE)/src/UserCode/pandolf/HelicityLikelihoodDiscriminant/PDFs/RooBkg2l2jHL.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/RooSpinZero5DV2.o: $(CMSSW_BASE)/src/UserCode/pandolf/HelicityLikelihoodDiscriminant/PDFs/RooSpinZero5DV2.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/RooBkgd2L2JV2.o: $(CMSSW_BASE)/src/UserCode/pandolf/HelicityLikelihoodDiscriminant/PDFs/RooBkgd2L2JV2.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+
+
+
 
 # Implicit rule to compile all classes
 $(OBJDIR)/%.o : %.cc

@@ -2,6 +2,10 @@
 
 #include "QGLikelihood/interface/QGLikelihoodCalculator.h"
 
+#include "KinematicFit/DiJetKinFitter.h"
+
+#include "HelicityLikelihoodDiscriminant/HelicityLikelihoodDiscriminant.h"
+
 
 
 
@@ -94,6 +98,9 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_etajet1->Sumw2();
 
 
+   TH1D* h1_kinfit_chiSquareProbMax = new TH1D("kinfit_chiSquareProbMax", "", 1000, 0., 1.0001);
+   h1_kinfit_chiSquareProbMax->Sumw2();
+
    TH1D* h1_mjj = new TH1D("mjj", "", 50, 0., 500.);
    h1_mjj->Sumw2();
    TH1D* h1_mjj_0btag = new TH1D("mjj_0btag", "", 50, 0., 500.);
@@ -138,12 +145,13 @@ void RedNtpFinalizer_VHgg::finalize()
    TH1D* h1_mgg_2btag_nebeb = new TH1D("mgg_2btag_nebeb", "", 80, 100., 180.);
    h1_mgg_2btag_nebeb->Sumw2();
 
+   TH1D*  h1_ptDiphot = new TH1D("ptDiphot", "", 100, 0., 500.);
+   h1_ptDiphot->Sumw2();
+
    TH1D*  h1_deltaPhi = new TH1D("deltaPhi", "", 100, 0., 3.1416);
    h1_deltaPhi->Sumw2();
    TH1D*  h1_ptDijet = new TH1D("ptDijet", "", 100, 0., 500.);
    h1_ptDijet->Sumw2();
-   TH1D*  h1_ptDiphot = new TH1D("ptDiphot", "", 100, 0., 500.);
-   h1_ptDiphot->Sumw2();
    TH1D*  h1_ptRatio = new TH1D("ptRatio", "", 100, 0., 3.);
    h1_ptRatio->Sumw2();
    TH1D*  h1_ptDifference = new TH1D("ptDifference", "", 100, -200., 200.);
@@ -155,6 +163,22 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_deltaFabsEtaJets->Sumw2();
    TH1D* h1_zeppen = new TH1D("zeppen", "", 100, -8., 8.);
    h1_zeppen->Sumw2();
+
+   TH1D*  h1_deltaPhi_kinfit = new TH1D("deltaPhi_kinfit", "", 100, 0., 3.1416);
+   h1_deltaPhi_kinfit->Sumw2();
+   TH1D*  h1_ptDijet_kinfit = new TH1D("ptDijet_kinfit", "", 100, 0., 500.);
+   h1_ptDijet_kinfit->Sumw2();
+   TH1D*  h1_ptRatio_kinfit = new TH1D("ptRatio_kinfit", "", 100, 0., 3.);
+   h1_ptRatio_kinfit->Sumw2();
+   TH1D*  h1_ptDifference_kinfit = new TH1D("ptDifference_kinfit", "", 100, -200., 200.);
+   h1_ptDifference_kinfit->Sumw2();
+
+   TH1D* h1_deltaEtaJets_kinfit = new TH1D("deltaEtaJets_kinfit", "", 100, -10., 10.);
+   h1_deltaEtaJets_kinfit->Sumw2();
+   TH1D* h1_deltaFabsEtaJets_kinfit = new TH1D("deltaFabsEtaJets_kinfit", "", 100, -5., 5.);
+   h1_deltaFabsEtaJets_kinfit->Sumw2();
+   TH1D* h1_zeppen_kinfit = new TH1D("zeppen_kinfit", "", 100, -8., 8.);
+   h1_zeppen_kinfit->Sumw2();
 
    TH1D* h1_qgljet0 = new TH1D("qgljet0", "", 100, 0., 1.0001);
    h1_qgljet0->Sumw2();
@@ -176,6 +200,23 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_qgljet0_incorrect->Sumw2();
    TH1D* h1_qgljet1_incorrect = new TH1D("qgljet1_incorrect", "", 100, 0., 1.0001);
    h1_qgljet1_incorrect->Sumw2();
+
+   TH1D* h1_cosTheta1 = new TH1D("cosTheta1", "", 100, 0., 1.0001);
+   h1_cosTheta1->Sumw2();
+   TH1D* h1_cosTheta2 = new TH1D("cosTheta2", "", 100, 0., 1.0001);
+   h1_cosTheta2->Sumw2();
+   TH1D* h1_cosThetaStar = new TH1D("cosThetaStar", "", 100, 0., 1.0001);
+   h1_cosThetaStar->Sumw2();
+   TH1D* h1_helphi = new TH1D("helphi", "", 100, 0., 1.0001);
+   h1_helphi->Sumw2();
+   TH1D* h1_helphi1 = new TH1D("helphi1", "", 100, 0., 1.0001);
+   h1_helphi1->Sumw2();
+
+   h1_cosTheta1->Write();
+   h1_cosTheta2->Write();
+   h1_cosThetaStar->Write();
+   h1_helphi->Write();
+   h1_helphi1->Write();
   
    int njets_t;
    int nbjets_loose_t;
@@ -197,6 +238,7 @@ void RedNtpFinalizer_VHgg::finalize()
    float mjj_t;
    float ptjj_t;
    float zeppen_t;
+   float chiSquareProbMax_t;
 
    float eventWeight = 1.;
 
@@ -226,12 +268,23 @@ void RedNtpFinalizer_VHgg::finalize()
    tree_passedEvents->Branch( "mjj", &mjj_t, "mjj_t/F" );
    tree_passedEvents->Branch( "ptjj", &ptjj_t, "ptjj_t/F" );
    tree_passedEvents->Branch( "zeppen", &zeppen_t, "zeppen_t/F" );
+   tree_passedEvents->Branch( "chiSquareProbMax", &chiSquareProbMax_t, "chiSquareProbMax_t/F" );
  
 
 
    std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
    QGLikelihoodCalculator *qglikeli = new QGLikelihoodCalculator( qglFileName );
 
+   float Zmass = 91.19;
+   float Wmass = 80.4;
+
+   DiJetKinFitter* fitter_jetsW = new DiJetKinFitter( "fitter_jetsW", "fitter_jets", Wmass );
+   DiJetKinFitter* fitter_jetsZ = new DiJetKinFitter( "fitter_jetsZ", "fitter_jets", Zmass );
+
+   HelicityLikelihoodDiscriminant *helicityDiscriminator = new HelicityLikelihoodDiscriminant();
+
+   int seed = 110;
+   TRandom3* coin = new TRandom3(seed);
 
    float allPairs = 0.;
    float correctPairs_lead = 0.;
@@ -454,12 +507,12 @@ void RedNtpFinalizer_VHgg::finalize()
 
 
        // choose jets as two btagged jets, OR leading ones
-       int indexjet0 = 0;
-       int indexjet1 = 1;
+       int indexjet0 = index_selected[0];
+       int indexjet1 = index_selected[1];
        bool firstjet_isbtaggedloose = false;
        bool secondjet_isbtaggedloose = false;
        if( index_selected_btagloose.size()==1 ) {
-         if( index_selected_btagloose[0]!=0 ) { 
+         if( index_selected_btagloose[0]!=index_selected[0] ) { 
            indexjet1 = index_selected_btagloose[0];
            secondjet_isbtaggedloose = true;
          } else {
@@ -478,6 +531,7 @@ void RedNtpFinalizer_VHgg::finalize()
        AnalysisJet jet1;
        jet1.SetPtEtaPhiE( ptcorrjet[indexjet1], etajet[indexjet1], phijet[indexjet1], ecorrjet[indexjet1] );
        AnalysisJet dijet = jet0 + jet1;
+
 
        h1_ptjet0->Fill( jet0.Pt(), eventWeight );
        h1_ptjet1->Fill( jet1.Pt(), eventWeight );
@@ -505,22 +559,69 @@ void RedNtpFinalizer_VHgg::finalize()
 
 
        float zeppen = diphot.Eta() - 0.5*( jet0.Eta() + jet1.Eta() );
-       if( fabs(zeppen)>zeppenfeld_thresh_ ) continue;
-
-
        h1_zeppen->Fill( zeppen, eventWeight);
+
+
+
+       // perform two kinfits:
+       std::pair<TLorentzVector,TLorentzVector> jets_kinfitW = fitter_jetsW->fit(jet0, jet1);
+       std::pair<TLorentzVector,TLorentzVector> jets_kinfitZ = fitter_jetsZ->fit(jet0, jet1);
+       float chiSquareProbW = TMath::Prob(fitter_jetsW->getS(), fitter_jetsW->getNDF());
+       float chiSquareProbZ = TMath::Prob(fitter_jetsZ->getS(), fitter_jetsZ->getNDF());
+
+
+       TLorentzVector phot0, phot1;
+       phot0.SetPtEtaPhiM( ptphot1, etaphot1, phiphot1, 0.);
+       phot1.SetPtEtaPhiM( ptphot2, etaphot2, phiphot2, 0.);
+
+       HelicityLikelihoodDiscriminant::HelicityAngles hangles;
+       if( coin->Uniform(1.)<0.5 ) hangles = helicityDiscriminator->computeHelicityAngles(phot0, phot1, jet0, jet1);
+       else                        hangles = helicityDiscriminator->computeHelicityAngles(phot1, phot0, jet0, jet1);
+
+       h1_cosTheta1->Fill( hangles.helCosTheta1, eventWeight );
+       h1_cosTheta2->Fill( hangles.helCosTheta2, eventWeight );
+       h1_cosThetaStar->Fill( hangles.helCosThetaStar, eventWeight );
+       h1_helphi->Fill( hangles.helPhi, eventWeight );
+       h1_helphi1->Fill( hangles.helPhi1, eventWeight );
+
+       TLorentzVector jet0_kinfit, jet1_kinfit;
+       float chiSquareProbMax=0.;
+
+       if( chiSquareProbW>chiSquareProbZ ) {
+
+         chiSquareProbMax = chiSquareProbW;
+         jet0_kinfit = jets_kinfitW.first;
+         jet1_kinfit = jets_kinfitW.second;
+
+       } else {
+
+         chiSquareProbMax = chiSquareProbZ;
+         jet0_kinfit = jets_kinfitZ.first;
+         jet1_kinfit = jets_kinfitZ.second;
+
+       }
+
+       TLorentzVector dijet_kinfit = jet0_kinfit + jet1_kinfit;
+
+       h1_kinfit_chiSquareProbMax->Fill( chiSquareProbMax, eventWeight );
+
+       
+       float zeppen_kinfit = diphot.Eta() - 0.5*( jet0_kinfit.Eta() + jet1_kinfit.Eta() );
+       h1_zeppen_kinfit->Fill( zeppen_kinfit, eventWeight );
+
+
 
 
        float qgljet0 = qglikeli->computeQGLikelihoodPU( jet0.Pt(), rhoPF, ntrkjet[indexjet0], nneutjet[indexjet0], ptDjet[indexjet0] );
        float qgljet1 = qglikeli->computeQGLikelihoodPU( jet1.Pt(), rhoPF, ntrkjet[indexjet1], nneutjet[indexjet1], ptDjet[indexjet1] );
 
 
-
        // med-med category for double higgs searches
-       // no kinematic cuts on jets expect preselection
+       // not many kinematic cuts on jets expect preselection (model independent)
        if( njets_selected_btagmedium==2 ) { 
 
-
+         // only lower bound on mjj mass
+         if( dijet.M()<mjj_min_thresh_ ) continue;
 
          h1_mgg_2btagmed->Fill( massggnewvtx, eventWeight );
 
@@ -542,6 +643,7 @@ void RedNtpFinalizer_VHgg::finalize()
            if( jet1.Pt() < ptjetsubleadthresh_0btag_ ) continue;
          }
 
+         if( fabs(zeppen)>zeppenfeld_thresh_ ) continue;
          if( dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_ ) continue;
 
 
@@ -595,12 +697,12 @@ void RedNtpFinalizer_VHgg::finalize()
 
 
 
+       h1_ptDiphot->Fill( diphot.Pt(), eventWeight );
 
 
        float deltaphi = fabs(dijet.DeltaPhi(diphot));
 
        h1_deltaPhi->Fill( deltaphi, eventWeight );
-       h1_ptDiphot->Fill( diphot.Pt(), eventWeight );
        h1_ptDijet->Fill( dijet.Pt(), eventWeight );
        h1_ptRatio->Fill( dijet.Pt()/diphot.Pt(), eventWeight );
        h1_ptDifference->Fill( dijet.Pt()-diphot.Pt(), eventWeight );
@@ -609,7 +711,19 @@ void RedNtpFinalizer_VHgg::finalize()
        h1_deltaFabsEtaJets->Fill( fabs(jet0.Eta())-fabs(jet1.Eta()), eventWeight );
 
 
+       float deltaphi_kinfit = fabs(dijet_kinfit.DeltaPhi(diphot));
+
+       h1_deltaPhi_kinfit->Fill( deltaphi_kinfit, eventWeight );
+       h1_ptDijet_kinfit->Fill( dijet_kinfit.Pt(), eventWeight );
+       h1_ptRatio_kinfit->Fill( dijet_kinfit.Pt()/diphot.Pt(), eventWeight );
+       h1_ptDifference_kinfit->Fill( dijet_kinfit.Pt()-diphot.Pt(), eventWeight );
+
+       h1_deltaEtaJets_kinfit->Fill( jet0_kinfit.Eta()-jet1_kinfit.Eta(), eventWeight );
+       h1_deltaFabsEtaJets_kinfit->Fill( fabs(jet0_kinfit.Eta())-fabs(jet1_kinfit.Eta()), eventWeight );
+
+
        h1_mgg->Fill( massggnewvtx, eventWeight );
+
 
 
        // set tree vars:
@@ -633,6 +747,7 @@ void RedNtpFinalizer_VHgg::finalize()
        mjj_t = dijet.M();
        ptjj_t = dijet.Pt();
        zeppen_t = zeppen;
+       chiSquareProbMax_t = chiSquareProbMax;
 
 
        tree_passedEvents->Fill();
@@ -673,6 +788,8 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_etajet0->Write();
    h1_etajet1->Write();
 
+   h1_kinfit_chiSquareProbMax->Write();
+
    h1_mjj->Write();
 
    h1_mjj_0btag->Write();
@@ -682,15 +799,25 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_mjj_correct->Write();
    h1_mjj_incorrect->Write();
 
+   h1_ptDiphot->Write();
+
    h1_deltaPhi->Write();
    h1_ptDijet->Write();
-   h1_ptDiphot->Write();
    h1_ptRatio->Write();
    h1_ptDifference->Write();
 
    h1_deltaEtaJets->Write();
    h1_deltaFabsEtaJets->Write();
    h1_zeppen->Write();
+
+   h1_deltaPhi_kinfit->Write();
+   h1_ptDijet_kinfit->Write();
+   h1_ptRatio_kinfit->Write();
+   h1_ptDifference_kinfit->Write();
+
+   h1_deltaEtaJets_kinfit->Write();
+   h1_deltaFabsEtaJets_kinfit->Write();
+   h1_zeppen_kinfit->Write();
 
    h1_mgg_prepresel->Write();
    h1_mgg_presel->Write();
@@ -718,6 +845,12 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_qgljet1_correct->Write();
    h1_qgljet0_incorrect->Write();
    h1_qgljet1_incorrect->Write();
+
+   h1_cosTheta1->Write();
+   h1_cosTheta2->Write();
+   h1_cosThetaStar->Write();
+   h1_helphi->Write();
+   h1_helphi1->Write();
 
 
 
@@ -1211,6 +1344,17 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
    mjj_max_thresh_ = 120.;
 
   } else if( selectionType=="sel1" ) {
+
+   ptphot1cut_ = 60.;
+   ptphot2cut_ = 25.;
+   pthiggsmincut_ = 50.;
+
+   ptjetleadthresh_0btag_ = 40.;
+
+   mjj_min_thresh_ = 60.;
+   mjj_max_thresh_ = 120.;
+
+  } else if( selectionType=="sel2" ) {
 
    ptphot1cut_ = 60.;
    ptphot2cut_ = 25.;

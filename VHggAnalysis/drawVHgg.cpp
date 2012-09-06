@@ -192,14 +192,21 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto("deltaFabsEtaJets_kinfit", "Jet-Jet #Delta|#eta|");
   db_nostack->drawHisto("zeppen_kinfit", "Zeppenfeld Variable");
 
+  db_nostack->drawHisto("cosTheta1");
+  db_nostack->drawHisto("cosTheta2");
+  db_nostack->drawHisto("cosThetaStar");
+  db_nostack->drawHisto("helphi");
+  db_nostack->drawHisto("helphi1");
+
   
   db_nostack->set_rebin(10);
-  db_nostack->drawHisto("kinfit_chiSquareProbMax", "KinFit Max #chi^2 Prob");
+  db_nostack->drawHisto("kinfit_chiSquareProbMax", "KinFit Max #chi^{2} Prob");
   db_nostack->set_xAxisMax(0.1);
   db_nostack->set_flags("zoom");
-  db_nostack->drawHisto("kinfit_chiSquareProbMax", "KinFit Max #chi^2 Prob");
-
+  db_nostack->drawHisto("kinfit_chiSquareProbMax", "KinFit Max #chi^{2} Prob");
   db_nostack->reset();
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "chiSquareProbMax", "eventWeight*(mjj>60. && mjj<120.)", 20, 0., 0.1, "kinfit_chiSquareProbMax_mjjwindow", "KinFit Max #chi^{2} Prob");
+
 
   db_stack->set_rebin(5);
 
