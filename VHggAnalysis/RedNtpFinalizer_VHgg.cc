@@ -121,6 +121,8 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_mgg_1btag->Sumw2();
    TH1D* h1_mgg_2btag = new TH1D("mgg_2btag", "", 80, 100., 180.);
    h1_mgg_2btag->Sumw2();
+   TH1D* h1_mgg_2btagmed = new TH1D("mgg_2btagmed", "", 80, 100., 180.);
+   h1_mgg_2btagmed->Sumw2();
 
    TH1D* h1_mgg_0btag_ebeb = new TH1D("mgg_0btag_ebeb", "", 80, 100., 180.);
    h1_mgg_0btag_ebeb->Sumw2();
@@ -158,6 +160,14 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_qgljet0->Sumw2();
    TH1D* h1_qgljet1 = new TH1D("qgljet1", "", 100, 0., 1.0001);
    h1_qgljet1->Sumw2();
+   TH1D* h1_qgljet0_0btag = new TH1D("qgljet0_0btag", "", 100, 0., 1.0001);
+   h1_qgljet0_0btag->Sumw2();
+   TH1D* h1_qgljet1_0btag = new TH1D("qgljet1_0btag", "", 100, 0., 1.0001);
+   h1_qgljet1_0btag->Sumw2();
+
+   TH1D* h1_qgljet_1btag = new TH1D("qgljet_1btag", "", 100, 0., 1.0001);
+   h1_qgljet_1btag->Sumw2();
+
    TH1D* h1_qgljet0_correct = new TH1D("qgljet0_correct", "", 100, 0., 1.0001);
    h1_qgljet0_correct->Sumw2();
    TH1D* h1_qgljet1_correct = new TH1D("qgljet1_correct", "", 100, 0., 1.0001);
@@ -180,6 +190,10 @@ void RedNtpFinalizer_VHgg::finalize()
    float ptJet2_t;
    float etaJet1_t;
    float etaJet2_t;
+   float qglJet1_t;
+   float qglJet2_t;
+   bool  btagJet1_t;
+   bool  btagJet2_t;
    float mjj_t;
    float ptjj_t;
    float zeppen_t;
@@ -205,6 +219,10 @@ void RedNtpFinalizer_VHgg::finalize()
    tree_passedEvents->Branch( "ptJet2", &ptJet2_t, "ptJet2_t/F" );
    tree_passedEvents->Branch( "etaJet1", &etaJet1_t, "etaJet1_t/F" );
    tree_passedEvents->Branch( "etaJet2", &etaJet2_t, "etaJet2_t/F" );
+   tree_passedEvents->Branch( "qglJet1", &qglJet1_t, "qglJet1_t/F" );
+   tree_passedEvents->Branch( "qglJet2", &qglJet2_t, "qglJet2_t/F" );
+   tree_passedEvents->Branch( "btagJet1", &btagJet1_t, "btagJet1_t/O" );
+   tree_passedEvents->Branch( "btagJet2", &btagJet2_t, "btagJet2_t/O" );
    tree_passedEvents->Branch( "mjj", &mjj_t, "mjj_t/F" );
    tree_passedEvents->Branch( "ptjj", &ptjj_t, "ptjj_t/F" );
    tree_passedEvents->Branch( "zeppen", &zeppen_t, "zeppen_t/F" );
@@ -438,12 +456,21 @@ void RedNtpFinalizer_VHgg::finalize()
        // choose jets as two btagged jets, OR leading ones
        int indexjet0 = 0;
        int indexjet1 = 1;
+       bool firstjet_isbtaggedloose = false;
+       bool secondjet_isbtaggedloose = false;
        if( index_selected_btagloose.size()==1 ) {
-         if( index_selected_btagloose[0]!=0 ) indexjet1 = index_selected_btagloose[0];
+         if( index_selected_btagloose[0]!=0 ) { 
+           indexjet1 = index_selected_btagloose[0];
+           secondjet_isbtaggedloose = true;
+         } else {
+           firstjet_isbtaggedloose = true;
+         }
        }
        if( index_selected_btagloose.size()>1 ) {
          indexjet0 = index_selected_btagloose[0];
          indexjet1 = index_selected_btagloose[1];
+         firstjet_isbtaggedloose = true;
+         secondjet_isbtaggedloose = true;
        }
 
        AnalysisJet jet0;
@@ -476,27 +503,6 @@ void RedNtpFinalizer_VHgg::finalize()
        }
 
 
-       if( njets_selected_btagloose==0 ) {
-         h1_mjj_0btag->Fill( dijet.M(), eventWeight );
-       } else if( njets_selected_btagloose==1 ) {
-         h1_mjj_1btag->Fill( dijet.M(), eventWeight );
-       } else {
-         h1_mjj_2btag->Fill( dijet.M(), eventWeight );
-       }
-       
-
-       if( njets_selected_btagloose==0 ) {
-         if( jet0.Pt() < ptjetleadthresh_0btag_ ) continue;
-         if( jet1.Pt() < ptjetsubleadthresh_0btag_ ) continue;
-       }
-
-       if( dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_ ) continue;
-
-       //if( njets_selected_btagloose==2 ) {
-       //  if( dijet.M()<mjj_min_2btag_thresh_|| dijet.M()>mjj_max_2btag_thresh_ ) continue;
-       //} else {
-       //  if( dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_ ) continue;
-       //}
 
        float zeppen = diphot.Eta() - 0.5*( jet0.Eta() + jet1.Eta() );
        if( fabs(zeppen)>zeppenfeld_thresh_ ) continue;
@@ -509,15 +515,87 @@ void RedNtpFinalizer_VHgg::finalize()
        float qgljet1 = qglikeli->computeQGLikelihoodPU( jet1.Pt(), rhoPF, ntrkjet[indexjet1], nneutjet[indexjet1], ptDjet[indexjet1] );
 
 
-       h1_qgljet0->Fill( qgljet0, eventWeight );
-       h1_qgljet1->Fill( qgljet1, eventWeight );
-       if( chose_correctPair ) {
-         h1_qgljet0_correct->Fill( qgljet0, eventWeight );
-         h1_qgljet1_correct->Fill( qgljet1, eventWeight );
-       } else {
-         h1_qgljet0_incorrect->Fill( qgljet0, eventWeight );
-         h1_qgljet1_incorrect->Fill( qgljet1, eventWeight );
+
+       // med-med category for double higgs searches
+       // no kinematic cuts on jets expect preselection
+       if( njets_selected_btagmedium==2 ) { 
+
+
+
+         h1_mgg_2btagmed->Fill( massggnewvtx, eventWeight );
+
+
+
+       } else { // SM higgs categories
+
+         if( njets_selected_btagloose==0 ) {
+           h1_mjj_0btag->Fill( dijet.M(), eventWeight );
+         } else if( njets_selected_btagloose==1 ) {
+           h1_mjj_1btag->Fill( dijet.M(), eventWeight );
+         } else {
+           h1_mjj_2btag->Fill( dijet.M(), eventWeight );
+         }
+         
+
+         if( njets_selected_btagloose==0 ) {
+           if( jet0.Pt() < ptjetleadthresh_0btag_ ) continue;
+           if( jet1.Pt() < ptjetsubleadthresh_0btag_ ) continue;
+         }
+
+         if( dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_ ) continue;
+
+
+         h1_qgljet0->Fill( qgljet0, eventWeight );
+         h1_qgljet1->Fill( qgljet1, eventWeight );
+         if( chose_correctPair ) {
+           h1_qgljet0_correct->Fill( qgljet0, eventWeight );
+           h1_qgljet1_correct->Fill( qgljet1, eventWeight );
+         } else {
+           h1_qgljet0_incorrect->Fill( qgljet0, eventWeight );
+           h1_qgljet1_incorrect->Fill( qgljet1, eventWeight );
+         }
+
+         if( njets_selected_btagloose==0 ) {
+
+           h1_mgg_0btag->Fill( massggnewvtx, eventWeight );
+           if( ebeb ) h1_mgg_0btag_ebeb->Fill( massggnewvtx, eventWeight );
+           else  h1_mgg_0btag_nebeb->Fill( massggnewvtx, eventWeight );
+
+           h1_qgljet0_0btag->Fill( qgljet0, eventWeight );
+           h1_qgljet1_0btag->Fill( qgljet1, eventWeight );
+
+         } else if( njets_selected_btagloose==1 ) {
+
+           h1_mgg_1btag->Fill( massggnewvtx, eventWeight );
+           if( ebeb ) h1_mgg_1btag_ebeb->Fill( massggnewvtx, eventWeight );
+           else  h1_mgg_1btag_nebeb->Fill( massggnewvtx, eventWeight );
+
+           // qg only for non-btagged jet:
+           if( firstjet_isbtaggedloose ) {
+             h1_qgljet_1btag->Fill( qgljet1, eventWeight );
+           } else {
+             h1_qgljet_1btag->Fill( qgljet0, eventWeight );
+           }
+
+         } else {
+           h1_mgg_2btag->Fill( massggnewvtx, eventWeight );
+           if( ebeb ) h1_mgg_2btag_ebeb->Fill( massggnewvtx, eventWeight );
+           else  h1_mgg_2btag_nebeb->Fill( massggnewvtx, eventWeight );
+         }
+
+
        }
+       
+       
+       //if( njets_selected_btagloose==2 ) {
+       //  if( dijet.M()<mjj_min_2btag_thresh_|| dijet.M()>mjj_max_2btag_thresh_ ) continue;
+       //} else {
+       //  if( dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_ ) continue;
+       //}
+
+
+
+
 
        float deltaphi = fabs(dijet.DeltaPhi(diphot));
 
@@ -532,19 +610,6 @@ void RedNtpFinalizer_VHgg::finalize()
 
 
        h1_mgg->Fill( massggnewvtx, eventWeight );
-       if( njets_selected_btagloose==0 ) {
-         h1_mgg_0btag->Fill( massggnewvtx, eventWeight );
-         if( ebeb ) h1_mgg_0btag_ebeb->Fill( massggnewvtx, eventWeight );
-         else  h1_mgg_0btag_nebeb->Fill( massggnewvtx, eventWeight );
-       } else if( njets_selected_btagloose==1 ) {
-         h1_mgg_1btag->Fill( massggnewvtx, eventWeight );
-         if( ebeb ) h1_mgg_1btag_ebeb->Fill( massggnewvtx, eventWeight );
-         else  h1_mgg_1btag_nebeb->Fill( massggnewvtx, eventWeight );
-       } else {
-         h1_mgg_2btag->Fill( massggnewvtx, eventWeight );
-         if( ebeb ) h1_mgg_2btag_ebeb->Fill( massggnewvtx, eventWeight );
-         else  h1_mgg_2btag_nebeb->Fill( massggnewvtx, eventWeight );
-       }
 
 
        // set tree vars:
@@ -561,6 +626,10 @@ void RedNtpFinalizer_VHgg::finalize()
        ptJet2_t = jet1.Pt();
        etaJet1_t = jet0.Eta();
        etaJet2_t = jet1.Eta();
+       qglJet1_t = qgljet0;
+       qglJet2_t = qgljet1;
+       btagJet1_t = firstjet_isbtaggedloose;
+       btagJet2_t = secondjet_isbtaggedloose;
        mjj_t = dijet.M();
        ptjj_t = dijet.Pt();
        zeppen_t = zeppen;
@@ -629,6 +698,7 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_mgg_0btag->Write();
    h1_mgg_1btag->Write();
    h1_mgg_2btag->Write();
+   h1_mgg_2btagmed->Write();
 
    h1_mgg_0btag_ebeb->Write();
    h1_mgg_1btag_ebeb->Write();
@@ -640,6 +710,10 @@ void RedNtpFinalizer_VHgg::finalize()
 
    h1_qgljet0->Write();
    h1_qgljet1->Write();
+   h1_qgljet0_0btag->Write();
+   h1_qgljet1_0btag->Write();
+   h1_qgljet_1btag->Write();
+
    h1_qgljet0_correct->Write();
    h1_qgljet1_correct->Write();
    h1_qgljet0_incorrect->Write();
