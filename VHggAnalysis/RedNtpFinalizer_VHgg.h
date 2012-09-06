@@ -830,15 +830,14 @@ public :
    float pthiggsmaxcut_;
 
    float ptjetthresh_;
-   float ptjetleadthresh_;
+   float ptjetleadthresh_0btag_;
+   float ptjetsubleadthresh_0btag_;
    float etajetthresh_;
 
    float zeppenfeld_thresh_;
 
    float mjj_min_thresh_;
    float mjj_max_thresh_;
-   float mjj_min_2btag_thresh_;
-   float mjj_max_2btag_thresh_;
 
 
 };

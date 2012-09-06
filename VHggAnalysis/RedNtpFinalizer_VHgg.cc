@@ -484,12 +484,19 @@ void RedNtpFinalizer_VHgg::finalize()
          h1_mjj_2btag->Fill( dijet.M(), eventWeight );
        }
        
-       if( njets_selected_btagloose==2 ) {
-         if( dijet.M()<mjj_min_2btag_thresh_|| dijet.M()>mjj_max_2btag_thresh_ ) continue;
-       } else {
-         if( jet0.Pt() < ptjetleadthresh_ ) continue;
-         if( dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_ ) continue;
+
+       if( njets_selected_btagloose==0 ) {
+         if( jet0.Pt() < ptjetleadthresh_0btag_ ) continue;
+         if( jet1.Pt() < ptjetsubleadthresh_0btag_ ) continue;
        }
+
+       if( dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_ ) continue;
+
+       //if( njets_selected_btagloose==2 ) {
+       //  if( dijet.M()<mjj_min_2btag_thresh_|| dijet.M()>mjj_max_2btag_thresh_ ) continue;
+       //} else {
+       //  if( dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_ ) continue;
+       //}
 
        float zeppen = diphot.Eta() - 0.5*( jet0.Eta() + jet1.Eta() );
        if( fabs(zeppen)>zeppenfeld_thresh_ ) continue;
@@ -1098,21 +1105,21 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
   r9cat_ = 1;
   photonID_thresh_ = 4;
   cs_ = false;
+
   ptphot1cut_ = 30.;
   ptphot2cut_ = 20.;
   pthiggsmincut_ = 0.;
   pthiggsmaxcut_ = 10000.;
 
   ptjetthresh_ = 20.;
-  ptjetleadthresh_ = 20.;
+  ptjetleadthresh_0btag_ = 20.;
+  ptjetsubleadthresh_0btag_ = 20.;
   etajetthresh_ = 2.4;
 
   zeppenfeld_thresh_ = 1000.;
 
   mjj_min_thresh_ = 0.;
   mjj_max_thresh_ = 10000.;
-  mjj_min_2btag_thresh_ = 0.;
-  mjj_max_2btag_thresh_ = 10000.;
 
 
 
@@ -1128,8 +1135,6 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
 
    mjj_min_thresh_ = 60.;
    mjj_max_thresh_ = 120.;
-   mjj_min_2btag_thresh_ = 50.;
-   mjj_max_2btag_thresh_ = 150.;
 
   } else if( selectionType=="sel1" ) {
 
@@ -1137,12 +1142,11 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
    ptphot2cut_ = 25.;
    pthiggsmincut_ = 50.;
 
-   ptjetleadthresh_ = 40.;
+   ptjetleadthresh_0btag_ = 55.;
+   ptjetsubleadthresh_0btag_ = 35.;
 
    mjj_min_thresh_ = 60.;
    mjj_max_thresh_ = 120.;
-   mjj_min_2btag_thresh_ = 50.;
-   mjj_max_2btag_thresh_ = 150.;
 
   } else if( selectionType=="ddrsel" ) {
 
@@ -1150,14 +1154,12 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
    ptphot2cut_ = 40.;
 
    ptjetthresh_ = 25.;
-   ptjetleadthresh_ = 40.;
+   ptjetleadthresh_0btag_ = 40.; //this is not accurate
 
    zeppenfeld_thresh_ = 1.5;
 
    mjj_min_thresh_ = 55.;
    mjj_max_thresh_ = 115.;
-   mjj_min_2btag_thresh_ = 55.;
-   mjj_max_2btag_thresh_ = 115.;
 
   } else {
 
