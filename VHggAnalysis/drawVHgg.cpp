@@ -157,6 +157,12 @@ int main(int argc, char* argv[]) {
   db_nostack->set_rebin(2);
   db_nostack->drawHisto("qgljet0", "Lead Jet Q-G LD");
   db_nostack->drawHisto("qgljet1", "Sublead Jet Q-G LD");
+  db_stack->set_legendTitle( "0 b-tag Category" );
+  db_nostack->drawHisto("qgljet0_0btag", "Lead Jet Q-G LD");
+  db_nostack->drawHisto("qgljet1_0btag", "Sublead Jet Q-G LD");
+  db_stack->set_legendTitle( "1 b-tag Category" );
+  db_nostack->drawHisto("qgljet_1btag", "Non b-Tagged Jet Q-G LD");
+  db_stack->set_legendTitle( "" );
   db_nostack->set_rebin();
 
   db_nostack->drawHisto("ptphot0", "Lead Photon p_{T}", "GeV");
@@ -165,9 +171,11 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto("ptjet1", "Sublead Jet p_{T}", "GeV");
 
   db_nostack->set_rebin(2);
+
+  db_nostack->drawHisto("ptDiphot", "Diphoton p_{T}", "GeV");
+
   db_nostack->drawHisto("deltaPhi", "#Delta#Phi(dijet-diphoton)", "rad");
   db_nostack->drawHisto("ptDijet", "Dijet p_{T}", "GeV");
-  db_nostack->drawHisto("ptDiphot", "Diphoton p_{T}", "GeV");
   db_nostack->drawHisto("ptRatio", "Dijet p_{T} / Diphoton p_{T}");
   db_nostack->drawHisto("ptDifference", "Dijet p_{T} - Diphoton p_{T}", "GeV");
 
@@ -175,7 +183,23 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto("deltaFabsEtaJets", "Jet-Jet #Delta|#eta|");
   db_nostack->drawHisto("zeppen", "Zeppenfeld Variable");
 
+  db_nostack->drawHisto("deltaPhi_kinfit", "#Delta#Phi(dijet-diphoton)", "rad");
+  db_nostack->drawHisto("ptDijet_kinfit", "Dijet p_{T}", "GeV");
+  db_nostack->drawHisto("ptRatio_kinfit", "Dijet p_{T} / Diphoton p_{T}");
+  db_nostack->drawHisto("ptDifference_kinfit", "Dijet p_{T} - Diphoton p_{T}", "GeV");
 
+  db_nostack->drawHisto("deltaEtaJets_kinfit", "Jet-Jet #Delta#eta");
+  db_nostack->drawHisto("deltaFabsEtaJets_kinfit", "Jet-Jet #Delta|#eta|");
+  db_nostack->drawHisto("zeppen_kinfit", "Zeppenfeld Variable");
+
+  
+  db_nostack->set_rebin(10);
+  db_nostack->drawHisto("kinfit_chiSquareProbMax", "KinFit Max #chi^2 Prob");
+  db_nostack->set_xAxisMax(0.1);
+  db_nostack->set_flags("zoom");
+  db_nostack->drawHisto("kinfit_chiSquareProbMax", "KinFit Max #chi^2 Prob");
+
+  db_nostack->reset();
 
   db_stack->set_rebin(5);
 
@@ -198,6 +222,29 @@ int main(int argc, char* argv[]) {
   db_stack->set_legendTitle( "2 b-tag Category" );
   db_stack->drawHisto("mgg_2btag", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "2tag", doUL );
+  db_stack->set_legendTitle( "2 b-tag Med Category" );
+  db_stack->drawHisto("mgg_2btagmed", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "2tagmed", doUL );
+
+  db_stack->set_legendTitle( "0 b-tag Category (EBEB)" );
+  db_stack->drawHisto("mgg_0btag_ebeb", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "0tag_ebeb", doUL );
+  db_stack->set_legendTitle( "1 b-tag Category (EBEB)" );
+  db_stack->drawHisto("mgg_1btag_ebeb", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "1tag_ebeb", doUL );
+  db_stack->set_legendTitle( "2 b-tag Category (EBEB)" );
+  db_stack->drawHisto("mgg_2btag_ebeb", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "2tag_ebeb", doUL );
+
+  db_stack->set_legendTitle( "0 b-tag Category (!EBEB)" );
+  db_stack->drawHisto("mgg_0btag_nebeb", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "0tag_nebeb", doUL );
+  db_stack->set_legendTitle( "1 b-tag Category (!EBEB)" );
+  db_stack->drawHisto("mgg_1btag_nebeb", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "1tag_nebeb", doUL );
+  db_stack->set_legendTitle( "2 b-tag Category (!EBEB)" );
+  db_stack->drawHisto("mgg_2btag_nebeb", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "2tag_nebeb", doUL );
 
 
 
@@ -215,6 +262,8 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
   ofstream yieldsFile(yieldsFileName.c_str());
 
 
+  //float xMin = 122.;
+  //float xMax = 128.;
   float xMin = 120.;
   float xMax = 130.;
 
@@ -222,6 +271,8 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
 
   int binXmin = histos[0]->FindBin(xMin);
   int binXmax = histos[0]->FindBin(xMax) -1;
+  std::cout <<  binXmin << std::endl;
+  std::cout <<  binXmax << std::endl;
 
   bool foundSignal = false;
   float totalBG = 0.;
@@ -241,7 +292,7 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
 
   yieldsFile << "Total BG: " << totalBG << std::endl;
 
-  float signal_xsec = 2.28E-03*(19.37 + 1.573 + 0.6966 + 0.3943); // ttH missing for now
+  float signal_xsec = 2.28E-03*(19.37 + 1.573 + 0.6966 + 0.3943 + 0.1302); 
   float total_signal = signal_xsec*db->get_lumi();
   float effS = signal/total_signal;
   yieldsFile << "Signal efficiency: " << effS << std::endl;
