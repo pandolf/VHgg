@@ -835,6 +835,7 @@ public :
    float etajetthresh_;
  
    float zeppenfeld_thresh_;
+   float costhetastar_thresh_;
 
    float mjj_min_thresh_;
    float mjj_max_thresh_;

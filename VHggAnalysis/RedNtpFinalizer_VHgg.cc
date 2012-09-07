@@ -260,6 +260,7 @@ void RedNtpFinalizer_VHgg::finalize()
    float ptjj_t;
    float zeppen_t;
    float chiSquareProbMax_t;
+   float cosThetaStar_t;
 
    float eventWeight = 1.;
 
@@ -290,6 +291,7 @@ void RedNtpFinalizer_VHgg::finalize()
    tree_passedEvents->Branch( "ptjj", &ptjj_t, "ptjj_t/F" );
    tree_passedEvents->Branch( "zeppen", &zeppen_t, "zeppen_t/F" );
    tree_passedEvents->Branch( "chiSquareProbMax", &chiSquareProbMax_t, "chiSquareProbMax_t/F" );
+   tree_passedEvents->Branch( "cosThetaStar", &cosThetaStar_t, "cosThetaStar_t/F" );
  
 
 
@@ -599,9 +601,11 @@ void RedNtpFinalizer_VHgg::finalize()
        if( coin->Uniform(1.)<0.5 ) hangles = helicityDiscriminator->computeHelicityAngles(phot0, phot1, jet0, jet1);
        else                        hangles = helicityDiscriminator->computeHelicityAngles(phot1, phot0, jet0, jet1);
 
+       
+       float cosThetaStar = hangles.helCosThetaStar;
+       h1_cosThetaStar->Fill( hangles.helCosThetaStar, eventWeight );
        h1_cosTheta1->Fill( hangles.helCosTheta1, eventWeight );
        h1_cosTheta2->Fill( hangles.helCosTheta2, eventWeight );
-       h1_cosThetaStar->Fill( hangles.helCosThetaStar, eventWeight );
        h1_helphi->Fill( hangles.helPhi, eventWeight );
        h1_helphi1->Fill( hangles.helPhi1, eventWeight );
 
@@ -670,6 +674,7 @@ void RedNtpFinalizer_VHgg::finalize()
          }
 
          if( fabs(zeppen)>zeppenfeld_thresh_ ) continue;
+         if( fabs(cosThetaStar)>costhetastar_thresh_ ) continue;
          if( dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_ ) continue;
 
 
@@ -788,6 +793,7 @@ void RedNtpFinalizer_VHgg::finalize()
        ptjj_t = dijet.Pt();
        zeppen_t = zeppen;
        chiSquareProbMax_t = chiSquareProbMax;
+       cosThetaStar_t = cosThetaStar;
 
 
        tree_passedEvents->Fill();
@@ -1377,6 +1383,7 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
   etajetthresh_ = 2.4;
 
   zeppenfeld_thresh_ = 1000.;
+  costhetastar_thresh_ = 2.;
 
   mjj_min_thresh_ = 0.;
   mjj_max_thresh_ = 10000.;
