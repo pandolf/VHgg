@@ -324,7 +324,7 @@ void RedNtpFinalizer_VHgg::finalize()
      std::cout << std::endl;
      std::cout << "-> Cross-Section: " << xSection_ << " pb" << std::endl;
      std::cout << "-> # Generated Events: " << nGenEvents_ << std::endl;
-     std::cout << "-> Event Weight: " << nGenEvents_ << std::endl << std::endl;
+     std::cout << "-> Event Weight: " << xSection_/nGenEvents_ << std::endl << std::endl;
    }
 
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
