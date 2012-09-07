@@ -150,10 +150,24 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto("nbjets_loose", "Number of b-Jets (Loose)", "", "Events");
   db_nostack->drawHisto("nbjets_medium", "Number of b-Jets (Medium)", "", "Events");
 
+
+  db_nostack->set_rebin(4);
   db_nostack->drawHisto("mjj", "Dijet Mass", "GeV");
   db_nostack->drawHisto("mjj_0btag", "Dijet Mass", "GeV");
   db_nostack->drawHisto("mjj_1btag", "Dijet Mass", "GeV");
   db_nostack->drawHisto("mjj_2btag", "Dijet Mass", "GeV");
+  std::vector< HistoAndName > hn;
+  HistoAndName hn_qglHI;
+  hn_qglHI.histoName = "mjj_qglHI";
+  hn_qglHI.legendName = "QG_{1}>0.8 && QG_{2}>0.8";
+  hn.push_back(hn_qglHI);
+  HistoAndName hn_qglLO;
+  hn_qglLO.histoName = "mjj_qglLO";
+  hn_qglLO.legendName = "!(QG_{1}>0.8 && QG_{2}>0.8)";
+  hn.push_back(hn_qglLO);
+  db_nostack->compareDifferentHistos_singleFile( db_nostack->get_mcFile(0), hn, "mjj_qglcat" );
+
+
   db_nostack->set_rebin(2);
   db_nostack->drawHisto("qgljet0", "Lead Jet Q-G LD");
   db_nostack->drawHisto("qgljet1", "Sublead Jet Q-G LD");
@@ -198,14 +212,31 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto("helphi");
   db_nostack->drawHisto("helphi1");
 
+  db_nostack->set_rebin(5);
+  db_nostack->drawHisto("mVstar");
+  db_nostack->drawHisto("ptVstar");
+  db_nostack->drawHisto("etaVstar");
+  db_nostack->drawHisto("phiVstar");
+
+  db_nostack->drawHisto("mVstar_kinfit");
+  db_nostack->drawHisto("ptVstar_kinfit");
+  db_nostack->drawHisto("etaVstar_kinfit");
+  db_nostack->drawHisto("phiVstar_kinfit");
   
-  db_nostack->set_rebin(10);
+  db_nostack->set_rebin(20);
   db_nostack->drawHisto("kinfit_chiSquareProbMax", "KinFit Max #chi^{2} Prob");
+  db_nostack->set_legendTitle( "60 < m_{jj} < 120 GeV");
+  db_nostack->drawHisto("kinfit_chiSquareProbMax_mjjWindow", "KinFit Max #chi^{2} Prob");
   db_nostack->set_xAxisMax(0.1);
+  db_nostack->set_rebin(5);
   db_nostack->set_flags("zoom");
+  db_nostack->set_legendTitle( "");
   db_nostack->drawHisto("kinfit_chiSquareProbMax", "KinFit Max #chi^{2} Prob");
+  db_stack->set_legendTitle( "60 < m_{jj} < 120 GeV");
+  db_nostack->drawHisto("kinfit_chiSquareProbMax_mjjWindow", "KinFit Max #chi^{2} Prob");
   db_nostack->reset();
-  db_nostack->drawHisto_fromTree("tree_passedEvents", "chiSquareProbMax", "eventWeight*(mjj>60. && mjj<120.)", 20, 0., 0.1, "kinfit_chiSquareProbMax_mjjwindow", "KinFit Max #chi^{2} Prob");
+  //db_nostack->drawHisto_fromTree("tree_passedEvents", "chiSquareProbMax", "eventWeight", 20, 0., 1, "kinfit_chiSquareProbMax_prova", "KinFit Max #chi^{2} Prob");
+  //db_nostack->drawHisto_fromTree("tree_passedEvents", "chiSquareProbMax", "eventWeight*(mjj>60. && mjj<120.)", 20, 0., 0.1, "kinfit_chiSquareProbMax_mjjwindow", "KinFit Max #chi^{2} Prob");
 
 
   db_stack->set_rebin(5);

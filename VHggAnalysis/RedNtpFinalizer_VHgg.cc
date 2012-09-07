@@ -100,18 +100,24 @@ void RedNtpFinalizer_VHgg::finalize()
 
    TH1D* h1_kinfit_chiSquareProbMax = new TH1D("kinfit_chiSquareProbMax", "", 1000, 0., 1.0001);
    h1_kinfit_chiSquareProbMax->Sumw2();
+   TH1D* h1_kinfit_chiSquareProbMax_mjjWindow = new TH1D("kinfit_chiSquareProbMax_mjjWindow", "", 1000, 0., 1.0001);
+   h1_kinfit_chiSquareProbMax_mjjWindow->Sumw2();
 
-   TH1D* h1_mjj = new TH1D("mjj", "", 50, 0., 500.);
+   TH1D* h1_mjj = new TH1D("mjj", "", 200, 0., 500.);
    h1_mjj->Sumw2();
-   TH1D* h1_mjj_0btag = new TH1D("mjj_0btag", "", 50, 0., 500.);
+   TH1D* h1_mjj_0btag = new TH1D("mjj_0btag", "", 200, 0., 500.);
    h1_mjj_0btag->Sumw2();
-   TH1D* h1_mjj_1btag = new TH1D("mjj_1btag", "", 50, 0., 500.);
+   TH1D* h1_mjj_1btag = new TH1D("mjj_1btag", "", 200, 0., 500.);
    h1_mjj_1btag->Sumw2();
-   TH1D* h1_mjj_2btag = new TH1D("mjj_2btag", "", 50, 0., 500.);
+   TH1D* h1_mjj_2btag = new TH1D("mjj_2btag", "", 200, 0., 500.);
    h1_mjj_2btag->Sumw2();
-   TH1D* h1_mjj_correct = new TH1D("mjj_correct", "", 50, 0., 500.);
+   TH1D* h1_mjj_qglHI = new TH1D("mjj_qglHI", "", 200, 0., 500.);
+   h1_mjj_qglHI->Sumw2();
+   TH1D* h1_mjj_qglLO = new TH1D("mjj_qglLO", "", 200, 0., 500.);
+   h1_mjj_qglLO->Sumw2();
+   TH1D* h1_mjj_correct = new TH1D("mjj_correct", "", 200, 0., 500.);
    h1_mjj_correct->Sumw2();
-   TH1D* h1_mjj_incorrect = new TH1D("mjj_incorrect", "", 50, 0., 500.);
+   TH1D* h1_mjj_incorrect = new TH1D("mjj_incorrect", "", 200, 0., 500.);
    h1_mjj_incorrect->Sumw2();
 
    TH1D* h1_mgg_prepresel = new TH1D("mgg_prepresel", "", 80, 100., 180.);
@@ -201,22 +207,37 @@ void RedNtpFinalizer_VHgg::finalize()
    TH1D* h1_qgljet1_incorrect = new TH1D("qgljet1_incorrect", "", 100, 0., 1.0001);
    h1_qgljet1_incorrect->Sumw2();
 
-   TH1D* h1_cosTheta1 = new TH1D("cosTheta1", "", 100, 0., 1.0001);
+   TH1D* h1_cosTheta1 = new TH1D("cosTheta1", "", 100, -1.0001, 1.0001);
    h1_cosTheta1->Sumw2();
-   TH1D* h1_cosTheta2 = new TH1D("cosTheta2", "", 100, 0., 1.0001);
+   TH1D* h1_cosTheta2 = new TH1D("cosTheta2", "", 100, -1.0001, 1.0001);
    h1_cosTheta2->Sumw2();
-   TH1D* h1_cosThetaStar = new TH1D("cosThetaStar", "", 100, 0., 1.0001);
+   TH1D* h1_cosThetaStar = new TH1D("cosThetaStar", "", 100, -1.0001, 1.0001);
    h1_cosThetaStar->Sumw2();
-   TH1D* h1_helphi = new TH1D("helphi", "", 100, 0., 1.0001);
+   TH1D* h1_helphi = new TH1D("helphi", "", 100, 0., 3.1416);
    h1_helphi->Sumw2();
-   TH1D* h1_helphi1 = new TH1D("helphi1", "", 100, 0., 1.0001);
+   TH1D* h1_helphi1 = new TH1D("helphi1", "", 100, 0., 3.1416);
    h1_helphi1->Sumw2();
 
-   h1_cosTheta1->Write();
-   h1_cosTheta2->Write();
-   h1_cosThetaStar->Write();
-   h1_helphi->Write();
-   h1_helphi1->Write();
+   TH1D* h1_mVstar = new TH1D("mVstar", "", 1000, 0., 1000.);
+   h1_mVstar->Sumw2();
+   TH1D* h1_ptVstar = new TH1D("ptVstar", "", 500, 0., 500.);
+   h1_ptVstar->Sumw2();
+   TH1D* h1_etaVstar = new TH1D("etaVstar", "", 100, -5., 5.);
+   h1_etaVstar->Sumw2();
+   TH1D* h1_phiVstar = new TH1D("phiVstar", "", 100, 0., 3.1416);
+   h1_phiVstar->Sumw2();
+
+   TH1D* h1_mVstar_kinfit = new TH1D("mVstar_kinfit", "", 1000, 0., 1000.);
+   h1_mVstar_kinfit->Sumw2();
+   TH1D* h1_ptVstar_kinfit = new TH1D("ptVstar_kinfit", "", 500, 0., 500.);
+   h1_ptVstar_kinfit->Sumw2();
+   TH1D* h1_etaVstar_kinfit = new TH1D("etaVstar_kinfit", "", 100, -5., 5.);
+   h1_etaVstar_kinfit->Sumw2();
+   TH1D* h1_phiVstar_kinfit = new TH1D("phiVstar_kinfit", "", 100, 0., 3.1416);
+   h1_phiVstar_kinfit->Sumw2();
+
+
+
   
    int njets_t;
    int nbjets_loose_t;
@@ -604,11 +625,14 @@ void RedNtpFinalizer_VHgg::finalize()
        TLorentzVector dijet_kinfit = jet0_kinfit + jet1_kinfit;
 
        h1_kinfit_chiSquareProbMax->Fill( chiSquareProbMax, eventWeight );
+       if( dijet.M()>60. && dijet.M()<120. ) 
+         h1_kinfit_chiSquareProbMax_mjjWindow->Fill( chiSquareProbMax, eventWeight );
 
        
        float zeppen_kinfit = diphot.Eta() - 0.5*( jet0_kinfit.Eta() + jet1_kinfit.Eta() );
        h1_zeppen_kinfit->Fill( zeppen_kinfit, eventWeight );
 
+      
 
 
 
@@ -637,6 +661,8 @@ void RedNtpFinalizer_VHgg::finalize()
            h1_mjj_2btag->Fill( dijet.M(), eventWeight );
          }
          
+         if( qgljet0>0.8 && qgljet1>0.8 ) h1_mjj_qglHI->Fill( dijet.M(), eventWeight );
+         else                             h1_mjj_qglLO->Fill( dijet.M(), eventWeight );
 
          if( njets_selected_btagloose==0 ) {
            if( jet0.Pt() < ptjetleadthresh_0btag_ ) continue;
@@ -725,6 +751,20 @@ void RedNtpFinalizer_VHgg::finalize()
        h1_mgg->Fill( massggnewvtx, eventWeight );
 
 
+       TLorentzVector Vstar = dijet + diphot;
+       TLorentzVector Vstar_kinfit = dijet_kinfit + diphot;
+       
+       h1_mVstar->Fill( Vstar.M(), eventWeight );
+       h1_ptVstar->Fill( Vstar.Pt(), eventWeight );
+       h1_etaVstar->Fill( Vstar.Eta(), eventWeight );
+       h1_phiVstar->Fill( Vstar.Phi(), eventWeight );
+
+       h1_mVstar_kinfit->Fill( Vstar_kinfit.M(), eventWeight );
+       h1_ptVstar_kinfit->Fill( Vstar_kinfit.Pt(), eventWeight );
+       h1_etaVstar_kinfit->Fill( Vstar_kinfit.Eta(), eventWeight );
+       h1_phiVstar_kinfit->Fill( Vstar_kinfit.Phi(), eventWeight );
+
+
 
        // set tree vars:
        njets_t  = njets_selected;
@@ -789,12 +829,16 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_etajet1->Write();
 
    h1_kinfit_chiSquareProbMax->Write();
+   h1_kinfit_chiSquareProbMax_mjjWindow->Write();
 
    h1_mjj->Write();
 
    h1_mjj_0btag->Write();
    h1_mjj_1btag->Write();
    h1_mjj_2btag->Write();
+
+   h1_mjj_qglHI->Write();
+   h1_mjj_qglLO->Write();
 
    h1_mjj_correct->Write();
    h1_mjj_incorrect->Write();
@@ -852,6 +896,15 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_helphi->Write();
    h1_helphi1->Write();
 
+   h1_mVstar->Write();
+   h1_ptVstar->Write();
+   h1_etaVstar->Write();
+   h1_phiVstar->Write();
+
+   h1_mVstar_kinfit->Write();
+   h1_ptVstar_kinfit->Write();
+   h1_etaVstar_kinfit->Write();
+   h1_phiVstar_kinfit->Write();
 
 
 } //finalize
