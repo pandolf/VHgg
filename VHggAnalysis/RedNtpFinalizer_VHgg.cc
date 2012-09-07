@@ -320,6 +320,13 @@ void RedNtpFinalizer_VHgg::finalize()
 
    Long64_t nbytes = 0, nb = 0;
 
+   if( xSection_!=1. && xSection_!=0. ) {
+     std::cout << std::endl;
+     std::cout << "-> Cross-Section: " << xSection_ << " pb" << std::endl;
+     std::cout << "-> # Generated Events: " << nGenEvents_ << std::endl;
+     std::cout << "-> Event Weight: " << nGenEvents_ << std::endl << std::endl;
+   }
+
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
 
       Long64_t ientry = LoadTree(jentry);
@@ -645,12 +652,12 @@ void RedNtpFinalizer_VHgg::finalize()
 
 
        // med-med category for double higgs searches
-       // not many kinematic cuts on jets expect preselection (model independent)
-       if( njets_selected_btagmedium==2 ) { 
+       // try to be as model independent as possible (no mass or angular cuts)
+       // just cut hard on jet pt's
+       if( njets_selected_btagmedium==2 && jet0.Pt()>50. && jet1.Pt()>50. ) { 
 
-         // only lower bound on mjj mass
+
          if( dijet.M()<mjj_min_thresh_ ) continue;
-
          h1_mgg_2btagmed->Fill( massggnewvtx, eventWeight );
 
 
@@ -717,7 +724,7 @@ void RedNtpFinalizer_VHgg::finalize()
          }
 
 
-       }
+       } // if susy 2 med btag cat
        
        
        //if( njets_selected_btagloose==2 ) {
