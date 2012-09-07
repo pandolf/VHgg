@@ -121,6 +121,9 @@ int main( int argc, char* argv[] ) {
 void finalize_oneDataset( const std::string& dataset, const std::string& selectionType, const std::string& bTaggerType, std::vector<std::string> *datasets ) {
 
   std::cout << std::endl << "-> Finalizing " << dataset << std::endl;
+  std::cout << "-> Selection: " << selectionType << std::endl;
+  std::cout << "-> b-Tagger: " << bTaggerType << std::endl << std::endl;
+
   RedNtpFinalizer_VHgg* rf = new RedNtpFinalizer_VHgg( dataset, selectionType, bTaggerType );
   //rf->set_redNtpDir("/xrootdfs/cms/local/pandolf/HiggsGammaGamma/reduced/redntp.52xv5_VH_feasibility_signalOnly.cicpfloose.regrPho_eCorr_20062012.VH_feasibility_v0/merged");
   rf->set_redNtpDir("/xrootdfs/cms/local/pandolf/HiggsGammaGamma/reduced/redntp.52xv5_VH_feasibility.cicpfloose.regrPho_eCorr_20062012.VH_feasibility_v0/merged"); 
