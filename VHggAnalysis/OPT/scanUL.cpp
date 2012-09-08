@@ -59,9 +59,13 @@ int main( int argc, char* argv[] ) {
   float effmax = 0.;
 
 //  TFile* signalFile = TFile::Open("../VHgg_HToGG_M-125_8TeV-pythia6_presel_JP.root");
-  // optimized working point chosen when looking only at VH signal:
-  TFile* signalFile = TFile::Open("../VHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_presel_JP.root");
-  TTree* signalTree = (TTree*)signalFile->Get("tree_passedEvents");
+  //TFile* signalFile = TFile::Open("../VHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_presel_JP.root");
+  //TTree* signalTree = (TTree*)signalFile->Get("tree_passedEvents");
+
+  // optimized working point chosen when looking only at VH (and ttH) signal:
+  TChain* signalTree = new TChain("tree_passedEvents");
+  signalTree->Add("../VHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_presel_JP.root");
+  signalTree->Add("../VHgg_TTH_HToGG_M-125_8TeV-pythia6_presel_JP.root");
 
 
   TChain* backgroundTree = new TChain("tree_passedEvents");
