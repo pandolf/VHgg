@@ -824,18 +824,28 @@ public :
    int r9cat_;
    int photonID_thresh_;
    bool cs_;
-   float ptphot2cut_;
-   float ptphot1cut_;
-   float pthiggsmincut_;
-   float pthiggsmaxcut_;
 
-   float ptjetthresh_;
+   float ptphot1cut_;
+   float ptphot2cut_;
+
+   float ptgg_0btag_thresh_;
+   float ptgg_1btag_thresh_;
+   float ptgg_2btag_thresh_;
+
+   float ptjetthresh_count_;
+   float etajetthresh_count_;
+
+   float ptjet_0btag_thresh_;
+   float ptjet_1btag_thresh_;
+   float ptjet_2btag_thresh_;
+
    float ptjetleadthresh_0btag_;
-   float ptjetsubleadthresh_0btag_;
-   float etajetthresh_;
- 
+
    float zeppenfeld_thresh_;
-   float costhetastar_thresh_;
+
+   float costhetastar_0btag_thresh_;
+   float costhetastar_1btag_thresh_;
+   float costhetastar_2btag_thresh_;
 
    float mjj_min_thresh_;
    float mjj_max_thresh_;

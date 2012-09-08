@@ -390,8 +390,7 @@ void RedNtpFinalizer_VHgg::finalize()
       if(ptphot2 < ptphot2cut_) continue; //pt second photon
 //       if(ptphot2<ptphot2cut* massggnewvtx/120.) continue; //pt second photon
 
-      if(pthiggsmincut_>0 && diphot.Pt()< pthiggsmincut_) continue; //pt higgs min
-      if(pthiggsmaxcut_>0 && diphot.Pt()>=pthiggsmaxcut_) continue; //pt higgs max
+      //if(ptgg_thresh_>0 && diphot.Pt()< pthiggsmincut_) continue; //pt higgs min
 
 
 //    if(ptjet1cut>0 && (ptcorrjet1<ptjet1cut_ || TMath::Abs(etajet1)>4.7)) continue; //pt first jet
@@ -462,8 +461,8 @@ void RedNtpFinalizer_VHgg::finalize()
        for( unsigned ijet=0; ijet<njets; ++ijet ) {
 
 //std::cout << ijet << "/" << njets << " pt: " << ptcorrjet[ijet] << " eta: " << etajet[ijet] << std::endl;
-         if( ptcorrjet[ijet] < ptjetthresh_ ) continue;
-         if( fabs(etajet[ijet]) > etajetthresh_ ) continue;
+         if( ptcorrjet[ijet] < ptjetthresh_count_ ) continue;
+         if( fabs(etajet[ijet]) > etajetthresh_count_ ) continue;
 
          //jet PU ID:
          bool passedPUID = true;
@@ -657,38 +656,59 @@ void RedNtpFinalizer_VHgg::finalize()
        // try to be as model independent as possible (no mass or angular cuts)
        // just cut hard on jet pt's
        int btagCategory = -1;
-       if( njets_selected_btagmedium==2 && jet0.Pt()>50. && jet1.Pt()>50. ) { 
-
+       if( njets_selected_btagmedium==2 && jet0.Pt()>50. && jet1.Pt()>50. && diphot.Pt()>100. ) { 
 
          btagCategory = 3;
+
          h1_mgg_2btagmed->Fill( massggnewvtx, eventWeight );
 
 
 
        } else { // SM higgs categories
 
-         if( njets_selected_btagloose==0 ) {
-           btagCategory = 0;
+
+         btagCategory = (njets_selected_btagloose<=2) ? njets_selected_btagloose : 2;
+
+         if( btagCategory==0 ) {
+           if( diphot.Pt() < ptgg_0btag_thresh_ ) continue;
+         } else if( btagCategory==1 ) {
+           if( diphot.Pt() < ptgg_1btag_thresh_ ) continue;
+         } else {
+           if( diphot.Pt() < ptgg_2btag_thresh_ ) continue;
+         }
+         
+         
+
+         if( btagCategory==0 ) {
            h1_mjj_0btag->Fill( dijet.M(), eventWeight );
-         } else if( njets_selected_btagloose==1 ) {
-           btagCategory = 1;
+         } else if( btagCategory==1 ) {
            h1_mjj_1btag->Fill( dijet.M(), eventWeight );
          } else {
-           btagCategory = 2;
            h1_mjj_2btag->Fill( dijet.M(), eventWeight );
          }
          
          if( qgljet0>0.8 && qgljet1>0.8 ) h1_mjj_qglHI->Fill( dijet.M(), eventWeight );
          else                             h1_mjj_qglLO->Fill( dijet.M(), eventWeight );
 
-         if( njets_selected_btagloose==0 ) {
+         // old cut logic:
+         if( btagCategory==0 ) {
            if( jet0.Pt() < ptjetleadthresh_0btag_ ) continue;
-           if( jet1.Pt() < ptjetsubleadthresh_0btag_ ) continue;
          }
 
          if( fabs(zeppen)>zeppenfeld_thresh_ ) continue;
-         if( fabs(cosThetaStar)>costhetastar_thresh_ ) continue;
          if( dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_ ) continue;
+
+         if( btagCategory==0 ) {
+           if( jet1.Pt() < ptjet_0btag_thresh_ ) continue;
+           if( fabs(cosThetaStar) > costhetastar_0btag_thresh_ ) continue;
+         } else if( btagCategory==1 ) {
+           if( jet1.Pt() < ptjet_1btag_thresh_ ) continue;
+           if( fabs(cosThetaStar) > costhetastar_1btag_thresh_ ) continue;
+         } else {
+           if( jet1.Pt() < ptjet_2btag_thresh_ ) continue;
+           if( fabs(cosThetaStar) > costhetastar_2btag_thresh_ ) continue;
+         }
+         
 
 
          h1_qgljet0->Fill( qgljet0, eventWeight );
@@ -701,7 +721,7 @@ void RedNtpFinalizer_VHgg::finalize()
            h1_qgljet1_incorrect->Fill( qgljet1, eventWeight );
          }
 
-         if( njets_selected_btagloose==0 ) {
+         if( btagCategory==0 ) {
 
            h1_mgg_0btag->Fill( massggnewvtx, eventWeight );
            if( ebeb ) h1_mgg_0btag_ebeb->Fill( massggnewvtx, eventWeight );
@@ -710,7 +730,7 @@ void RedNtpFinalizer_VHgg::finalize()
            h1_qgljet0_0btag->Fill( qgljet0, eventWeight );
            h1_qgljet1_0btag->Fill( qgljet1, eventWeight );
 
-         } else if( njets_selected_btagloose==1 ) {
+         } else if( btagCategory==1 ) {
 
            h1_mgg_1btag->Fill( massggnewvtx, eventWeight );
            if( ebeb ) h1_mgg_1btag_ebeb->Fill( massggnewvtx, eventWeight );
@@ -724,9 +744,11 @@ void RedNtpFinalizer_VHgg::finalize()
            }
 
          } else {
+
            h1_mgg_2btag->Fill( massggnewvtx, eventWeight );
            if( ebeb ) h1_mgg_2btag_ebeb->Fill( massggnewvtx, eventWeight );
            else  h1_mgg_2btag_nebeb->Fill( massggnewvtx, eventWeight );
+
          }
 
 
@@ -1388,16 +1410,26 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
 
   ptphot1cut_ = 30.;
   ptphot2cut_ = 20.;
-  pthiggsmincut_ = 0.;
-  pthiggsmaxcut_ = 10000.;
 
-  ptjetthresh_ = 20.;
-  ptjetleadthresh_0btag_ = 20.;
-  ptjetsubleadthresh_0btag_ = 20.;
-  etajetthresh_ = 2.4;
+  ptgg_0btag_thresh_ = 0.;
+  ptgg_1btag_thresh_ = 0.;
+  ptgg_2btag_thresh_ = 0.;
+
+  ptjetthresh_count_ = 20.;
+  etajetthresh_count_ = 2.4;
+
+  ptjet_0btag_thresh_ = 20.;
+  ptjet_1btag_thresh_ = 20.;
+  ptjet_2btag_thresh_ = 20.;
+
+  // old cut logic, kept for backwards compatibility:
+  ptjetleadthresh_0btag_ = 40.;
 
   zeppenfeld_thresh_ = 1000.;
-  costhetastar_thresh_ = 2.;
+
+  costhetastar_0btag_thresh_ = 2.;
+  costhetastar_1btag_thresh_ = 2.;
+  costhetastar_2btag_thresh_ = 2.;
 
   mjj_min_thresh_ = 0.;
   mjj_max_thresh_ = 10000.;
@@ -1421,21 +1453,12 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
 
    ptphot1cut_ = 60.;
    ptphot2cut_ = 25.;
-   pthiggsmincut_ = 50.;
+
+   ptgg_0btag_thresh_ = 50.;
+   ptgg_1btag_thresh_ = 50.;
+   ptgg_2btag_thresh_ = 50.;
 
    ptjetleadthresh_0btag_ = 40.;
-
-   mjj_min_thresh_ = 60.;
-   mjj_max_thresh_ = 120.;
-
-  } else if( selectionType=="sel2" ) {
-
-   ptphot1cut_ = 60.;
-   ptphot2cut_ = 25.;
-   pthiggsmincut_ = 50.;
-
-   ptjetleadthresh_0btag_ = 55.;
-   ptjetsubleadthresh_0btag_ = 35.;
 
    mjj_min_thresh_ = 60.;
    mjj_max_thresh_ = 120.;
@@ -1445,7 +1468,7 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
    ptphot1cut_ = 62.5;
    ptphot2cut_ = 40.;
 
-   ptjetthresh_ = 25.;
+   ptjetthresh_count_ = 25.;
    ptjetleadthresh_0btag_ = 40.; //this is not accurate
 
    zeppenfeld_thresh_ = 1.5;
