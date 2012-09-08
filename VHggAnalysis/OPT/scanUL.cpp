@@ -53,18 +53,21 @@ int main( int argc, char* argv[] ) {
   ofs_UL << "Seff   \tS     \tB +- s(B)\t" << std::endl;
 
   TGraphErrors* gr_UL = new TGraphErrors(0);
-  float UL_min = 0.;
+  float UL_max = 0.;
+  float UL_min = 999.;
   float effS_UL_min = 0.;
   float effmax = 0.;
 
-  TFile* signalFile = TFile::Open("../VHgg_HToGG_M-125_8TeV-pythia6_presel_JP.root");
+//  TFile* signalFile = TFile::Open("../VHgg_HToGG_M-125_8TeV-pythia6_presel_JP.root");
+  // optimized working point chosen when looking only at VH signal:
+  TFile* signalFile = TFile::Open("../VHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_presel_JP.root");
   TTree* signalTree = (TTree*)signalFile->Get("tree_passedEvents");
 
 
   TChain* backgroundTree = new TChain("tree_passedEvents");
   backgroundTree->Add("../VHgg_DiPhoton_8TeV-pythia6_presel_JP.root/tree_passedEvents");
   backgroundTree->Add("../VHgg_GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("../VV_8TeV_presel_JP.root/tree_passedEvents");
+  backgroundTree->Add("../VHgg_VV_8TeV_presel_JP.root/tree_passedEvents");
   backgroundTree->Add("../VHgg_VGG_8TeV_presel_JP.root/tree_passedEvents");
   backgroundTree->Add("../VHgg_TT_8TeV_presel_JP.root/tree_passedEvents");
   backgroundTree->Add("../VHgg_QCD_doubleEMEnriched_TuneZ2star_8TeV-pythia6_presel_JP.root/tree_passedEvents");
@@ -113,20 +116,20 @@ int main( int argc, char* argv[] ) {
       selection += thisCut_str;
     }
 
-    char btagCut[200];
-    if( nbtags==2 )
-      sprintf( btagCut, "nbjets_loose >= %d", nbtags );
-    else
-      sprintf( btagCut, "nbjets_loose == %d", nbtags );
-    std::string btagCut_str(btagCut);
-    selection += btagCut_str;
+//  char btagCut[200];
+//  if( nbtags==2 )
+//    sprintf( btagCut, "nbjets_loose >= %d", nbtags );
+//  else
+//    sprintf( btagCut, "nbjets_loose == %d", nbtags );
+//  std::string btagCut_str(btagCut);
+//  selection += btagCut_str;
     selection += " )";
 
 std::cout << "selection: " << selection << std::endl;
 
-    TH1F* h1_bg = new TH1F("bg", "", 2, 0, 2);
+    TH1F* h1_bg = new TH1F("bg", "", 80, 100., 180.);
     h1_bg->Sumw2();
-    TH1F* h1_signal = new TH1F("signal", "", 2, 0, 2);
+    TH1F* h1_signal = new TH1F("signal", "", 80, 100., 180.);
     h1_signal->Sumw2();
    
     signalTree->Project( "signal", "mgg", selection.c_str() );
@@ -145,11 +148,14 @@ std::cout << "selection: " << selection << std::endl;
     background *= lumi;
     background_error *= lumi;
 
-    float signal_xsec = 2.28E-03*(19.37 + 1.573 + 0.6966 + 0.3943 + 0.1302); 
+    //float signal_xsec = 2.28E-03*(19.37 + 1.573 + 0.6966 + 0.3943 + 0.1302); 
+    // VH cross section only:
+    float signal_xsec = 2.28E-03*(0.6966); 
     float total_signal = signal_xsec*db->get_lumi();
     float effS = signal/total_signal;
     //float UL = StatTools::computeUL( signal+background, background, background_error );
     float UL = CLA( db->get_lumi(), 0., effS, 0., background, 0. );
+    float ULSM = UL/signal_xsec;
 
 
 std::cout << "signal: " << signal << " bg: " << background << " +- " << background_error << std::endl;
@@ -158,10 +164,14 @@ std::cout << "signal: " << signal << " bg: " << background << " +- " << backgrou
     if( effS > effmax )
       effmax = effS;
 
-    gr_UL->SetPoint( iEff-1, 100.*effS, UL );
+    gr_UL->SetPoint( iEff-1, 100.*effS, ULSM );
 
-    if( UL < UL_min ) {
-      UL_min = UL;
+    if( ULSM > UL_max ) {
+      UL_max = ULSM;
+    }
+
+    if( ULSM < UL_min ) {
+      UL_min = ULSM;
       effS_UL_min = effS;
     }
 
@@ -240,7 +250,7 @@ std::cout << "signal: " << signal << " bg: " << background << " +- " << backgrou
     delete h1_signal;
     delete h1_bg;
 
-std::cout << "### " << iEff << "   UL: " << UL << std::endl;
+std::cout << "### " << iEff << "   UL: " << UL << "  UL/SM: " << UL/signal_xsec << std::endl;
   } // for iEff
 
   std::cout << "> > >   BEST UL: " << UL_min << std::endl;
@@ -255,10 +265,10 @@ std::cout << "### " << iEff << "   UL: " << UL << std::endl;
   gr_UL->SetMarkerColor(kRed+3);
 
 
-  TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1.3*effmax*100., 10, 0., 1.6*UL_min ); 
+  TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1.3*effmax*100., 10, 0., 1.6*UL_max ); 
   //TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1., 10, 0., 5.);
-  h2_axes_gr->SetYTitle("UL (30 fb^{-1})");
-  h2_axes_gr->SetXTitle("Signal Efficiency Steps [a.u.]");
+  h2_axes_gr->SetYTitle("UL / SM (30 fb^{-1})");
+  h2_axes_gr->SetXTitle("Signal Efficiency [%]");
 
 
   TCanvas* c_gr = new TCanvas("c_gr", "c_gr", 600., 600.);
@@ -270,7 +280,7 @@ std::cout << "### " << iEff << "   UL: " << UL << std::endl;
   label_sqrt->Draw("same");
 
   char UL_vs_Seff_name[250];
-  sprintf(UL_vs_Seff_name, "%s/UL_vs_Seff.eps", optcutsdir.c_str() );
+  sprintf(UL_vs_Seff_name, "%s/UL_vs_Seff_%dbtag.eps", optcutsdir.c_str(), nbtags );
   c_gr->SaveAs(UL_vs_Seff_name);
 
 }
