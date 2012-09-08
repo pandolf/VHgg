@@ -1463,6 +1463,26 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
    mjj_min_thresh_ = 60.;
    mjj_max_thresh_ = 120.;
 
+  } else if( selectionType=="optsel1" ) {
+
+   ptphot1cut_ = 60.;
+   ptphot2cut_ = 25.;
+
+   ptgg_0btag_thresh_ = 117.;
+   ptgg_1btag_thresh_ = 103.;
+   ptgg_2btag_thresh_ = 93.;
+
+   ptjet_0btag_thresh_ = 36.;
+   ptjet_1btag_thresh_ = 23.;
+   ptjet_2btag_thresh_ = 25.;
+
+   costhetastar_0btag_thresh_ = 0.74;
+   costhetastar_1btag_thresh_ = 0.52;
+   costhetastar_2btag_thresh_ = 0.58;
+
+   mjj_min_thresh_ = 60.;
+   mjj_max_thresh_ = 120.;
+
   } else if( selectionType=="ddrsel" ) {
 
    ptphot1cut_ = 62.5;
