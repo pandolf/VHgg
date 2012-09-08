@@ -12,7 +12,7 @@
 
 #include "DrawBase.h"
 
-#include "cl95cms.C"
+#include "../cl95cms.C"
 
 
 
@@ -23,6 +23,17 @@ int main( int argc, char* argv[] ) {
   if( argc>1 ) {
     std::string selectionType_str(argv[1]);
     selectionType = selectionType_str;
+  }
+
+  int nbtags = -1;
+  if( argc>2 ) {
+    std::string nbtags_str(argv[2]);
+    nbtags = atoi(nbtags_str.c_str());
+  }
+
+  if( nbtags!=0 && nbtags!=1 && nbtags!=2 ) {
+    std::cout << "nbtags must be 0, 1, or 2. Exiting." << std::endl;
+    exit(11);
   }
 
 
@@ -44,13 +55,11 @@ int main( int argc, char* argv[] ) {
   TGraphErrors* gr_UL = new TGraphErrors(0);
   float UL_min = 0.;
   float effS_UL_min = 0.;
-  float effmin = 0.;
+  float effmax = 0.;
 
   TFile* signalFile = TFile::Open("../VHgg_HToGG_M-125_8TeV-pythia6_presel_JP.root");
   TTree* signalTree = (TTree*)signalFile->Get("tree_passedEvents");
 
-  TH1D* h1_nCounter_signal = (TH1D*)signalFile->Get("nCounter");
-  float nGen_signal = h1_nCounter_signal->GetBinContent(1);
 
   TChain* backgroundTree = new TChain("tree_passedEvents");
   backgroundTree->Add("../VHgg_DiPhoton_8TeV-pythia6_presel_JP.root/tree_passedEvents");
@@ -66,7 +75,7 @@ int main( int argc, char* argv[] ) {
   for( unsigned iEff=1; iEff<10; ++iEff ) {
 
     char infileName[300];
-    sprintf( infileName, "%s/cuts_Seff%d.txt", optcutsdir.c_str(), iEff*10);
+    sprintf( infileName, "%s/cuts_%dbtag_Seff%d.txt", optcutsdir.c_str(), nbtags, iEff*10);
     ifstream ifs(infileName);
     std::cout << "-> Opening Seff file: " << infileName << std::endl;
   
@@ -113,7 +122,7 @@ int main( int argc, char* argv[] ) {
     selection += btagCut_str;
     selection += " )";
 
-//std::cout << selection << std::endl;
+std::cout << "selection: " << selection << std::endl;
 
     TH1F* h1_bg = new TH1F("bg", "", 2, 0, 2);
     h1_bg->Sumw2();
@@ -136,26 +145,28 @@ int main( int argc, char* argv[] ) {
     background *= lumi;
     background_error *= lumi;
 
-    float UL = StatTools::computeUL( signal+background, background, background_error );
+    float signal_xsec = 2.28E-03*(19.37 + 1.573 + 0.6966 + 0.3943 + 0.1302); 
+    float total_signal = signal_xsec*db->get_lumi();
+    float effS = signal/total_signal;
+    //float UL = StatTools::computeUL( signal+background, background, background_error );
+    float UL = CLA( db->get_lumi(), 0., effS, 0., background, 0. );
+
 
 std::cout << "signal: " << signal << " bg: " << background << " +- " << background_error << std::endl;
 
 
-    float effS = (float)h1_signal->GetEntries()/nGen_signal/(2.*0.06*0.22*0.67);
-    //float effS = (float)h1_signal->GetEntries()/nGen_signal/(0.22*0.22*0.67);
-
-    if( effS > effmin )
-      effmin = effS;
+    if( effS > effmax )
+      effmax = effS;
 
     gr_UL->SetPoint( iEff-1, 100.*effS, UL );
 
-    if( UL > UL_min ) {
+    if( UL < UL_min ) {
       UL_min = UL;
       effS_UL_min = effS;
     }
 
-    float ymin = h1_signal->Getminimum() + h1_bg->Getminimum();
-    ymin*=1.5;
+    float ymax = h1_signal->GetMaximum() + h1_bg->GetMaximum();
+    ymax*=1.5;
 
 //  THStack* stack = new THStack();
 //  stack->Add( h1_bg );
@@ -244,10 +255,10 @@ std::cout << "### " << iEff << "   UL: " << UL << std::endl;
   gr_UL->SetMarkerColor(kRed+3);
 
 
-  TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1.3*effmin*100., 10, 0., 1.6*UL_min ); 
+  TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1.3*effmax*100., 10, 0., 1.6*UL_min ); 
   //TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1., 10, 0., 5.);
-  h2_axes_gr->SetYTitle("UL (5 fb^{-1})");
-  h2_axes_gr->SetXTitle("Signal Efficiency [%]");
+  h2_axes_gr->SetYTitle("UL (30 fb^{-1})");
+  h2_axes_gr->SetXTitle("Signal Efficiency Steps [a.u.]");
 
 
   TCanvas* c_gr = new TCanvas("c_gr", "c_gr", 600., 600.);
