@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.3 2012/05/16 09:03:06 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.1 2012/09/08 17:03:42 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -308,15 +308,19 @@ void TMVAClassification( std::string optName, int nbtags, TString myMethodList =
    //char presel[500];
    //sprintf( presel, "NJ>=%d && NbJ>=%d && pT1>%f && pT2>%f", nJ_min_presel, nbJ_min_presel, ptLep1_min_presel, ptLep2_min_presel );
 
-   char presel_cuts[500];
-   if( nbtags<2 )
-     sprintf( presel_cuts, "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==%d", nbtags );
-   else
-     sprintf( presel_cuts, "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose>=2" );
-   std::string presel_cuts_str(presel_cuts);
 
-   TCut mycuts = presel_cuts_str;
-   TCut mycutb = presel_cuts_str;
+   TCut mycuts;
+   TCut mycutb;
+   if( nbtags==0 ) {
+     mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0";
+     mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0";
+   } else if( nbtags==1 ) {
+     mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==1";
+     mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==1";
+   } else if( nbtags==2 ) {
+     mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose>=2";
+     mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose>=2";
+   }
    //TCut mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
    //TCut mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycutb = "abs(var1)<0.5";
 
@@ -586,7 +590,7 @@ void TMVAClassification( std::string optName, int nbtags, TString myMethodList =
        ofs << "ptPhot1 60. 100000." << std::endl;
        char btagcutline[300];
        if( nbtags<2 )
-         sprintf( btagcutline, "nbjets_loose %d %d", nbtags, nbtags);
+         sprintf( btagcutline, "nbjets_loose %d %d", nbtags, nbtags+1);
        else
          sprintf( btagcutline, "nbjets_loose 2 1000");
        std::string btagcutline_str(btagcutline);
