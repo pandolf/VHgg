@@ -239,6 +239,7 @@ void RedNtpFinalizer_VHgg::finalize()
 
 
   
+   int btagCategory_t;
    int njets_t;
    int nbjets_loose_t;
    int nbjets_medium_t;
@@ -260,7 +261,7 @@ void RedNtpFinalizer_VHgg::finalize()
    float ptjj_t;
    float zeppen_t;
    float chiSquareProbMax_t;
-   float cosThetaStar_t;
+   float absCosThetaStar_t;
 
    float eventWeight = 1.;
 
@@ -270,6 +271,7 @@ void RedNtpFinalizer_VHgg::finalize()
    tree_passedEvents->Branch( "lumi", &lumi, "lumi/I" );
    tree_passedEvents->Branch( "event", &event, "event/I" );
    tree_passedEvents->Branch( "eventWeight", &eventWeight, "eventWeight/F" );
+   tree_passedEvents->Branch( "btagCategory", &btagCategory_t, "btagCategory_t/I" );
    tree_passedEvents->Branch( "njets", &njets_t, "njets_t/I" );
    tree_passedEvents->Branch( "nbjets_loose", &nbjets_loose_t, "nbjets_loose_t/I" );
    tree_passedEvents->Branch( "nbjets_medium", &nbjets_medium_t, "nbjets_medium_t/I" );
@@ -291,7 +293,7 @@ void RedNtpFinalizer_VHgg::finalize()
    tree_passedEvents->Branch( "ptjj", &ptjj_t, "ptjj_t/F" );
    tree_passedEvents->Branch( "zeppen", &zeppen_t, "zeppen_t/F" );
    tree_passedEvents->Branch( "chiSquareProbMax", &chiSquareProbMax_t, "chiSquareProbMax_t/F" );
-   tree_passedEvents->Branch( "cosThetaStar", &cosThetaStar_t, "cosThetaStar_t/F" );
+   tree_passedEvents->Branch( "absCosThetaStar", &absCosThetaStar_t, "absCosThetaStar_t/F" );
  
 
 
@@ -654,10 +656,11 @@ void RedNtpFinalizer_VHgg::finalize()
        // med-med category for double higgs searches
        // try to be as model independent as possible (no mass or angular cuts)
        // just cut hard on jet pt's
+       int btagCategory = -1;
        if( njets_selected_btagmedium==2 && jet0.Pt()>50. && jet1.Pt()>50. ) { 
 
 
-         if( dijet.M()<mjj_min_thresh_ ) continue;
+         btagCategory = 3;
          h1_mgg_2btagmed->Fill( massggnewvtx, eventWeight );
 
 
@@ -665,10 +668,13 @@ void RedNtpFinalizer_VHgg::finalize()
        } else { // SM higgs categories
 
          if( njets_selected_btagloose==0 ) {
+           btagCategory = 0;
            h1_mjj_0btag->Fill( dijet.M(), eventWeight );
          } else if( njets_selected_btagloose==1 ) {
+           btagCategory = 1;
            h1_mjj_1btag->Fill( dijet.M(), eventWeight );
          } else {
+           btagCategory = 2;
            h1_mjj_2btag->Fill( dijet.M(), eventWeight );
          }
          
@@ -779,6 +785,7 @@ void RedNtpFinalizer_VHgg::finalize()
 
 
        // set tree vars:
+       btagCategory_t = btagCategory;
        njets_t  = njets_selected;
        nbjets_loose_t = njets_selected_btagloose;
        nbjets_medium_t = njets_selected_btagmedium;
@@ -800,7 +807,7 @@ void RedNtpFinalizer_VHgg::finalize()
        ptjj_t = dijet.Pt();
        zeppen_t = zeppen;
        chiSquareProbMax_t = chiSquareProbMax;
-       cosThetaStar_t = cosThetaStar;
+       absCosThetaStar_t = fabs(cosThetaStar);
 
 
        tree_passedEvents->Fill();
