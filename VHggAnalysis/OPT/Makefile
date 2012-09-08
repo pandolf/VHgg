@@ -14,7 +14,7 @@ EXTRALIBS  :=  -L$(ROOTSYS)/lib -L$(ROOFIT_LIBDIR)/ -lHtml -lMathCore -lGenVecto
 
 
 
-scanUL: scanUL.cpp DrawBase.o fitTools.o StatTools.o
+scanUL: scanUL.cpp DrawBase.o fitTools.o 
 	$(CC) -Wall $(INCLUDES) -o scanUL scanUL.cpp *.o $(ROOTFLAG) $(EXTRALIBS)
 
 
