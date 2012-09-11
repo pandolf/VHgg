@@ -212,27 +212,30 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto("helphi");
   db_nostack->drawHisto("helphi1");
 
-  db_nostack->set_rebin(5);
-  db_nostack->drawHisto("mVstar");
-  db_nostack->drawHisto("ptVstar");
-  db_nostack->drawHisto("etaVstar");
-  db_nostack->drawHisto("phiVstar");
-
-  db_nostack->drawHisto("mVstar_kinfit");
-  db_nostack->drawHisto("ptVstar_kinfit");
-  db_nostack->drawHisto("etaVstar_kinfit");
-  db_nostack->drawHisto("phiVstar_kinfit");
-  
   db_nostack->set_rebin(20);
+  db_nostack->drawHisto("mVstar", "V* Mass", "GeV");
+  db_nostack->set_rebin(5);
+  db_nostack->set_xAxisMax(200);
+  db_nostack->drawHisto("ptVstar", "V* p_{T}", "GeV");
+  db_nostack->set_xAxisMax();
+  db_nostack->drawHisto("etaVstar", "V* #eta");
+  db_nostack->drawHisto("phiVstar", "V* #phi", "rad");
+
+  db_nostack->drawHisto("mVstar_kinfit", "V* Mass", "GeV");
+  db_nostack->drawHisto("ptVstar_kinfit", "V* p_{T}", "GeV");
+  db_nostack->drawHisto("etaVstar_kinfit", "V* #eta");
+  db_nostack->drawHisto("phiVstar_kinfit", "V* #phi", "rad");
+  
+  db_nostack->set_rebin(40);
   db_nostack->drawHisto("kinfit_chiSquareProbMax", "KinFit Max #chi^{2} Prob");
   db_nostack->set_legendTitle( "60 < m_{jj} < 120 GeV");
   db_nostack->drawHisto("kinfit_chiSquareProbMax_mjjWindow", "KinFit Max #chi^{2} Prob");
   db_nostack->set_xAxisMax(0.1);
-  db_nostack->set_rebin(5);
+  db_nostack->set_rebin(20);
   db_nostack->set_flags("zoom");
   db_nostack->set_legendTitle( "");
   db_nostack->drawHisto("kinfit_chiSquareProbMax", "KinFit Max #chi^{2} Prob");
-  db_stack->set_legendTitle( "60 < m_{jj} < 120 GeV");
+  db_nostack->set_legendTitle( "60 < m_{jj} < 120 GeV");
   db_nostack->drawHisto("kinfit_chiSquareProbMax_mjjWindow", "KinFit Max #chi^{2} Prob");
   db_nostack->reset();
   //db_nostack->drawHisto_fromTree("tree_passedEvents", "chiSquareProbMax", "eventWeight", 20, 0., 1, "kinfit_chiSquareProbMax_prova", "KinFit Max #chi^{2} Prob");
@@ -314,21 +317,24 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
 
   bool foundSignal = false;
   float totalBG = 0.;
+  float totalBG_ave = 0.;
   float signal = 0.;
 
   yieldsFile << std::endl << "Yields (@ 30 fb-1): " << std::endl;
   for( unsigned int ii=0; ii<histos.size(); ++ii ) {
     yieldsFile << db->get_mcFile(ii).datasetName << " " << histos[ii]->Integral(binXmin, binXmax) << std::endl;
-    if( db->get_mcFile(ii).datasetName != "HToGG" ) 
+    if( db->get_mcFile(ii).datasetName != "HToGG" ) {
       totalBG += histos[ii]->Integral(binXmin, binXmax);
-    else {
+      totalBG_ave += histos[ii]->Integral(1, histos[ii]->GetNbinsX());
+    } else {
       foundSignal = true;
       signal = histos[ii]->Integral(binXmin, binXmax);
     }
   }
 
+  totalBG_ave *= (10.)/(histos[0]->GetXaxis()->GetXmax()-histos[0]->GetXaxis()->GetXmin());
 
-  yieldsFile << "Total BG: " << totalBG << std::endl;
+  yieldsFile << "Total BG: " << totalBG << " (averaged: " << totalBG_ave << ")" << std::endl;
 
   float signal_xsec = 2.28E-03*(19.37 + 1.573 + 0.6966 + 0.3943 + 0.1302); 
   float total_signal = signal_xsec*db->get_lumi();
@@ -341,9 +347,10 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
   if( doUL && foundSignal ) {
 
     float ul = CLA( db->get_lumi(), 0., effS, 0., totalBG, 0. );
+    float ul_bgave = CLA( db->get_lumi(), 0., effS, 0., totalBG_ave, 0. );
     yieldsFile << std::endl << "No error on BG:" << std::endl;
-    yieldsFile << "UL: " << ul << std::endl;
-    yieldsFile << "UL/SM: " << ul/signal_xsec << std::endl;
+    yieldsFile << "UL: " << ul << "    (average BG): " << ul_bgave << std::endl;
+    yieldsFile << "UL/SM: " << ul/signal_xsec << "    (average BG): " << ul_bgave/signal_xsec << std::endl;
     float ul_bgerr = CLA( db->get_lumi(), 0., effS, 0., totalBG, 0.05*totalBG );
     yieldsFile << std::endl << "5\% error on BG:" << std::endl;
     yieldsFile << "UL: " << ul_bgerr << std::endl;
