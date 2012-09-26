@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.5 2012/08/25 16:32:27 pandolf Exp $
+# $Id: Makefile,v 1.6 2012/09/06 17:04:35 pandolf Exp $
 ROOTLIBS      = $(shell $(ROOTSYS)/bin/root-config --libs)
 ROOTGLIBS     = $(shell $(ROOTSYS)/bin/root-config --glibs)
 
@@ -101,6 +101,11 @@ $(OBJDIR)/TFitConstraintM.o: $(CMSSW_BASE)/src/UserCode/pandolf/KinematicFit/TFi
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
 $(OBJDIR)/TFitParticleEtEtaPhi.o: $(CMSSW_BASE)/src/UserCode/pandolf/KinematicFit/TFitParticleEtEtaPhi.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/TKinFitter.o: $(CMSSW_BASE)/src/UserCode/pandolf/KinematicFit/TKinFitter.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
