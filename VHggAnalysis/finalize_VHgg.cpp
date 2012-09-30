@@ -71,7 +71,7 @@ int main( int argc, char* argv[] ) {
 
     finalize_oneDataset(redntpVersion, "DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1" , selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "WJetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
 
   } else if( dataset=="GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6" ) {
 
