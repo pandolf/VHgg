@@ -188,6 +188,12 @@ RedntpDirStruct dirs = get_dirs( const std::string& prodVersion ) {
     returnStruct.datadir = "redntp.53xv1_data.cicpfloose.scales-Lisbon-Hgg.v2";
     returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.v1";
 
+  } else if( prodVersion=="micheli_20120930" ) {
+
+    returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
+    returnStruct.datadir = "redntp.53xv1_data.cicpfloose.scales-Lisbon-Hgg.ttH_feasibility_v1";
+    returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.ttH_feasibility_v1";
+
   } else {
 
     std::cout << "-> Unknown prodVersion: '" << prodVersion << "'! Exiting." << std::endl;
