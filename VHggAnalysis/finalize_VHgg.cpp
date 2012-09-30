@@ -4,10 +4,20 @@
 
 
 
+struct RedntpDirStruct {
+
+  std::string maindir;
+  std::string datadir;
+  std::string mcdir;
+
+};
+
+
 
 void finalize_oneDataset(const std::string& redntpVersion,  const std::string& dataset, const std::string& selectionType, const std::string& bTaggerType, std::vector<std::string> *datasets );
-void do_haddCommand( const std::string& dataset, std::vector<std::string> *datasets, const std::string& selectionType, const std::string& bTaggerType );
-std::string getSingleFileName( const std::string& dataset, const std::string& selectionType, const std::string& bTaggerType );
+void do_haddCommand( const std::string& redntpVersion, const std::string& dataset, std::vector<std::string> *datasets, const std::string& selectionType, const std::string& bTaggerType );
+std::string getSingleFileName( const std::string& redntpVersion, const std::string& dataset, const std::string& selectionType, const std::string& bTaggerType );
+RedntpDirStruct get_dirs( const std::string& prodVersion );
 
 
 
@@ -45,63 +55,63 @@ int main( int argc, char* argv[] ) {
 
   } else if( dataset=="DiPhotonBox_8TeV-pythia6" ) {
 
-    finalize_oneDataset(redntpVersion, "DiPhotonBox_Pt-10To25_8TeV-pythia6", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "DiPhotonBox_Pt-250ToInf_8TeV-pythia6", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "DiPhotonBox_Pt-25To250_8TeV-pythia6", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DiPhotonBox_Pt-10To25_8TeV-pythia6_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DiPhotonBox_Pt-250ToInf_8TeV-pythia6_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DiPhotonBox_Pt-25To250_8TeV-pythia6_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
 
   } else if( dataset=="DiPhoton_8TeV-pythia6" ) {
 
-    finalize_oneDataset(redntpVersion, "DiPhotonBox_Pt-10To25_8TeV-pythia6", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "DiPhotonBox_Pt-250ToInf_8TeV-pythia6", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "DiPhotonBox_Pt-25To250_8TeV-pythia6", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "DiPhotonJets_8TeV-madgraph-tarball-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DiPhotonBox_Pt-10To25_8TeV-pythia6_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DiPhotonBox_Pt-250ToInf_8TeV-pythia6_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DiPhotonBox_Pt-25To250_8TeV-pythia6_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DiPhotonJets_8TeV-madgraph-tarball-v2_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
 
   } else if( dataset=="V_8TeV") {
   //} else if( dataset=="DYJetsToLL_8TeV-madgraph" ) {
 
-    finalize_oneDataset(redntpVersion, "DYJetsToLL_M-10To50filter_8TeV-madgraph" , selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "WJetsToLNu_TuneZ2Star_8TeV-madgraph", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1" , selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12-PU_S7_START52_V9-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "WJetsToLNu_TuneZ2Star_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
 
   } else if( dataset=="GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6" ) {
 
-    finalize_oneDataset(redntpVersion, "GJet_Pt-20to40_doubleEMEnriched_TuneZ2star_8TeV-pythia6", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "GJet_Pt40_doubleEMEnriched_TuneZ2star_8TeV-pythia6", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "GJet_Pt-20to40_doubleEMEnriched_TuneZ2star_8TeV-pythia6_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "GJet_Pt40_doubleEMEnriched_TuneZ2star_8TeV-pythia6_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
 
   } else if( dataset=="QCD_doubleEMEnriched_TuneZ2star_8TeV-pythia6") {
 
-    finalize_oneDataset(redntpVersion, "QCD_Pt-40_doubleEMEnriched_TuneZ2star_8TeV-pythia6", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "QCD_Pt-30to40_doubleEMEnriched_TuneZ2star_8TeV-pythia6", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "QCD_Pt-40_doubleEMEnriched_TuneZ2star_8TeV-pythia6_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "QCD_Pt-30to40_doubleEMEnriched_TuneZ2star_8TeV-pythia6_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
 
   } else if( dataset=="TT_8TeV" ) {
 
-    finalize_oneDataset(redntpVersion, "TTbarGG_0Jet_S1" , selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "TTGJets_8TeV-madgraph", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "TTJets_TuneZ2star_8TeV-madgraph-tauola", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "TTbarGG_0Jet_Summer12-PU_S7_START52_V9-v1" , selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "TTGJets_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "TTJets_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
 
   //} else if( dataset=="VG_8TeV" ) {
 
   } else if( dataset=="VV_8TeV" ) {
 
     //finalize_oneDataset("WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola");
-    finalize_oneDataset(redntpVersion, "WW_TuneZ2star_8TeV_pythia6_tauola", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "ZZ_TuneZ2star_8TeV_pythia6_tauola", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "WZ_TuneZ2star_8TeV_pythia6_tauola", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "WGToLNuG_TuneZ2star_8TeV-madgraph-tauola", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "ZGToLLG_8TeV-madgraph", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "WW_TuneZ2star_8TeV_pythia6_tauola_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "ZZ_TuneZ2star_8TeV_pythia6_tauola_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "WZ_TuneZ2star_8TeV_pythia6_tauola_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "WGToLNuG_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "ZGToLLG_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
 
   } else if( dataset=="VGG_8TeV" ) {
 
-    finalize_oneDataset(redntpVersion, "WmGG_cmkuo", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "WpGG-cmkuo", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "ZGG-cmkuo", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "WmGG", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "WpGG", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "ZGG", selectionType, bTaggerType, datasets);
 
   } else if( dataset=="HToGG_M-125_8TeV-pythia6" ) {
 
-    finalize_oneDataset(redntpVersion, "WH_ZH_HToGG_M-125_8TeV-pythia6", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "GluGluToHToGG_M-125_8TeV-powheg-pythia6", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "VBF_HToGG_M-125_8TeV-powheg-pythia6", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "TTH_HToGG_M-125_8TeV-pythia6", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "WH_ZH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "GluGluToHToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "VBF_HToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2", selectionType, bTaggerType, datasets);
 
   } else {
   
@@ -120,6 +130,8 @@ int main( int argc, char* argv[] ) {
 
 
 void finalize_oneDataset( const std::string& redntpProdVersion, const std::string& dataset, const std::string& selectionType, const std::string& bTaggerType, std::vector<std::string> *datasets ) {
+
+  TString dataset_tstr(dataset);
 
   std::cout << std::endl << std::endl << std::endl << "####     Finalizing " << dataset << std::endl;
   std::cout << "####     Selection: " << selectionType << std::endl;
@@ -172,27 +184,27 @@ void do_haddCommand( const std::string& redntpVersion, const std::string& datase
 
 std::string getSingleFileName( const std::string& redntpVersion, const std::string& dataset, const std::string& selectionType, const std::string& bTaggerType ) {
 
-  std::string fileName = "finalizedTrees_" + redntpProdVersion + "/VHgg_" + dataset + "_" + selectionType + "_" + bTaggerType + ".root";
+  std::string fileName = "finalizedTrees_" + redntpVersion + "/VHgg_" + dataset + "_" + selectionType + "_" + bTaggerType + ".root";
   return fileName;
 
 }
 
 
-RedntpDirStruct dirs = get_dirs( const std::string& prodVersion ) {
+RedntpDirStruct get_dirs( const std::string& prodVersion ) {
 
   RedntpDirStruct returnStruct;
 
   if( prodVersion=="Lisbon" ) {
 
     returnStruct.maindir = "/xrootdfs/cms/local/meridian/Higgs/reduced/";
-    returnStruct.datadir = "redntp.53xv1_data.cicpfloose.scales-Lisbon-Hgg.v2";
-    returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.v1";
+    returnStruct.datadir = "redntp.53xv1_data.cicpfloose.scales-Lisbon-Hgg.v2/merged";
+    returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.v1/merged";
 
   } else if( prodVersion=="micheli_20120930" ) {
 
     returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
-    returnStruct.datadir = "redntp.53xv1_data.cicpfloose.scales-Lisbon-Hgg.ttH_feasibility_v1";
-    returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.ttH_feasibility_v1";
+    returnStruct.datadir = "redntp.53xv1_data.cicpfloose.scales-Lisbon-Hgg.ttH_feasibility_v1/merged";
+    returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.ttH_feasibility_v1/merged";
 
   } else {
 
