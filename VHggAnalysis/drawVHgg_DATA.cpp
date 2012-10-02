@@ -118,15 +118,15 @@ int main(int argc, char* argv[]) {
   bool log = true;
 
 
-  db_stack->drawHisto("nvertex");
-  db_stack->drawHisto("nvertex_PUW");
+  db_stack->drawHisto("nvertex", "Number of Reconstructed Vertexes");
+  db_stack->drawHisto("nvertex_PUW", "Number of Reconstructed Vertexes");
 
-  db_stack->drawHisto("njets", "Number of Jets", "", "Events");
-  db_stack->drawHisto("nbjets_loose", "Number of b-Jets (Loose)", "", "Events");
-  db_stack->drawHisto("nbjets_medium", "Number of b-Jets (Medium)", "", "Events");
+  db_stack->drawHisto("njets", "Number of Jets", "", "Events", log);
+  db_stack->drawHisto("nbjets_loose", "Number of b-Jets (Loose)", "", "Events", log);
+  db_stack->drawHisto("nbjets_medium", "Number of b-Jets (Medium)", "", "Events", log);
 
 
-  db_stack->set_rebin(4);
+  db_stack->set_rebin(8);
   db_stack->drawHisto("mjj", "Dijet Mass", "GeV");
   db_stack->drawHisto("mjj_0btag", "Dijet Mass", "GeV");
   db_stack->drawHisto("mjj_1btag", "Dijet Mass", "GeV");
@@ -154,6 +154,7 @@ int main(int argc, char* argv[]) {
   db_stack->set_legendTitle( "" );
   db_stack->set_rebin();
 
+  db_stack->set_rebin(5);
   db_stack->drawHisto("ptphot0", "Lead Photon p_{T}", "GeV");
   db_stack->drawHisto("ptphot1", "Sublead Photon p_{T}", "GeV");
   db_stack->drawHisto("ptjet0", "Lead Jet p_{T}", "GeV");
