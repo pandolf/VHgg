@@ -47,6 +47,9 @@ void RedNtpFinalizer_VHgg::finalize()
 
 
 
+   TH1D*  h1_nGenEvents = new TH1D("nGenEvents", "", 1, 0., 1.);
+   h1_nGenEvents->Sumw2();
+
    TH1D*  h1_nvertex = new TH1D("nvertex", "", 51, -0.5, 50.5);
    h1_nvertex->Sumw2();
    TH1D*  h1_nvertex_PUW = new TH1D("nvertex_PUW", "", 51, -0.5, 50.5);
@@ -111,6 +114,18 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_mjj_1btag->Sumw2();
    TH1D* h1_mjj_2btag = new TH1D("mjj_2btag", "", 200, 0., 500.);
    h1_mjj_2btag->Sumw2();
+   TH1D* h1_mjj_2btagmed = new TH1D("mjj_2btagmed", "", 200, 0., 500.);
+   h1_mjj_2btagmed->Sumw2();
+
+   TH1D* h1_mjj_cutMgg_0btag = new TH1D("mjj_cutMgg_0btag", "", 200, 0., 500.);
+   h1_mjj_cutMgg_0btag->Sumw2();
+   TH1D* h1_mjj_cutMgg_1btag = new TH1D("mjj_cutMgg_1btag", "", 200, 0., 500.);
+   h1_mjj_cutMgg_1btag->Sumw2();
+   TH1D* h1_mjj_cutMgg_2btag = new TH1D("mjj_cutMgg_2btag", "", 200, 0., 500.);
+   h1_mjj_cutMgg_2btag->Sumw2();
+   TH1D* h1_mjj_cutMgg_2btagmed = new TH1D("mjj_cutMgg_2btagmed", "", 200, 0., 500.);
+   h1_mjj_cutMgg_2btagmed->Sumw2();
+
    TH1D* h1_mjj_qglHI = new TH1D("mjj_qglHI", "", 200, 0., 500.);
    h1_mjj_qglHI->Sumw2();
    TH1D* h1_mjj_qglLO = new TH1D("mjj_qglLO", "", 200, 0., 500.);
@@ -143,6 +158,8 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_mgg_1btag_ebeb->Sumw2();
    TH1D* h1_mgg_2btag_ebeb = new TH1D("mgg_2btag_ebeb", "", 80, 100., 180.);
    h1_mgg_2btag_ebeb->Sumw2();
+   TH1D* h1_mgg_2btagmed_ebeb = new TH1D("mgg_2btagmed_ebeb", "", 80, 100., 180.);
+   h1_mgg_2btagmed_ebeb->Sumw2();
 
    TH1D* h1_mgg_0btag_nebeb = new TH1D("mgg_0btag_nebeb", "", 80, 100., 180.);
    h1_mgg_0btag_nebeb->Sumw2();
@@ -150,6 +167,8 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_mgg_1btag_nebeb->Sumw2();
    TH1D* h1_mgg_2btag_nebeb = new TH1D("mgg_2btag_nebeb", "", 80, 100., 180.);
    h1_mgg_2btag_nebeb->Sumw2();
+   TH1D* h1_mgg_2btagmed_nebeb = new TH1D("mgg_2btagmed_nebeb", "", 80, 100., 180.);
+   h1_mgg_2btagmed_nebeb->Sumw2();
 
    TH1D*  h1_ptDiphot = new TH1D("ptDiphot", "", 100, 0., 500.);
    h1_ptDiphot->Sumw2();
@@ -217,6 +236,11 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_helphi->Sumw2();
    TH1D* h1_helphi1 = new TH1D("helphi1", "", 100, 0., 3.1416);
    h1_helphi1->Sumw2();
+
+   TH1D* h1_cosThetaStar_jets = new TH1D("cosThetaStar_jets", "", 100, -1.0001, 1.0001);
+   h1_cosThetaStar_jets->Sumw2();
+   TH1D* h1_helicityAngle_V = new TH1D("helicityAngle_V", "", 100, -1.0001, 1.0001);
+   h1_helicityAngle_V->Sumw2();
 
    TH1D* h1_mVstar = new TH1D("mVstar", "", 1000, 0., 1000.);
    h1_mVstar->Sumw2();
@@ -328,6 +352,10 @@ void RedNtpFinalizer_VHgg::finalize()
      std::cout << "-> # Generated Events: " << nGenEvents_ << std::endl;
      std::cout << "-> Event Weight: " << xSection_/nGenEvents_ << std::endl << std::endl;
    }
+
+
+   h1_nGenEvents->SetBinContent(1, nGenEvents_);
+
 
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
 
@@ -617,6 +645,42 @@ void RedNtpFinalizer_VHgg::finalize()
        h1_helphi->Fill( hangles.helPhi, eventWeight );
        h1_helphi1->Fill( hangles.helPhi1, eventWeight );
 
+
+       TLorentzVector Vstar = dijet + diphot;
+
+       // boost stuff in Vstar frame
+       TLorentzVector Vstar_Vstar(Vstar);
+       Vstar_Vstar.Boost(-Vstar.BoostVector());
+       TLorentzVector V_Vstar(dijet);
+       V_Vstar.Boost(-Vstar.BoostVector());
+
+       // boost stuff in the V_Vstar frame:
+       TLorentzVector Vstar_V(Vstar_Vstar);
+       Vstar_V.Boost(-V_Vstar.BoostVector());
+       TLorentzVector jet0_V, jet1_V;
+       // randomize:
+       if( coin->Uniform(1.)<0.5) {
+         jet0_V = jet0;
+         jet1_V = jet1;
+       } else {
+         jet0_V = jet1;
+         jet1_V = jet0;
+       }
+       jet0_V.Boost(-dijet.BoostVector());
+       jet1_V.Boost(-dijet.BoostVector());
+      
+       TVector3 v3_jet0_V  = jet0_V.Vect();
+       TVector3 v3_jet1_V  = jet1_V.Vect();
+       TVector3 v3_Vstar_V = Vstar_V.Vect();
+       TVector3 v3_V_Vstar = V_Vstar.Vect();
+
+       float cosThetaStar_jets = cos( v3_jet0_V.Angle(v3_V_Vstar) );
+       float helicityAngle_V = sin( v3_jet0_V.Angle(v3_Vstar_V) );
+
+       h1_cosThetaStar_jets->Fill( cosThetaStar_jets, eventWeight );
+       h1_helicityAngle_V->Fill( helicityAngle_V, eventWeight );
+
+
        TLorentzVector jet0_kinfit, jet1_kinfit;
        float chiSquareProbMax=0.;
 
@@ -660,8 +724,14 @@ void RedNtpFinalizer_VHgg::finalize()
 
          btagCategory = 3;
 
+         h1_mjj_2btagmed->Fill( dijet.M(), eventWeight );
+         if( massggnewvtx>122. && massggnewvtx<128. )
+           h1_mjj_cutMgg_2btagmed->Fill( dijet.M(), eventWeight );
+
          h1_mgg_2btagmed->Fill( massggnewvtx, eventWeight );
 
+         if( ebeb ) h1_mgg_2btagmed_ebeb->Fill( massggnewvtx, eventWeight );
+         else  h1_mgg_2btagmed_nebeb->Fill( massggnewvtx, eventWeight );
 
 
        } else { // SM higgs categories
@@ -681,10 +751,16 @@ void RedNtpFinalizer_VHgg::finalize()
 
          if( btagCategory==0 ) {
            h1_mjj_0btag->Fill( dijet.M(), eventWeight );
+           if( massggnewvtx>122. && massggnewvtx<128. )
+             h1_mjj_cutMgg_0btag->Fill( dijet.M(), eventWeight );
          } else if( btagCategory==1 ) {
            h1_mjj_1btag->Fill( dijet.M(), eventWeight );
+           if( massggnewvtx>122. && massggnewvtx<128. )
+             h1_mjj_cutMgg_1btag->Fill( dijet.M(), eventWeight );
          } else {
            h1_mjj_2btag->Fill( dijet.M(), eventWeight );
+           if( massggnewvtx>122. && massggnewvtx<128. )
+             h1_mjj_cutMgg_2btag->Fill( dijet.M(), eventWeight );
          }
          
          if( qgljet0>0.8 && qgljet1>0.8 ) h1_mjj_qglHI->Fill( dijet.M(), eventWeight );
@@ -791,7 +867,6 @@ void RedNtpFinalizer_VHgg::finalize()
        h1_mgg->Fill( massggnewvtx, eventWeight );
 
 
-       TLorentzVector Vstar = dijet + diphot;
        TLorentzVector Vstar_kinfit = dijet_kinfit + diphot;
        
        h1_mVstar->Fill( Vstar.M(), eventWeight );
@@ -845,6 +920,8 @@ void RedNtpFinalizer_VHgg::finalize()
 
    tree_passedEvents->Write();
 
+   h1_nGenEvents->Write();
+
    h1_nvertex->Write();
    h1_nvertex_PUW->Write();
 
@@ -878,6 +955,12 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_mjj_0btag->Write();
    h1_mjj_1btag->Write();
    h1_mjj_2btag->Write();
+   h1_mjj_2btagmed->Write();
+
+   h1_mjj_cutMgg_0btag->Write();
+   h1_mjj_cutMgg_1btag->Write();
+   h1_mjj_cutMgg_2btag->Write();
+   h1_mjj_cutMgg_2btagmed->Write();
 
    h1_mjj_qglHI->Write();
    h1_mjj_qglLO->Write();
@@ -916,10 +999,12 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_mgg_0btag_ebeb->Write();
    h1_mgg_1btag_ebeb->Write();
    h1_mgg_2btag_ebeb->Write();
+   h1_mgg_2btagmed_ebeb->Write();
 
    h1_mgg_0btag_nebeb->Write();
    h1_mgg_1btag_nebeb->Write();
    h1_mgg_2btag_nebeb->Write();
+   h1_mgg_2btagmed_nebeb->Write();
 
    h1_qgljet0->Write();
    h1_qgljet1->Write();
@@ -937,6 +1022,9 @@ void RedNtpFinalizer_VHgg::finalize()
    h1_cosThetaStar->Write();
    h1_helphi->Write();
    h1_helphi1->Write();
+
+   h1_cosThetaStar_jets->Write();
+   h1_helicityAngle_V->Write();
 
    h1_mVstar->Write();
    h1_ptVstar->Write();
@@ -1479,6 +1567,26 @@ void RedNtpFinalizer_VHgg::setSelectionType( const std::string& selectionType ) 
    costhetastar_0btag_thresh_ = 0.74;
    costhetastar_1btag_thresh_ = 0.52;
    costhetastar_2btag_thresh_ = 0.58;
+
+   mjj_min_thresh_ = 60.;
+   mjj_max_thresh_ = 120.;
+
+  } else if( selectionType=="optsel1_bis" ) {
+
+   ptphot1cut_ = 60.;
+   ptphot2cut_ = 25.;
+
+   ptgg_0btag_thresh_ = 117.;
+   ptgg_1btag_thresh_ = 103.;
+   ptgg_2btag_thresh_ = 0.;
+
+   ptjet_0btag_thresh_ = 36.;
+   ptjet_1btag_thresh_ = 23.;
+   ptjet_2btag_thresh_ = 25.;
+
+   costhetastar_0btag_thresh_ = 0.74;
+   costhetastar_1btag_thresh_ = 0.52;
+   costhetastar_2btag_thresh_ = 1.5;
 
    mjj_min_thresh_ = 60.;
    mjj_max_thresh_ = 120.;

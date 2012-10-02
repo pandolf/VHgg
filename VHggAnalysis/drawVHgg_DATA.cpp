@@ -128,19 +128,21 @@ int main(int argc, char* argv[]) {
 
   db_stack->set_rebin(8);
   db_stack->drawHisto("mjj", "Dijet Mass", "GeV");
+  db_stack->set_legendTitle( "0 b-tag Category" );
   db_stack->drawHisto("mjj_0btag", "Dijet Mass", "GeV");
+  db_stack->drawHisto("mjj_cutMgg_0btag", "Dijet Mass (122 < m_{#gamma#gamma} < 128 GeV)", "GeV");
+
+  db_stack->set_legendTitle( "1 b-tag Category" );
   db_stack->drawHisto("mjj_1btag", "Dijet Mass", "GeV");
+  db_stack->drawHisto("mjj_cutMgg_1btag", "Dijet Mass (122 < m_{#gamma#gamma} < 128 GeV)", "GeV");
+
+  db_stack->set_legendTitle( "2 b-tag Category" );
   db_stack->drawHisto("mjj_2btag", "Dijet Mass", "GeV");
-  std::vector< HistoAndName > hn;
-  HistoAndName hn_qglHI;
-  hn_qglHI.histoName = "mjj_qglHI";
-  hn_qglHI.legendName = "QG_{1}>0.8 && QG_{2}>0.8";
-  hn.push_back(hn_qglHI);
-  HistoAndName hn_qglLO;
-  hn_qglLO.histoName = "mjj_qglLO";
-  hn_qglLO.legendName = "!(QG_{1}>0.8 && QG_{2}>0.8)";
-  hn.push_back(hn_qglLO);
-  db_stack->compareDifferentHistos_singleFile( db_stack->get_mcFile(0), hn, "mjj_qglcat" );
+  db_stack->drawHisto("mjj_cutMgg_2btag", "Dijet Mass (122 < m_{#gamma#gamma} < 128 GeV)", "GeV");
+
+  db_stack->set_legendTitle( "2 b-tag Med Category" );
+  db_stack->drawHisto("mjj_2btagmed", "Dijet Mass", "GeV");
+  db_stack->drawHisto("mjj_cutMgg_2btagmed", "Dijet Mass (122 < m_{#gamma#gamma} < 128 GeV)", "GeV");
 
 
   db_stack->set_rebin(2);
