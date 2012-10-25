@@ -46,6 +46,9 @@ void RedNtpFinalizer_TTVHgg::finalize()
    outFile_->cd();
 
 
+   TH1D*  h1_nGenEvents = new TH1D("nGenEvents", "", 1, 0., 1.);
+   h1_nGenEvents->Sumw2();
+
 
    TH1D*  h1_nvertex = new TH1D("nvertex", "", 51, -0.5, 50.5);
    h1_nvertex->Sumw2();
@@ -260,6 +263,12 @@ void RedNtpFinalizer_TTVHgg::finalize()
    TH1D* h1_helphi1 = new TH1D("helphi1", "", 100, 0., 3.1416);
    h1_helphi1->Sumw2();
 
+   TH1D* h1_cosThetaStar_jets = new TH1D("cosThetaStar_jets", "", 100, -1.0001, 1.0001);
+   h1_cosThetaStar_jets->Sumw2();
+   TH1D* h1_helicityAngle_V = new TH1D("helicityAngle_V", "", 100, -1.0001, 1.0001);
+   h1_helicityAngle_V->Sumw2();
+
+
    TH1D* h1_mVstar = new TH1D("mVstar", "", 1000, 0., 1000.);
    h1_mVstar->Sumw2();
    TH1D* h1_ptVstar = new TH1D("ptVstar", "", 500, 0., 500.);
@@ -299,26 +308,10 @@ void RedNtpFinalizer_TTVHgg::finalize()
    float etaPhot1_scaled_weight_t;
    float etaPhot2_scaled_weight_t;
    float ptgg_t;
-   float ptJet1_t;
-   float ptJet2_t;
-   float ptJet3_t=0;
-   float ptJet4_t=0;
-   float ptJet5_t=0;
-   float ptJet6_t=0;
-   float ptJet7_t=0;
-   float ptJet8_t=0;
-   float ptJet9_t=0;
-   float ptJet10_t=0;
-   float etaJet1_t;
-   float etaJet2_t;
-   float etaJet3_t=-10;
-   float etaJet4_t=-10;
-   float etaJet5_t=-10;
-   float etaJet6_t=-10;
-   float etaJet7_t=-10;
-   float etaJet8_t=-10;
-   float etaJet9_t=-10;
-   float etaJet10_t=-10;
+   float ptJet_t[20];
+   float etaJet_t[20];
+   bool  btaggedLooseJet_t[20];
+   bool  btaggedMediumJet_t[20];
    float Ht_t;
    float qglJet1_t;
    float qglJet2_t;
@@ -356,26 +349,10 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "eta_scaled_weight", &eta_scaled_weight_t, "eta_scaled_weight_t/F" );
    tree_passedEvents->Branch( "eta_scaled_2D_weight", &eta_scaled_2D_weight_t, "eta_scaled_2D_weight_t/F" );
    tree_passedEvents->Branch( "ptgg", &ptgg_t, "ptgg_t/F" );
-   tree_passedEvents->Branch( "ptJet1", &ptJet1_t, "ptJet1_t/F" );
-   tree_passedEvents->Branch( "ptJet2", &ptJet2_t, "ptJet2_t/F" );
-   tree_passedEvents->Branch( "ptJet3", &ptJet3_t, "ptJet3_t/F" );
-   tree_passedEvents->Branch( "ptJet4", &ptJet4_t, "ptJet4_t/F" );
-   tree_passedEvents->Branch( "ptJet5", &ptJet5_t, "ptJet5_t/F" );
-   tree_passedEvents->Branch( "ptJet6", &ptJet6_t, "ptJet6_t/F" );
-   tree_passedEvents->Branch( "ptJet7", &ptJet7_t, "ptJet7_t/F" );
-   tree_passedEvents->Branch( "ptJet8", &ptJet8_t, "ptJet8_t/F" );
-   tree_passedEvents->Branch( "ptJet9", &ptJet9_t, "ptJet9_t/F" );
-   tree_passedEvents->Branch( "ptJet10", &ptJet10_t, "ptJet10_t/F" );
-   tree_passedEvents->Branch( "etaJet1", &etaJet1_t, "etaJet1_t/F" );
-   tree_passedEvents->Branch( "etaJet2", &etaJet2_t, "etaJet2_t/F" );
-   tree_passedEvents->Branch( "etaJet3", &etaJet3_t, "etaJet3_t/F" );
-   tree_passedEvents->Branch( "etaJet4", &etaJet4_t, "etaJet4_t/F" );
-   tree_passedEvents->Branch( "etaJet5", &etaJet5_t, "etaJet5_t/F" );
-   tree_passedEvents->Branch( "etaJet6", &etaJet6_t, "etaJet6_t/F" );
-   tree_passedEvents->Branch( "etaJet7", &etaJet7_t, "etaJet7_t/F" );
-   tree_passedEvents->Branch( "etaJet8", &etaJet8_t, "etaJet8_t/F" );
-   tree_passedEvents->Branch( "etaJet9", &etaJet9_t, "etaJet9_t/F" );
-   tree_passedEvents->Branch( "etaJet10", &etaJet10_t, "etaJet10_t/F" );
+   tree_passedEvents->Branch( "ptJet", ptJet_t, "ptJet_t[njets]/F" );
+   tree_passedEvents->Branch( "etaJet", etaJet_t, "etaJet_t[njets]/F" );
+   tree_passedEvents->Branch( "btaggedLooseJet", btaggedLooseJet_t, "btaggedLooseJet_t[njets]/O" );
+   tree_passedEvents->Branch( "btaggedMediumJet", btaggedMediumJet_t, "btaggedMediumJet_t[njets]/O" );
    tree_passedEvents->Branch( "Ht", &Ht_t, "Ht_t/F" );
    tree_passedEvents->Branch( "qglJet1", &qglJet1_t, "qglJet1_t/F" );
    tree_passedEvents->Branch( "qglJet2", &qglJet2_t, "qglJet2_t/F" );
@@ -467,6 +444,10 @@ void RedNtpFinalizer_TTVHgg::finalize()
      std::cout << "-> Event Weight: " << xSection_/nGenEvents_ << std::endl << std::endl;
    }
 
+
+   h1_nGenEvents->SetBinContent(1, nGenEvents_);
+
+
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
 
       Long64_t ientry = LoadTree(jentry);
@@ -480,7 +461,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
       bool isMC = ( run<5 );
 
-      
+     
 
 
       if( isMC ) {
@@ -622,6 +603,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
        std::vector<int> index_selected;
        std::vector<int> index_selected_btagloose;
        std::vector<int> index_selected_btagmedium;
+       Ht_t = 0.;
 
        for( unsigned ijet=0; ijet<njets; ++ijet ) {
 
@@ -662,7 +644,19 @@ void RedNtpFinalizer_TTVHgg::finalize()
          }
 
          index_selected.push_back(ijet);
+
+         if( njets_selected<20 ) {
+           ptJet_t[njets_selected] = ptcorrjet[ijet];
+           etaJet_t[njets_selected] = etajet[ijet];
+           btaggedLooseJet_t[njets_selected] = btagjprobjet[ijet]>0.275;
+           btaggedMediumJet_t[njets_selected] = btagjprobjet[ijet]>0.545;
+         }
+
          njets_selected++;
+
+
+         Ht_t += ptcorrjet[ijet];
+
 
          //AnalysisJet thisJet;
          //thisJet.set
@@ -670,20 +664,28 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
        } //for jets
 
+
+
+
        //       cout<<njets_selected<<"------"<<endl;
        if(njets_selected<njets_thresh_) continue;
        if(njets_selected>njets_upper_thresh_)continue;
        if(njets_selected_btagloose<nbtagloose_thresh_) continue;
        if(njets_selected_btagmedium<nbtagmedium_thresh_) continue;
        if(noBTagMedium_){
-	 if(njets_selected_btagmedium>0)continue;
+         if(njets_selected_btagmedium>0)continue;
        };
        int isLeptonic= (ptele1>0 || ptmu1>0);
        if (isLeptonic<isLeptonic_thresh_) continue;
        if(leptonVeto_){
-	 if(isLeptonic==1)continue;
-
+         if(isLeptonic==1)continue;
        }
+       if(Ht_t<Ht_thresh_)continue;
+
+
+
+
+
 
        h1_ptphot0->Fill(ptphot1, eventWeight);
        h1_ptphot1->Fill(ptphot2, eventWeight);
@@ -761,69 +763,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
        h1_etajet0->Fill( jet0.Eta(), eventWeight );
        h1_etajet1->Fill( jet1.Eta(), eventWeight );
 
-       float HtotherJets=0;
 
-
-       //additional jets
-       ptJet3_t=0;
-       ptJet4_t=0;
-       ptJet5_t=0;
-       ptJet6_t=0;
-       ptJet7_t=0;
-       ptJet8_t=0;
-       ptJet9_t=0;
-       ptJet10_t=0;
-       AnalysisJet otherJets[numMaxJets];
-       for(int i =2; i<index_selected.size();++i){
-	 otherJets[i-2].SetPtEtaPhiE( ptcorrjet[index_selected[i]], etajet[index_selected[i]], phijet[index_selected[i]], ecorrjet[index_selected[i]] );
-	 h1_ptOtherJets[i-2]->Fill( otherJets[i-2].Pt(), eventWeight );
-	 h1_etaOtherJets[i-2]->Fill( otherJets[i-2].Eta(), eventWeight );
-	 HtotherJets+=otherJets[i-2].Pt();
-	 if(i==2){
-	   ptJet3_t=otherJets[i-2].Pt();
-	   etaJet3_t=otherJets[i-2].Eta();
-	 }
-	 if(i==3){
-	   ptJet4_t=otherJets[i-2].Pt();
-	   etaJet4_t=otherJets[i-2].Eta();
-	 }
-	 if(i==4){
-	   ptJet5_t=otherJets[i-2].Pt();
-	   etaJet5_t=otherJets[i-2].Eta();
-	 }
-	 if(i==5){
-	   ptJet6_t=otherJets[i-2].Pt();
-	   etaJet6_t=otherJets[i-2].Eta();
-	 }
-	 if(i==6){
-	   ptJet7_t=otherJets[i-2].Pt();
-	   etaJet7_t=otherJets[i-2].Eta();
-	 }
-	 if(i==7){
-	   ptJet8_t=otherJets[i-2].Pt();
-	   etaJet8_t=otherJets[i-2].Eta();
-	 }
-
-	 if(i==8){
-	   ptJet9_t=otherJets[i-2].Pt();
-	   etaJet9_t=otherJets[i-2].Eta();
-	 }
-
-	 if(i==9){
-	   ptJet10_t=otherJets[i-2].Pt();
-	   etaJet10_t=otherJets[i-2].Eta();
-	 }
-       }
-
-       //       std::cout<<HtotherJets<<" "<<ptphot1<<" "<<ptphot2<<" "<<jet0.Pt()<<" "<<jet1.Pt()<<std::endl;
-       float Ht=HtotherJets+ptphot1+ptphot2+jet0.Pt()+jet1.Pt();
-       if(ptele1>0)Ht+=ptele1;
-       if(ptele2>0)Ht+=ptele2;
-       if(ptmu1>0)Ht+=ptmu1;
-       if(ptmu2>0)Ht+=ptmu2;
-       if(epfMet>0)Ht+=epfMet;
-       if(Ht<Ht_thresh_)continue;
-       h1_Ht->Fill(Ht,eventWeight);
+       h1_Ht->Fill(Ht_t,eventWeight);
 
 
        bool chose_correctPair = (partMomPdgIDjet[indexjet0] == 23 || abs( partMomPdgIDjet[indexjet0] ) == 24)
@@ -872,6 +813,41 @@ void RedNtpFinalizer_TTVHgg::finalize()
        h1_cosTheta2->Fill( hangles.helCosTheta2, eventWeight );
        h1_helphi->Fill( hangles.helPhi, eventWeight );
        h1_helphi1->Fill( hangles.helPhi1, eventWeight );
+
+       TLorentzVector Vstar = dijet + diphot;
+
+       // boost stuff in Vstar frame
+       TLorentzVector Vstar_Vstar(Vstar);
+       Vstar_Vstar.Boost(-Vstar.BoostVector());
+       TLorentzVector V_Vstar(dijet);
+       V_Vstar.Boost(-Vstar.BoostVector());
+
+       // boost stuff in the V_Vstar frame:
+       TLorentzVector Vstar_V(Vstar_Vstar);
+       Vstar_V.Boost(-V_Vstar.BoostVector());
+       TLorentzVector jet0_V, jet1_V;
+       // randomize:
+       if( coin->Uniform(1.)<0.5) {
+         jet0_V = jet0;
+         jet1_V = jet1;
+       } else {
+         jet0_V = jet1;
+         jet1_V = jet0;
+       }
+       jet0_V.Boost(-dijet.BoostVector());
+       jet1_V.Boost(-dijet.BoostVector());
+      
+       TVector3 v3_jet0_V  = jet0_V.Vect();
+       TVector3 v3_jet1_V  = jet1_V.Vect();
+       TVector3 v3_Vstar_V = Vstar_V.Vect();
+       TVector3 v3_V_Vstar = V_Vstar.Vect();
+
+       float cosThetaStar_jets = cos( v3_jet0_V.Angle(v3_V_Vstar) );
+       float helicityAngle_V = sin( v3_jet0_V.Angle(v3_Vstar_V) );
+
+       h1_cosThetaStar_jets->Fill( cosThetaStar_jets, eventWeight );
+       h1_helicityAngle_V->Fill( helicityAngle_V, eventWeight );
+
 
        TLorentzVector jet0_kinfit, jet1_kinfit;
        float chiSquareProbMax=0.;
@@ -1055,36 +1031,38 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
 
        if(selectionType_.find("inverted")!=string::npos){//if not inverted do not apply corrections. useful for plots
-	 h1_mgg_scaled->Fill( massggnewvtx, eventWeight*ptweightPhot1*ptweightPhot2 );
 
-	 pt_scaled_weight_t=eventWeight*ptweightPhot1*ptweightPhot2;
-	 ptPhot1_scaled_weight_t=eventWeight*ptweightPhot1;
-	 ptPhot2_scaled_weight_t=eventWeight*ptweightPhot2;
-	 pt_scaled_2D_weight_t=eventWeight*ptweight2D;
+         h1_mgg_scaled->Fill( massggnewvtx, eventWeight*ptweightPhot1*ptweightPhot2 );
+        
+         pt_scaled_weight_t=eventWeight*ptweightPhot1*ptweightPhot2;
+         ptPhot1_scaled_weight_t=eventWeight*ptweightPhot1;
+         ptPhot2_scaled_weight_t=eventWeight*ptweightPhot2;
+         pt_scaled_2D_weight_t=eventWeight*ptweight2D;
+        
+         eta_scaled_weight_t=eventWeight*etaweightPhot1*etaweightPhot2;
+         etaPhot1_scaled_weight_t=eventWeight*etaweightPhot1;
+         etaPhot2_scaled_weight_t=eventWeight*etaweightPhot2;
+         eta_scaled_2D_weight_t=eventWeight*etaweight2D;
 
-	 eta_scaled_weight_t=eventWeight*etaweightPhot1*etaweightPhot2;
-	 etaPhot1_scaled_weight_t=eventWeight*etaweightPhot1;
-	 etaPhot2_scaled_weight_t=eventWeight*etaweightPhot2;
-	 eta_scaled_2D_weight_t=eventWeight*etaweight2D;
+       } else {
 
-       }else{
-	 h1_mgg_scaled->Fill(massggnewvtx, eventWeight );
-	 pt_scaled_weight_t=eventWeight;
-	 ptPhot1_scaled_weight_t=eventWeight;
-	 ptPhot2_scaled_weight_t=eventWeight;
-	 pt_scaled_2D_weight_t=eventWeight;
+         h1_mgg_scaled->Fill(massggnewvtx, eventWeight );
+         pt_scaled_weight_t=eventWeight;
+         ptPhot1_scaled_weight_t=eventWeight;
+         ptPhot2_scaled_weight_t=eventWeight;
+         pt_scaled_2D_weight_t=eventWeight;
+        
+         eta_scaled_weight_t=eventWeight;
+         etaPhot1_scaled_weight_t=eventWeight;
+         etaPhot2_scaled_weight_t=eventWeight;
+         eta_scaled_2D_weight_t=eventWeight;
 
-	 eta_scaled_weight_t=eventWeight;
-	 etaPhot1_scaled_weight_t=eventWeight;
-	 etaPhot2_scaled_weight_t=eventWeight;
-	 eta_scaled_2D_weight_t=eventWeight;
        }
 
 
        //       std::cout<<massggnewvtx<<" "<<mgg_scaled<<std::endl;
        //std::cout<<"ptweightPhot0 "<<ptweightPhot0<<"ptweightPhot1 "<<ptweightPhot1<<std::endl;
 
-       TLorentzVector Vstar = dijet + diphot;
        TLorentzVector Vstar_kinfit = dijet_kinfit + diphot;
        
        h1_mVstar->Fill( Vstar.M(), eventWeight );
@@ -1105,8 +1083,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
        //MET
        h1_pfMet->Fill(epfMet,eventWeight);
-       //Ht
-       Ht_t=Ht;
+
+
 
        // set tree vars:
        btagCategory_t = btagCategory;
@@ -1119,14 +1097,14 @@ void RedNtpFinalizer_TTVHgg::finalize()
        etaPhot2_t = etaphot2;
        mgg_t = diphot.M();
        ptgg_t = diphot.Pt();
-       ptJet1_t = jet0.Pt();
-       ptJet2_t = jet1.Pt();
-       etaJet1_t = jet0.Eta();
-       etaJet2_t = jet1.Eta();
-       qglJet1_t = qgljet0;
-       qglJet2_t = qgljet1;
-       btagJet1_t = firstjet_isbtaggedloose;
-       btagJet2_t = secondjet_isbtaggedloose;
+       //ptJet1_t = jet0.Pt();
+       //ptJet2_t = jet1.Pt();
+       //etaJet1_t = jet0.Eta();
+       //etaJet2_t = jet1.Eta();
+       //qglJet1_t = qgljet0;
+       //qglJet2_t = qgljet1;
+       //btagJet1_t = firstjet_isbtaggedloose;
+       //btagJet2_t = secondjet_isbtaggedloose;
        mjj_t = dijet.M();
        ptjj_t = dijet.Pt();
        zeppen_t = zeppen;
@@ -1150,6 +1128,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
    outFile_->cd();
 
    tree_passedEvents->Write();
+
+   h1_nGenEvents->Write();
 
    h1_nvertex->Write();
    h1_nvertex_PUW->Write();
@@ -1255,6 +1235,9 @@ void RedNtpFinalizer_TTVHgg::finalize()
    h1_cosThetaStar->Write();
    h1_helphi->Write();
    h1_helphi1->Write();
+
+   h1_cosThetaStar_jets->Write();
+   h1_helicityAngle_V->Write();
 
    h1_mVstar->Write();
    h1_ptVstar->Write();
