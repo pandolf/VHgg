@@ -860,8 +860,6 @@ public :
    float mjj_min_thresh_;
    float mjj_max_thresh_;
 
-   int isLeptonic_thresh_;
-   bool leptonVeto_;
    float   Ht_thresh_;
    bool  invert_photonCuts_;
    bool noBTagMedium_;

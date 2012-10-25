@@ -1781,7 +1781,6 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   njets_upper_thresh_=15;
   nbtagloose_thresh_=0;
   nbtagmedium_thresh_=0;
-  isLeptonic_thresh_=0;
   Ht_thresh_=0;
   invert_photonCuts_=false;
   noBTagMedium_=false;
