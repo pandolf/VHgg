@@ -831,6 +831,8 @@ public :
    float ptphot1cut_;
    float ptphot2cut_;
 
+   bool ebeb_0btag_thresh_;
+
    float ptgg_0btag_thresh_;
    float ptgg_1btag_thresh_;
    float ptgg_2btag_thresh_;
