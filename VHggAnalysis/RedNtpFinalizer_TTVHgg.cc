@@ -697,10 +697,6 @@ void RedNtpFinalizer_TTVHgg::finalize()
          if(njets_selected_btagmedium>0)continue;
        };
        int isLeptonic= (ptele1>0 || ptmu1>0);
-       if (isLeptonic<isLeptonic_thresh_) continue;
-       if(leptonVeto_){
-         if(isLeptonic==1)continue;
-       }
        if(Ht_t<Ht_thresh_)continue;
 
 
@@ -1787,7 +1783,6 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   nbtagmedium_thresh_=0;
   isLeptonic_thresh_=0;
   Ht_thresh_=0;
-  leptonVeto_=false;
   invert_photonCuts_=false;
   noBTagMedium_=false;
 
@@ -1902,29 +1897,6 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
     njets_thresh_=5;
     invert_photonCuts_=true;
 
-  }else if ( selectionType=="ttHsel4JetsNoBTagLeptonVeto_inverted" ){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-
-    njets_thresh_=4;
-    invert_photonCuts_=true;
-    leptonVeto_=true;
-
-  } else if ( selectionType=="ttHsel4JetsNoBTagLeptonVeto" ){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-
-    njets_thresh_=4;
-    leptonVeto_=true;
-
   } else if ( selectionType=="ttHselNJets" ){
 
     ptphot1cut_ = 33.;
@@ -1956,189 +1928,6 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
 
     njets_thresh_=4;
     nbtagmedium_thresh_=1;
-
-  } else if ( selectionType=="ttHsel4JetsNoBTag" ){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-
-    njets_thresh_=4;
-    leptonVeto_=true;
-
-  } else if ( selectionType=="ttHsel3Jets1Lepton" ){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-
-    njets_thresh_=3;
-    isLeptonic_thresh_=1;    
-  } else if ( selectionType=="ttHsel3Jets1LeptonBTagVeto_inverted" ){
-
-    invert_photonCuts_=true;
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-
-    noBTagMedium_=true;
-    njets_thresh_=3;
-    isLeptonic_thresh_=1;    
-  } else if ( selectionType=="ttHsel3Jets1Lepton1BtagMedium" ){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-
-    njets_thresh_=3;
-    isLeptonic_thresh_=1;    
-
-    nbtagmedium_thresh_=1;
-
-  } else if ( selectionType=="ttHsel5JetsBtagMediumLeptonVeto" ){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-
-    njets_thresh_=5;
-
-    nbtagmedium_thresh_=1;
-    leptonVeto_=true;
-
-  } else if ( selectionType=="ttHsel2JetsBtagMediumLeptonVeto" ){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 2;
-
-    njets_thresh_=2;
-
-    nbtagmedium_thresh_=1;
-    leptonVeto_=true;
-
-  } else if ( selectionType=="ttHsel3JetsHtCut" ){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-
-    njets_thresh_=3;
-    Ht_thresh_=340;
-
-  }else if ( selectionType=="invertedPhotonID1Phot"){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-    njets_thresh_=2;
-
-    invert_photonCuts_=true;
-
-    
-  }else if(selectionType=="2-4Jets_LeptonVeto"){
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-    njets_thresh_=2;
-    njets_upper_thresh_=4;
-
-    leptonVeto_=true;
-
-  } else if(selectionType=="4Jets_LeptonVeto"){
-  ptphot1cut_ = 33.;
-  ptphot2cut_ = 25.;
-
-
-  ptjetthresh_count_ = 25.;
-  photonID_thresh_ = 4;
-  njets_thresh_=4;
-  njets_upper_thresh_=4;
-
-
-  leptonVeto_=true;
-
- }else if(selectionType=="2-4Jets_LeptonVeto_inverted"){
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-    njets_thresh_=2;
-    njets_upper_thresh_=4;
-
-    invert_photonCuts_=true;
-    leptonVeto_=true;
-
-  } else if(selectionType=="4Jets_LeptonVeto_inverted"){
-  ptphot1cut_ = 33.;
-  ptphot2cut_ = 25.;
-
-
-  ptjetthresh_count_ = 25.;
-  photonID_thresh_ = 4;
-  njets_thresh_=4;
-  njets_upper_thresh_=4;
-
-  invert_photonCuts_=true;
-  leptonVeto_=true;
-
-  }else if(selectionType=="onlyPhotonCuts"){
-  ptphot1cut_ = 33.;
-  ptphot2cut_ = 25.;
-
-
-  }else if(selectionType=="onlyPhotonCuts_inverted"){
-  ptphot1cut_ = 33.;
-  ptphot2cut_ = 25.;
-  invert_photonCuts_=true;
-
-  }else if(selectionType=="1-4Jets_LeptonVeto"){
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-    njets_thresh_=1;
-    njets_upper_thresh_=4;
-
-   
-    leptonVeto_=true;
-
-  }else if(selectionType=="1-4Jets_LeptonVeto_inverted"){
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-    njets_thresh_=1;
-    njets_upper_thresh_=4;
-
-    invert_photonCuts_=true;
-    leptonVeto_=true;
 
   } else {
     std::cout << std::endl << std::endl << "Selection '" << selectionType << "' currently not implemented. Exiting." << std::endl;
