@@ -179,8 +179,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
    h1_mgg_1btag->Sumw2();
    TH1D* h1_mgg_2btag = new TH1D("mgg_2btag", "", 80, 100., 180.);
    h1_mgg_2btag->Sumw2();
-   TH1D* h1_mgg_2btagmed = new TH1D("mgg_2btagmed", "", 80, 100., 180.);
-   h1_mgg_2btagmed->Sumw2();
+   TH1D* h1_mgg_bsm = new TH1D("mgg_bsm", "", 80, 100., 180.);
+   h1_mgg_bsm->Sumw2();
 
    TH1D* h1_mgg_0btag_ebeb = new TH1D("mgg_0btag_ebeb", "", 80, 100., 180.);
    h1_mgg_0btag_ebeb->Sumw2();
@@ -923,7 +923,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
          isBSMEvent_t = true;
 
-         h1_mgg_2btagmed->Fill( massggnewvtx, eventWeight );
+         h1_mgg_bsm->Fill( massggnewvtx, eventWeight );
 
        }
 
@@ -935,14 +935,18 @@ void RedNtpFinalizer_TTVHgg::finalize()
        if(  isLeptonic && njets_selected>=3 && njets_selected_btagmedium>0 ) {
 
          category_t = 0;
-	 h1_mgg_ttH_leptonic->Fill( massggnewvtx, eventWeight );
+         h1_mgg_ttH_leptonic->Fill( massggnewvtx, eventWeight );
+
+
 
        // *****   ttH hadronic category: 
        // *****   (5 jets, 1 btag medium, no lepton)
        } else if(  !isLeptonic && njets_selected>=5 && njets_selected_btagmedium>0 ) {
 
          category_t = 1;
-	 h1_mgg_ttH_hadronic->Fill( massggnewvtx, eventWeight );
+         h1_mgg_ttH_hadronic->Fill( massggnewvtx, eventWeight );
+
+
 
        // *****   VH 2-btag category: 
        // *****   (2 jets, 2 btag loose)
@@ -961,6 +965,10 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
          if( jet1.Pt() < ptjet_2btag_thresh_ ) continue;
          if( fabs(cosThetaStar) > costhetastar_2btag_thresh_ ) continue;
+
+         h1_mgg_2btag->Fill( massggnewvtx, eventWeight );
+         if( ebeb ) h1_mgg_2btag_ebeb->Fill( massggnewvtx, eventWeight );
+         else  h1_mgg_2btag_nebeb->Fill( massggnewvtx, eventWeight );
 
 
 
@@ -1249,7 +1257,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    h1_mgg_0btag->Write();
    h1_mgg_1btag->Write();
    h1_mgg_2btag->Write();
-   h1_mgg_2btagmed->Write();
+   h1_mgg_bsm->Write();
 
    h1_mgg_0btag_ebeb->Write();
    h1_mgg_1btag_ebeb->Write();
