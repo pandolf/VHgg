@@ -196,6 +196,14 @@ void RedNtpFinalizer_TTVHgg::finalize()
    TH1D* h1_mgg_2btag_nebeb = new TH1D("mgg_2btag_nebeb", "", 80, 100., 180.);
    h1_mgg_2btag_nebeb->Sumw2();
 
+   //categories for TTH
+   TH1D* h1_mgg_ttH_leptonic = new TH1D("mgg_ttH_leptonic", "", 80, 100., 180.);
+   h1_mgg_ttH_leptonic->Sumw2();
+   TH1D* h1_mgg_ttH_hadronic = new TH1D("mgg_ttH_hadronic", "", 80, 100., 180.);
+   h1_mgg_ttH_hadronic->Sumw2();
+
+
+
    TH1D*  h1_ptDiphot = new TH1D("ptDiphot", "", 100, 0., 500.);
    h1_ptDiphot->Sumw2();
 
@@ -930,14 +938,14 @@ void RedNtpFinalizer_TTVHgg::finalize()
        if(  isLeptonic && njets_selected>=3 && njets_selected_btagmedium>0 ) {
 
          category_t = 0;
-
+	 h1_mgg_ttH_leptonic->Fill( massggnewvtx, eventWeight );
 
        // *****   ttH hadronic category: 
        // *****   (5 jets, 1 btag medium, no lepton)
        } else if(  !isLeptonic && njets_selected>=5 && njets_selected_btagmedium>0 ) {
 
          category_t = 1;
-
+	 h1_mgg_ttH_hadronic->Fill( massggnewvtx, eventWeight );
 
        // *****   VH 2-btag category: 
        // *****   (2 jets, 2 btag loose)
@@ -1253,6 +1261,9 @@ void RedNtpFinalizer_TTVHgg::finalize()
    h1_mgg_0btag_nebeb->Write();
    h1_mgg_1btag_nebeb->Write();
    h1_mgg_2btag_nebeb->Write();
+
+   h1_mgg_ttH_leptonic->Write();
+   h1_mgg_ttH_hadronic->Write();
 
    h1_qgljet0->Write();
    h1_qgljet1->Write();
