@@ -701,9 +701,6 @@ void RedNtpFinalizer_TTVHgg::finalize()
        if(njets_selected>njets_upper_thresh_)continue;
        if(njets_selected_btagloose<nbtagloose_thresh_) continue;
        if(njets_selected_btagmedium<nbtagmedium_thresh_) continue;
-       if(noBTagMedium_){
-         if(njets_selected_btagmedium>0)continue;
-       };
        int isLeptonic= (ptele1>0 || ptmu1>0);
        if(Ht_t<Ht_thresh_)continue;
 
@@ -1762,7 +1759,7 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   ebeb_0btag_thresh_ = false;
 
   ptphot1cut_ = 30.;
-  ptphot2cut_ = 20.;
+  ptphot2cut_ = 25.;
 
   ptgg_0btag_thresh_ = 0.;
   ptgg_1btag_thresh_ = 0.;
@@ -1775,9 +1772,6 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   ptjet_1btag_thresh_ = 20.;
   ptjet_2btag_thresh_ = 20.;
 
-  // old cut logic, kept for backwards compatibility:
-  ptjetleadthresh_0btag_ = 40.;
-
   zeppenfeld_thresh_ = 1000.;
 
   costhetastar_0btag_thresh_ = 2.;
@@ -1787,14 +1781,13 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   mjj_min_thresh_ = 0.;
   mjj_max_thresh_ = 10000.;
 
-  //threshold added for ttH
   njets_thresh_=0;
-  njets_upper_thresh_=15;
+  njets_upper_thresh_=1000;
   nbtagloose_thresh_=0;
   nbtagmedium_thresh_=0;
+
   Ht_thresh_=0;
   invert_photonCuts_=false;
-  noBTagMedium_=false;
 
   if( selectionType=="presel" ) {
 
@@ -1816,8 +1809,6 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
    ptgg_0btag_thresh_ = 50.;
    ptgg_1btag_thresh_ = 50.;
    ptgg_2btag_thresh_ = 50.;
-
-   ptjetleadthresh_0btag_ = 40.;
 
    mjj_min_thresh_ = 60.;
    mjj_max_thresh_ = 120.;
@@ -1850,7 +1841,6 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
    ptphot2cut_ = 40.;
 
    ptjetthresh_count_ = 25.;
-   ptjetleadthresh_0btag_ = 40.; //this is not accurate
 
    zeppenfeld_thresh_ = 1.5;
 
@@ -1864,80 +1854,6 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
     ptjetthresh_count_ = 25.;
     photonID_thresh_ = 4;
 
-    //    njets_thresh_=3;
-  } else if ( selectionType=="ttHsel2Jets" ){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-
-    njets_thresh_=2;
-  } else if ( selectionType=="ttHsel2Jets1BTagLoose" ){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-
-    njets_thresh_=2;
-    nbtagloose_thresh_=1;
-
-  } else if ( selectionType=="ttHsel5JetsNoBTag" ){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-
-    njets_thresh_=5;
-
-
-  }else if ( selectionType=="ttHsel5JetsNoBTag_inverted" ){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-
-    njets_thresh_=5;
-    invert_photonCuts_=true;
-
-  } else if ( selectionType=="ttHselNJets" ){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-
-    njets_thresh_=3;
-
-  } else if ( selectionType=="ttHsel4JetsBTagLoose" ){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-
-    njets_thresh_=4;
-    nbtagloose_thresh_=1;
-
-  }   else if ( selectionType=="ttHsel4JetsBTagMedium" ){
-
-    ptphot1cut_ = 33.;
-    ptphot2cut_ = 25.;
-
-    ptjetthresh_count_ = 25.;
-    photonID_thresh_ = 4;
-
-    njets_thresh_=4;
-    nbtagmedium_thresh_=1;
 
   } else {
     std::cout << std::endl << std::endl << "Selection '" << selectionType << "' currently not implemented. Exiting." << std::endl;

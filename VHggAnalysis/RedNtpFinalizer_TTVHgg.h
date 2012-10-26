@@ -849,8 +849,6 @@ public :
    int nbtagloose_thresh_;
    int nbtagmedium_thresh_;
 
-   float ptjetleadthresh_0btag_;
-
    float zeppenfeld_thresh_;
 
    float costhetastar_0btag_thresh_;
@@ -862,7 +860,6 @@ public :
 
    float   Ht_thresh_;
    bool  invert_photonCuts_;
-   bool noBTagMedium_;
 };
 
 #endif
