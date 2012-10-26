@@ -7,7 +7,7 @@
 #include "cl95cms.C"
 
 bool separate_signals = true;
-bool use_all_bkg=false;
+bool use_all_bkg=true;
 
 void printYields( DrawBase* db, const std::string& suffix, bool doUL=false );
 
@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
 
   DrawBase* db_nostack = new DrawBase("TTVHgg_nostack");
   DrawBase* db_stack = new DrawBase("TTVHgg_stack");
+  DrawBase* db_stack_UL = new DrawBase("TTVHgg_stack_UL");
 
   db_nostack->set_lumiOnRightSide();
   db_stack->set_lumiOnRightSide();
@@ -44,17 +45,23 @@ int main(int argc, char* argv[]) {
   db_stack->set_lumiNormalization(30000.);
   db_stack->set_noStack(false);
 
+  db_stack_UL->set_lumiOnRightSide();
+  db_stack_UL->set_lumiNormalization(30000.);
+  db_stack_UL->set_noStack(false);
+
+
   std::string outputdir_str = "TTVHgg_plots/"+redntpProdVersion+"/TTVHggPlots_MConly_" + selType + "_" + bTaggerType;
   if(use_all_bkg)outputdir_str+="_all";
   db_nostack->set_outputdir(outputdir_str);
   db_stack->set_outputdir(outputdir_str);
+  db_stack_UL->set_outputdir(outputdir_str+"/UL");
 
   int signalFillColor = 46;
 
   std::string inputDir="finalizedTrees_"+redntpProdVersion+"/";
 
 
-  if( separate_signals ) {
+
 
 
     std::string ttHFileName =inputDir +  "TTVHgg_TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2";
@@ -91,7 +98,6 @@ int main(int argc, char* argv[]) {
     db_stack->add_mcFile( VBFHFile, "VBFH", "VBF H ", signalFillColor, 0);
     db_nostack->add_mcFile( VBFHFile, "VBFH", "VBF H", signalFillColor, 0);
 
-  } else {
 
     // inclusive signal file for stack plot
     std::string HToGGFileName = inputDir +  "TTVHgg_HToGG_M-125_8TeV-pythia6";
@@ -99,9 +105,9 @@ int main(int argc, char* argv[]) {
     HToGGFileName += "_" + bTaggerType;
     HToGGFileName += ".root";
     TFile* HToGGFile = TFile::Open(HToGGFileName.c_str());
-    db_stack->add_mcFile( HToGGFile, "HToGG", "H (125)", signalFillColor, 0);
+    db_stack_UL->add_mcFile( HToGGFile, "HToGG", "H (125)", signalFillColor, 0);
 
-  }
+
 
 
   std::string DiPhotonFileName = inputDir +  "TTVHgg_DiPhoton_8TeV-pythia6";
@@ -111,6 +117,7 @@ int main(int argc, char* argv[]) {
   TFile* DiPhotonFile = TFile::Open(DiPhotonFileName.c_str());
   db_nostack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
   db_stack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
+  db_stack_UL->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
 
   std::string GammaJetFileName = inputDir +  "TTVHgg_GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6";
   GammaJetFileName += "_" + selType;
@@ -119,7 +126,7 @@ int main(int argc, char* argv[]) {
   TFile* GammaJetFile = TFile::Open(GammaJetFileName.c_str());
   db_nostack->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
   db_stack->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
-
+  db_stack_UL->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
 
   std::string DiBosonFileName = inputDir +  "TTVHgg_VV_8TeV";
   DiBosonFileName += "_" + selType;
@@ -152,11 +159,17 @@ int main(int argc, char* argv[]) {
   if(use_all_bkg){
   db_stack->add_mcFile( DiBosonFile, "DiBoson", "Diboson", 39);
   db_stack->add_mcFile( QCDFile, "QCD", "QCD", 41);
-  db_nostack->add_mcFile( DiBosonFile, "DiBoson", "Diboson", 39);
   db_stack->add_mcFile( TTFile, "TT", "Top", 44);
+
+  db_stack_UL->add_mcFile( DiBosonFile, "DiBoson", "Diboson", 39);
+  db_stack_UL->add_mcFile( QCDFile, "QCD", "QCD", 41);
+  db_stack_UL->add_mcFile( TTFile, "TT", "Top", 44);
+
+
   db_nostack->add_mcFile( TTFile, "TT", "Top", 44);
-  db_stack->add_mcFile( TriBosonFile, "TriBoson", "V + #gamma#gamma", 40);
-  db_nostack->add_mcFile( QCDFile, "QCD", "QCD", 41); 
+
+
+
 
   }
 
@@ -274,26 +287,59 @@ int main(int argc, char* argv[]) {
   db_stack->drawHisto("mgg_presel", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "presel");
 
-  //  bool doUL = (selType != "presel" );
-  bool doUL=false;
+    bool doUL = (selType != "presel" );
+  //  bool doUL=false;
 
   db_stack->drawHisto("mgg", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "incl", doUL );
 
-  db_stack->set_legendTitle( "0 b-tag Category" );
+  db_stack->set_legendTitle( "VH, 0 b-tag" );
   db_stack->drawHisto("mgg_0btag", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "0tag", doUL );
-  db_stack->set_legendTitle( "1 b-tag Category" );
+  db_stack->set_legendTitle( "VH, 1 b-tag" );
   db_stack->drawHisto("mgg_1btag", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "1tag", doUL );
-  db_stack->set_legendTitle( "2 b-tag Category" );
+  db_stack->set_legendTitle( "VH, 2 b-tag" );
   db_stack->drawHisto("mgg_2btag", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "2tag", doUL );
-  db_stack->set_legendTitle( "2 b-tag Med Category" );
-  db_stack->drawHisto("mgg_2btagmed", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack, "2tagmed", doUL );
+  db_stack->set_legendTitle( "BSM Category" );
+  db_stack->drawHisto("mgg_bsm", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "mgg_bsm", doUL );
 
-  db_stack->set_legendTitle( "0 b-tag Category (EBEB)" );
+  db_stack->set_legendTitle( "ttH, lepton tag" );
+  db_stack->drawHisto("mgg_ttH_leptonic", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "ttH_leptonic", doUL );
+  db_stack->set_legendTitle( "ttH, hadronic" );
+  db_stack->drawHisto("mgg_ttH_hadronic", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "ttH_hadronic", doUL );
+
+
+  //Upper limits
+  db_stack_UL->set_rebin(5);
+  db_stack->set_legendTitle( "VH, 0 b-tag" );
+  db_stack_UL->drawHisto("mgg_0btag", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack_UL, "0tag", doUL );
+  db_stack->set_legendTitle( "VH, 1 b-tag" );
+  db_stack_UL->drawHisto("mgg_1btag", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack_UL, "1tag", doUL );
+  db_stack->set_legendTitle( "VH, 2 b-tag" ); 
+  db_stack_UL->drawHisto("mgg_2btag", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack_UL, "2tag", doUL );
+  db_stack_UL->set_legendTitle( "BSM Category" );
+  db_stack_UL->drawHisto("mgg_bsm", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack_UL, "mgg_bsm", doUL );
+
+  db_stack_UL->set_legendTitle( "ttH, lepton tag" );
+  db_stack_UL->drawHisto("mgg_ttH_leptonic", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack_UL, "ttH_leptonic", doUL );
+  db_stack_UL->set_legendTitle( "ttH, hadronic" );
+  db_stack_UL->drawHisto("mgg_ttH_hadronic", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack_UL, "ttH_hadronic", doUL );
+
+
+
+
+  /*  db_stack->set_legendTitle( "0 b-tag Category (EBEB)" );
   db_stack->drawHisto("mgg_0btag_ebeb", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "0tag_ebeb", doUL );
   db_stack->set_legendTitle( "1 b-tag Category (EBEB)" );
@@ -313,11 +359,7 @@ int main(int argc, char* argv[]) {
   db_stack->drawHisto("mgg_2btag_nebeb", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "2tag_nebeb", doUL );
 
-  db_stack->drawHisto("mgg_ttH_leptonic", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack, "2tag_nebeb", doUL );
-  db_stack->drawHisto("mgg_ttH_hadronic", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack, "2tag_nebeb", doUL );
-
+  */
 
 
   return 0;
