@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
     VBFHFileName += ".root";
     TFile* VBFHFile = TFile::Open(VBFHFileName.c_str());
     db_stack->add_mcFile( VBFHFile, "VBFH", "VBF H ", signalFillColor, 0);
-    db_nostack->add_mcFile( VBFHFile, "VBFH", "VBF H", signalFillColor, 0);
+    //    db_nostack->add_mcFile( VBFHFile, "VBFH", "VBF H", signalFillColor, 0);
 
 
     // inclusive signal file for stack plot
