@@ -860,6 +860,8 @@ public :
 
    float   Ht_thresh_;
    bool  invert_photonCuts_;
+   bool use_PUID_;
+
 };
 
 #endif

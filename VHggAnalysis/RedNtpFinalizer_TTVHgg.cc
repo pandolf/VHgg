@@ -642,6 +642,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
          //jet PU ID:
          bool passedPUID = true;
+	 if(use_PUID_){
          if(TMath::Abs(etajet[ijet]) < 2.5) {
            if(betastarjet[ijet] > 0.2 * log( nvtx - 0.67 ) ) passedPUID = false;
            if(rmsjet[ijet] > 0.06) passedPUID = false;
@@ -650,8 +651,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
          } else {
            if(rmsjet[ijet] > 0.055) passedPUID = false;
          }
-         if( !passedPUID ) continue;
-
+         if( !passedPUID )continue;
+	 }
 
          if( isMC ) {
            if( partMomPdgIDjet[ijet] == 23 || abs( partMomPdgIDjet[ijet] ) == 24 ) {
@@ -1796,6 +1797,7 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
 
   Ht_thresh_=0;
   invert_photonCuts_=false;
+  use_PUID_=true;
 
   if( selectionType=="presel" ) {
 
