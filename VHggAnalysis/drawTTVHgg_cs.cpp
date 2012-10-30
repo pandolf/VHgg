@@ -132,20 +132,38 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto_fromTree("tree_passedEvents","ptele1","",120,0,120,"","ptele1", "Lead electron p_{T}", "GeV");
   db_nostack->drawHisto_fromTree("tree_passedEvents","ptele2","",120,0,120,"","ptele2", "Sublead electron p_{T}", "GeV");
 
-  db_nostack->drawHisto_fromTree("tree_passedEvents","ptmu1","",120,0,120, "Lead muon p_{T}", "GeV");
-  db_nostack->drawHisto_fromTree("tree_passedEvents","ptmu2","",120,0,120, "Sublead muon p_{T}", "GeV");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","ptmu1","",120,0,120,"ptmu1", "Lead muon p_{T}", "GeV");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","ptmu2","",120,0,120,"ptmu2", "Sublead muon p_{T}", "GeV");
 
   db_nostack->set_rebin(2);
 
-  db_nostack->drawHisto_fromTree("tree_passedEvents","ptDiphot","",50,0,500, "Diphoton p_{T}", "GeV");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","ptDiphot","",50,0,500, "ptDiphot","Diphoton p_{T}", "GeV");
 
-  db_nostack->drawHisto_fromTree("tree_passedEvents","deltaPhi","",90,0,3, "#Delta#Phi(dijet-diphoton)", "rad");
-  db_nostack->drawHisto_fromTree("tree_passedEvents","ptDijet","",50,0,500, "Dijet p_{T}", "GeV");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","deltaPhi","",90,0,3, "deltaPhi","#Delta#Phi(dijet-diphoton)", "rad");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","ptDijet","",50,0,500, "ptDiJet","Dijet p_{T}", "GeV");
   db_nostack->drawHisto_fromTree("tree_passedEvents","ptRatio","",30,0,3, "Dijet p_{T} / Diphoton p_{T}","");
   db_nostack->drawHisto_fromTree("tree_passedEvents","ptDifference","",100,-200.,200, "Dijet p_{T} - Diphoton p_{T}", "GeV");
 
   db_nostack->drawHisto_fromTree("tree_passedEvents","deltaEtaJets","",40,-10,10, "Jet-Jet #Delta#eta","");
   db_nostack->drawHisto_fromTree("tree_passedEvents","deltaFabsEtaJets","",40,-5,5, "Jet-Jet #Delta|#eta|","");
+
+  db_nostack->drawHisto_fromTree("tree_passedEvents","cosTheta1","",50,-1,-1,"cosTheta1","cosTheta1","");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","cosTheta2","",50,-1,-1,"cosTheta2","cosTheta2","");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","cosThetaStar","",50,-1,-1,"cosThetaStar","cosThetaStar","");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","helphi","",30,0,30,"helphi","helphi","");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","helphi1","",30,0,30,"helphi1","helphi1","");
+
+  db_nostack->drawHisto_fromTree("tree_passedEvents","mVstar","",500,0,1000,"mVstar", "V* Mass", "GeV");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","ptVstar","",100,0,200,"ptVstar", "V* p_{T}", "GeV");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","etaVstar","",30,-3,3, "V* #eta","");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","phiVstar","",30,0,3, "V* #phi", "rad","");
+
+  db_nostack->drawHisto_fromTree("tree_passedEvents","mVstar_kinfit","",500,0,1000, "V* Mass", "GeV");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","ptVstar_kinfit","",100,0,200, "V* p_{T}", "GeV");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","etaVstar_kinfit","",30,-3,3,"", "V* #eta","");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","phiVstar_kinfit","",30,0,3, "", "V* #phi", "rad");
+
+
 
   return 0;
 
