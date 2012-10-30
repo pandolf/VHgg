@@ -213,7 +213,21 @@ RedntpDirStruct get_dirs( const std::string& prodVersion ) {
     returnStruct.datadir = "redntp.53xv1_data.cicpfloose.scales-Lisbon-Hgg.ttH_feasibility_v1/merged";
     returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.ttH_feasibility_v1/merged";
 
-  } else if( prodVersion=="VH_feasibility" ) {
+  } else if(prodVersion=="micheli_noPUID"){
+    
+    returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
+    returnStruct.datadir = "redntp.53xv1_data.cicpfloose.scales-Lisbon-Hgg.ttH_feasibility_HLT/merged";
+    returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.ttH_feasibility_HLT/merged";
+
+
+  }else if(prodVersion=="micheli_SinglePhoton"){
+    
+    returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
+    returnStruct.datadir = "redntp.53xv2_data_3.preselectionCS.scales-Lisbon-Hgg.singlePhotonHLT_v2/merged";
+    returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.ttH_feasibility_HLT/merged";
+
+
+  }else if( prodVersion=="VH_feasibility" ) {
 
     returnStruct.maindir = "/xrootdfs/cms/local/pandolf/HiggsGammaGamma/reduced/";
     returnStruct.datadir = "redntp.52xv5_VH_feasibility.cicpfloose.regrPho_eCorr_20062012.VH_feasibility_v0/merged";
