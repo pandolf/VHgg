@@ -1086,7 +1086,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
        // *****   VH 2-btag category: 
        // *****   (2 jets, 2 btag loose)
        } else if(  njets_selected>=2 && diphot.Pt() < ptgg_2btag_thresh_ && fabs(zeppen)>zeppenfeld_thresh_ 
-		   && (dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_) && ptjet_2btag_thresh_ &&
+		   && (dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_) && jet1.Pt() <ptjet_2btag_thresh_ &&
 		   fabs(cosThetaStar) > costhetastar_2btag_thresh_  ) {
 
          category_t = 2;
