@@ -1,3 +1,5 @@
+
+
 #include "RedNtpFinalizer_TTVHgg.h"
 
 #include "QGLikelihood/interface/QGLikelihoodCalculator.h"
@@ -347,6 +349,9 @@ void RedNtpFinalizer_TTVHgg::finalize()
    float chiSquareProbMax_t;
    float absCosThetaStar_t;
 
+   int hasPassedSinglePhot_t;
+   int hasPassedDoublePhot_t;
+
    float eventWeight = 1.;
 
    TTree* tree_passedEvents = new TTree();
@@ -405,6 +410,10 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch("etamu2", &etamu2, "etamu2/F");
    tree_passedEvents->Branch("phimu2", &phimu2, "phimu2/F");
    tree_passedEvents->Branch("epfMet", &epfMet, "epfMet");
+   tree_passedEvents->Branch( "hasPassedSinglePhot", &hasPassedSinglePhot_t, "hasPassedSinglePhot_t/I" );
+   tree_passedEvents->Branch( "hasPassedDoublePhot", &hasPassedDoublePhot_t, "hasPassedDoublePhot_t/I" );
+
+
 
    //   std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
    std::string qglFileName="/afs/cern.ch/user/m/micheli/public/ttH/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
@@ -600,7 +609,6 @@ void RedNtpFinalizer_TTVHgg::finalize()
        h1_mgg_prepresel->Fill( massggnewvtx, eventWeight );
 
 
-
        if(selectionType_=="onlyPhotonCuts" || selectionType_=="onlyPhotonCuts_inverted"){
 	 if(diphot.M()<100 || diphot.M()>180) continue;
 	 ptPhot1_t = ptphot1;
@@ -618,8 +626,11 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	 pt_scaled_2D_weight_t=eventWeight;
 	 eta_scaled_2D_weight_t=eventWeight;
        }
-
+	 cout<<"onlypho"<<endl;
+	 cout<<ptPhot1_t<<" "<<ptPhot2_t<<" "<<etaPhot1_t<<" "<<etaPhot2_t<<" "<<mgg_t<<" "<<ptgg_t<<" "<< pt_scaled_2D_weight_t<<" "<<eta_scaled_2D_weight_t<<endl;
+	 cout<<"jentry "<<jentry<<endl;
 	 tree_passedEvents->Fill();
+	 cout<<"filled"<<endl;
 	 continue;
        }
 
@@ -929,10 +940,14 @@ void RedNtpFinalizer_TTVHgg::finalize()
        }
 
 
+
+
        // SM Higgs CATEGORIES:
 
        // *****   ttH leptonic category: 
        // *****   (3 jets, 1 btag medium, 1 lepton)
+
+       if( selectionType_!="cs_selection" ){
        if(  isLeptonic && njets_selected>=3 && njets_selected_btagmedium>0 ) {
 
          category_t = 0;
@@ -1045,7 +1060,70 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
        }
 
+       }else{//cs selection no btag requirement
+
+       // SM Higgs CATEGORIES:
+
+       // *****   ttH leptonic category: 
+       // *****   (3 jets, 1 btag medium, 1 lepton)
+
+	 if(hasPassedSinglePhot==1 && hasPassedDoublePhot==0)continue; 
+
+	   if(  isLeptonic && njets_selected>=3  ) {
+	     
+	     category_t = 0;
+	     h1_mgg_ttH_leptonic->Fill( massggnewvtx, eventWeight );
+	     
+	     
+	     
+       // *****   ttH hadronic category: 
+       // *****   (5 jets, 1 btag medium, no lepton)
+	   } else if(  !isLeptonic && njets_selected>=5  ) {
+	     
+	     category_t = 1;
+	     h1_mgg_ttH_hadronic->Fill( massggnewvtx, eventWeight );
+	
+       // *****   VH 2-btag category: 
+       // *****   (2 jets, 2 btag loose)
+       } else if(  njets_selected>=2 && diphot.Pt() < ptgg_2btag_thresh_ && fabs(zeppen)>zeppenfeld_thresh_ 
+		   && (dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_) && ptjet_2btag_thresh_ &&
+		   fabs(cosThetaStar) > costhetastar_2btag_thresh_  ) {
+
+         category_t = 2;
+
+
+       // *****   VH 1-btag category: 
+       // *****   (2 jets, 1 btag loose)
+       } else if(  njets_selected>=2 &&  diphot.Pt() < ptgg_1btag_thresh_ &&  fabs(zeppen)>zeppenfeld_thresh_ 
+		   && ( dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_) &&  jet1.Pt() < ptjet_1btag_thresh_ &&
+		   fabs(cosThetaStar) > costhetastar_1btag_thresh_ ) {
+
+         category_t = 3;
+
+
+       // *****   VH 1-btag category: 
+       // *****   (2 jets, 0 btag loose)
+       } else if(  njets_selected>=2 && diphot.Pt() < ptgg_0btag_thresh_ && (ebeb!=ebeb_0btag_thresh_) && fabs(zeppen)>zeppenfeld_thresh_
+		   && (dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_) && jet1.Pt() < ptjet_0btag_thresh_ 
+		   && fabs(cosThetaStar) > costhetastar_0btag_thresh_ ) {
+
+         category_t = 4;
+
+       } else {
+
+         if( isBSMEvent_t ) { //keep only if BSM cat is ok
+
+           category_t = -1; //these are BSMEvents which are not part of other categories
+
+         } else {
+
+           continue; // not my category, not my problem
        
+         }
+
+
+       }
+       }
 
        // inclusive plots:
 
@@ -1163,7 +1241,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
        zeppen_t = zeppen;
        chiSquareProbMax_t = chiSquareProbMax;
        absCosThetaStar_t = fabs(cosThetaStar);
-
+       hasPassedSinglePhot_t=hasPassedSinglePhot;
+       hasPassedDoublePhot_t=hasPassedDoublePhot;
 
        tree_passedEvents->Fill();
 
@@ -1747,6 +1826,9 @@ void RedNtpFinalizer_TTVHgg::Init()
    tree_->SetBranchAddress("photmuloose2", &photmuloose2, &b_photmuloose2);
    tree_->SetBranchAddress("puptmuloose1", &puptmuloose1, &b_puptmuloose1);
    tree_->SetBranchAddress("puptmuloose2", &puptmuloose2, &b_puptmuloose2);
+   tree_->SetBranchAddress("hasPassedSinglePhot", &hasPassedSinglePhot, &b_hasPassedSinglePhot);
+   tree_->SetBranchAddress("hasPassedDoublePhot", &hasPassedDoublePhot, &b_hasPassedDoublePhot);
+
 }
 
 
@@ -1824,12 +1906,12 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
    mjj_max_thresh_ = 120.;
 
   } else if( selectionType=="optsel1" ) {
-
+    
    ptphot1cut_ = 60.;
    ptphot2cut_ = 25.;
-  
+   
    ebeb_0btag_thresh_ = true;
-
+   
    ptgg_0btag_thresh_ = 117.;
    ptgg_1btag_thresh_ = 103.;
    ptgg_2btag_thresh_ = 93.;
@@ -1845,6 +1927,65 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
    mjj_min_thresh_ = 60.;
    mjj_max_thresh_ = 120.;
 
+  } else if( selectionType=="cs_selection" ) {
+    //opt sel 1 with photon id inverted on 2nd photon
+    invert_photonCuts_=true;
+    ptphot1cut_ = 60.;
+    ptphot2cut_ = 25.;
+    
+    ebeb_0btag_thresh_ = true;
+    
+    ptgg_0btag_thresh_ = 117.;
+    ptgg_1btag_thresh_ = 103.;
+    ptgg_2btag_thresh_ = 93.;
+
+    ptjet_0btag_thresh_ = 36.;
+    ptjet_1btag_thresh_ = 23.;
+    ptjet_2btag_thresh_ = 25.;
+    
+    costhetastar_0btag_thresh_ = 0.74;
+    costhetastar_1btag_thresh_ = 0.52;
+    costhetastar_2btag_thresh_ = 0.58;
+    
+    mjj_min_thresh_ = 60.;
+    mjj_max_thresh_ = 120.;
+    
+  }else if( selectionType=="optsel1_noPUID" ) {
+    //opt sel 1 without pu id
+   use_PUID_=false;    
+   ptphot1cut_ = 60.;
+   ptphot2cut_ = 25.;
+   
+   ebeb_0btag_thresh_ = true;
+   
+   ptgg_0btag_thresh_ = 117.;
+   ptgg_1btag_thresh_ = 103.;
+   ptgg_2btag_thresh_ = 93.;
+
+   ptjet_0btag_thresh_ = 36.;
+   ptjet_1btag_thresh_ = 23.;
+   ptjet_2btag_thresh_ = 25.;
+
+   costhetastar_0btag_thresh_ = 0.74;
+   costhetastar_1btag_thresh_ = 0.52;
+   costhetastar_2btag_thresh_ = 0.58;
+
+   mjj_min_thresh_ = 60.;
+   mjj_max_thresh_ = 120.;
+
+  } else if(selectionType=="onlyPhotonCuts"){
+    
+    ptphot1cut_ = 60.;
+    ptphot2cut_ = 25.;
+
+
+  }else if( selectionType=="onlyPhotonCuts_inverted" ) {
+    
+    invert_photonCuts_=true;
+    ptphot1cut_ = 60.;
+    ptphot2cut_ = 25.;
+    
+    
   } else if( selectionType=="ddrsel" ) {
 
    ptphot1cut_ = 62.5;
