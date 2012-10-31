@@ -1067,8 +1067,11 @@ void RedNtpFinalizer_TTVHgg::finalize()
        // *****   ttH leptonic category: 
        // *****   (3 jets, 1 btag medium, 1 lepton)
 
-	 if(hasPassedSinglePhot==1 && hasPassedDoublePhot==0)continue; 
+	 if(hasPassedDoublePhot==1)continue;
 
+	 if(hasPassedSinglePhot==1){
+	   if(!(hasPassedSinglePhot==1 && hasPassedDoublePhot==0))continue; 
+	 }
 	   if(  isLeptonic && njets_selected>=3  ) {
 	     
 	     category_t = 0;
@@ -1085,28 +1088,25 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	
        // *****   VH 2-btag category: 
        // *****   (2 jets, 2 btag loose)
-       } else if(  njets_selected>=2 && diphot.Pt() < ptgg_2btag_thresh_ && fabs(zeppen)>zeppenfeld_thresh_ 
-		   && (dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_) && jet1.Pt() <ptjet_2btag_thresh_ &&
-		   fabs(cosThetaStar) > costhetastar_2btag_thresh_  ) {
-
+       } else if(  njets_selected>=2 && diphot.Pt() > ptgg_2btag_thresh_ && fabs(zeppen)<zeppenfeld_thresh_ 
+		   && dijet.M()>mjj_min_thresh_ && dijet.M()<mjj_max_thresh_ && jet1.Pt() >ptjet_2btag_thresh_ &&
+		   fabs(cosThetaStar) < costhetastar_2btag_thresh_  ) {
          category_t = 2;
 
 
        // *****   VH 1-btag category: 
        // *****   (2 jets, 1 btag loose)
-       } else if(  njets_selected>=2 &&  diphot.Pt() < ptgg_1btag_thresh_ &&  fabs(zeppen)>zeppenfeld_thresh_ 
-		   && ( dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_) &&  jet1.Pt() < ptjet_1btag_thresh_ &&
-		   fabs(cosThetaStar) > costhetastar_1btag_thresh_ ) {
+       } else if(  njets_selected>=2 &&  diphot.Pt() > ptgg_1btag_thresh_ &&  fabs(zeppen)<zeppenfeld_thresh_ 
+		   &&  dijet.M()>mjj_min_thresh_ && dijet.M()<mjj_max_thresh_ &&  jet1.Pt() > ptjet_1btag_thresh_ &&
+		   fabs(cosThetaStar) < costhetastar_1btag_thresh_ ) {
 
          category_t = 3;
 
-
        // *****   VH 1-btag category: 
        // *****   (2 jets, 0 btag loose)
-       } else if(  njets_selected>=2 && diphot.Pt() < ptgg_0btag_thresh_ && (ebeb!=ebeb_0btag_thresh_) && fabs(zeppen)>zeppenfeld_thresh_
-		   && (dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_) && jet1.Pt() < ptjet_0btag_thresh_ 
-		   && fabs(cosThetaStar) > costhetastar_0btag_thresh_ ) {
-
+       } else if(  njets_selected>=2 && diphot.Pt() > ptgg_0btag_thresh_ && (ebeb==ebeb_0btag_thresh_) && fabs(zeppen)<zeppenfeld_thresh_
+		   && dijet.M()>mjj_min_thresh_ && dijet.M()<mjj_max_thresh_ && jet1.Pt() > ptjet_0btag_thresh_ 
+		   && fabs(cosThetaStar) < costhetastar_0btag_thresh_ ) {
          category_t = 4;
 
        } else {
