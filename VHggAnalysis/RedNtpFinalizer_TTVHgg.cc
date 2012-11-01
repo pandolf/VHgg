@@ -413,6 +413,15 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "hasPassedSinglePhot", &hasPassedSinglePhot_t, "hasPassedSinglePhot_t/I" );
    tree_passedEvents->Branch( "hasPassedDoublePhot", &hasPassedDoublePhot_t, "hasPassedDoublePhot_t/I" );
 
+   TTree* tree_weights=new TTree();
+   tree_weights->SetName("tree_weights");
+   tree_weights->Branch( "eventWeight", &eventWeight, "eventWeight/F" );
+   tree_weights->Branch( "ptPhot1", &ptPhot1_t, "ptPhot1_t/F" );
+   tree_weights->Branch( "ptPhot2", &ptPhot2_t, "ptPhot2_t/F" );
+   tree_weights->Branch( "etaPhot1", &etaPhot1_t, "etaPhot1_t/F" );
+   tree_weights->Branch( "etaPhot2", &etaPhot2_t, "etaPhot2_t/F" );
+   tree_weights->Branch( "mgg", &mgg_t, "mgg_t/F" );
+   tree_weights->Branch( "ptgg", &ptgg_t, "ptgg_t/F" );
 
 
    //   std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
@@ -423,7 +432,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    std::string ptweightPhot2FileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_ptphot2_4GeVbinning.root";
 
    //2D weights 
-   std::string ptweight2DFileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_pt_preselectionCS_onlyPhotonCuts_8GeVbinning.root";
+   std::string ptweight2DFileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_pt_preselectionCS_onlyPhotonCuts_4GeVbinning.root";
 
 
    TFile* ptweightPhot1File=TFile::Open(ptweightPhot1FileName.c_str());
@@ -440,7 +449,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    std::string etaweightPhot2FileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_etaphot2_01binning.root";
 
    //2D weights
-   std::string etaweight2DFileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_eta_2-4Jets_01binning.root";
+   std::string etaweight2DFileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_eta_preselectionCS_onlyPhotonCuts_01binning.root";
 
    TFile* etaweightPhot1File=TFile::Open(etaweightPhot1FileName.c_str());
    TFile* etaweightPhot2File=TFile::Open(etaweightPhot2FileName.c_str());
@@ -619,18 +628,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	 ptgg_t = diphot.Pt();
 	 double ptweight2D=h2_ptweight->GetBinContent(h2_ptweight->GetXaxis()->FindBin(ptphot2),h2_ptweight->GetYaxis()->FindBin(ptphot1));
 	 double etaweight2D=h2_etaweight->GetBinContent(h2_etaweight->GetXaxis()->FindBin(etaphot2),h2_etaweight->GetYaxis()->FindBin(etaphot1));
-       if(selectionType_.find("inverted")!=string::npos){//if not inverted do not apply corrections. useful for plots
-	 pt_scaled_2D_weight_t=eventWeight*ptweight2D;
-	 eta_scaled_2D_weight_t=eventWeight*etaweight2D;
-       }else{
-	 pt_scaled_2D_weight_t=eventWeight;
-	 eta_scaled_2D_weight_t=eventWeight;
-       }
-	 cout<<"onlypho"<<endl;
-	 cout<<ptPhot1_t<<" "<<ptPhot2_t<<" "<<etaPhot1_t<<" "<<etaPhot2_t<<" "<<mgg_t<<" "<<ptgg_t<<" "<< pt_scaled_2D_weight_t<<" "<<eta_scaled_2D_weight_t<<endl;
-	 cout<<"jentry "<<jentry<<endl;
-	 tree_passedEvents->Fill();
-	 cout<<"filled"<<endl;
+	 tree_weights->Fill();
 	 continue;
        }
 
@@ -1255,7 +1253,13 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
    outFile_->cd();
 
+
    tree_passedEvents->Write();
+
+
+
+   tree_weights->Write();
+
 
    h1_nGenEvents->Write();
 
