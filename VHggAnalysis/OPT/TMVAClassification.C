@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.3 2012/09/08 18:04:50 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.4 2012/11/05 14:34:55 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -328,15 +328,15 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
    } else if( category==1 ) { //ttH hadronic
      mycuts = "ptPhot1>60. && ptPhot2>25. && category==1";
      mycutb = "ptPhot1>60. && ptPhot2>25. && category==1";
-   } else if( category==2 ) { //VH 0 tag
-     mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==2";
-     mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==2";
+   } else if( category==2 ) { //VH 2 tag
+     mycuts = "mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==2";
+     mycutb = "mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==2";
    } else if( category==3 ) { //VH 1 tag
      mycuts = "mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==3";
      mycutb = "mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==3";
-   } else if( category==4 ) { //VH 2 tag
-     mycuts = "mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==4";
-     mycutb = "mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==4";
+   } else if( category==4 ) { //VH 0 tag
+     mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==4";
+     mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==4";
    }
    //TCut mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
    //TCut mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycutb = "abs(var1)<0.5";
@@ -606,10 +606,10 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
        // preselection cuts (if not optimized):
        ofs << "ptPhot1 60. 100000." << std::endl;
        ofs << "ptPhot2 25. 100000." << std::endl;
-       if( category==2 )
-         ofs << "mjj 60. 120." << std::endl;
-       if( category==3 || category==4 )
+       if( category==2 || category==3 )
          ofs << "mjj 70. 120." << std::endl;
+       if( category==4 )
+         ofs << "mjj 60. 120." << std::endl;
        char btagcutline[300];
        sprintf( btagcutline, "category %d %d", category, category+1);
        std::string btagcutline_str(btagcutline);
