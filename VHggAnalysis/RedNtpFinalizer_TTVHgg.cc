@@ -363,7 +363,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "category", &category_t, "category_t/I" );
    tree_passedEvents->Branch( "isBSMEvent", &isBSMEvent_t, "isBSMEvent_t/O" );
    tree_passedEvents->Branch( "njets", &njets_t, "njets_t/I" );
-   tree_passedEvents->Branch( "nbjets_xloose", &nbjets_loose_t, "nbjets_loose_t/I" );
+   tree_passedEvents->Branch( "nbjets_loose", &nbjets_loose_t, "nbjets_loose_t/I" );
    tree_passedEvents->Branch( "nbjets_medium", &nbjets_medium_t, "nbjets_medium_t/I" );
    tree_passedEvents->Branch( "ptPhot1", &ptPhot1_t, "ptPhot1_t/F" );
    tree_passedEvents->Branch( "ptPhot2", &ptPhot2_t, "ptPhot2_t/F" );
