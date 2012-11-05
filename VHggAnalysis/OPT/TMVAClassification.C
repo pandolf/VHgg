@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.2 2012/09/08 17:27:27 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.3 2012/09/08 18:04:50 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -55,7 +55,7 @@ bool btagMed_presel_ = false;
 
 
    
-void TMVAClassification( std::string optName, int nbtags, TString myMethodList = "" ) 
+void TMVAClassification( std::string optName, int category, TString myMethodList = "" ) 
 {
    // The explicit loading of the shared libTMVA is done in TMVAlogon.C, defined in .rootrc
    // if you use your private .rootrc, or run from a different directory, please copy the 
@@ -175,13 +175,20 @@ void TMVAClassification( std::string optName, int nbtags, TString myMethodList =
    // note that you may also use variable expressions, such as: "3*var1/var2*abs(var3)"
    // [all types of expressions that can also be parsed by TTree::Draw( "expression" )]
    //factory->AddVariable( "ptLept3"       , "Third Lepton p_{T}", "GeV", 'F');
-   //factory->AddVariable( "nbjets_loose"         , "N Loose bJets", "", 'I');
-   //factory->AddVariable( "ptPhot1"            , "Lead Photon p_{T}", "GeV", 'F');
-   //factory->AddVariable( "ptPhot2"            , "Sublead Photon p_{T}", "GeV", 'F');
-   //factory->AddVariable( "ptJet1"            , "Lead Jet p_{T}", "GeV", 'F');
+   factory->AddVariable( "njets"         , "N Jets", "", 'I');
    factory->AddVariable( "ptgg"            , "DiPhoton p_{T}", "GeV", 'F');
-   factory->AddVariable( "absCosThetaStar"            , "|cos(#theta*)|", "", 'F');
-   factory->AddVariable( "ptJet2"            , "Sublead Jet p_{T}", "GeV", 'F');
+   if( category>1 ) { // VH stuff:
+     factory->AddVariable( "ptPhot1"            , "Lead Photon p_{T}", "GeV", 'F');
+     factory->AddVariable( "ptPhot2"            , "Sublead Photon p_{T}", "GeV", 'F');
+     //factory->AddVariable( "ptJet1"            , "Lead Jet p_{T}", "GeV", 'F');
+     factory->AddVariable( "absCosThetaStar"            , "|cos(#theta*)|", "", 'F');
+     factory->AddVariable( "ptJet2"            , "Sublead Jet p_{T}", "GeV", 'F');
+   } else {
+     factory->AddVariable( "Alt$(ptJet[2],0)"            , "Third Jet p_{T}", "GeV", 'F');
+     factory->AddVariable( "Alt$(ptJet[3],0)"            , "Fourth Jet p_{T}", "GeV", 'F');
+     factory->AddVariable( "Alt$(ptJet[4],0)"            , "Fifth Jet p_{T}", "GeV", 'F');
+     factory->AddVariable( "Ht"            , "H_{T}", "GeV", 'F');
+   }
    //factory->AddVariable( "ptjj"            , "DiJet p_{T}", "GeV", 'F');
 
    // You can add so-called "Spectator variables", which are not used in the MVA training, 
@@ -225,13 +232,17 @@ void TMVAClassification( std::string optName, int nbtags, TString myMethodList =
 
       
 
+      std::string treeDir = "/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/presel/";
+
       
-      std::string signalFileName = "../VHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_presel_JP.root";
+      std::string signalFileName = treeDir;
+      if( category>1 ) signalFileName += "/TTVHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_JP.root";
+      else             signalFileName += "/TTVHgg_TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_JP.root"; 
       TFile* signalFile = TFile::Open(signalFileName.c_str());
       TTree *signal     = (TTree*)signalFile->Get("tree_passedEvents");
 
       TChain* background = new TChain("tree_passedEvents");
-      std::string bgFileName = "../VHgg_DiPhoton_8TeV-pythia6_presel_JP.root";
+      std::string bgFileName = treeDir + "/TTVHgg_DiPhoton_8TeV-pythia6_presel_JP.root";
       background->Add(bgFileName.c_str());
 
       //TFile* file_TTJ = TFile::Open("../TTZTrilepton_TTJ_Fall11_highstat_presel_TCHE_ALL.root");
@@ -311,15 +322,21 @@ void TMVAClassification( std::string optName, int nbtags, TString myMethodList =
 
    TCut mycuts;
    TCut mycutb;
-   if( nbtags==0 ) {
-     mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && btagCategory==0";
-     mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && btagCategory==0";
-   } else if( nbtags==1 ) {
-     mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && btagCategory==1";
-     mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && btagCategory==1";
-   } else if( nbtags==2 ) {
-     mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && btagCategory==2";
-     mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && btagCategory==2";
+   if( category==0 ) { //ttH leptonic
+     mycuts = "ptPhot1>60. && ptPhot2>25. && category==0";
+     mycutb = "ptPhot1>60. && ptPhot2>25. && category==0";
+   } else if( category==1 ) { //ttH hadronic
+     mycuts = "ptPhot1>60. && ptPhot2>25. && category==1";
+     mycutb = "ptPhot1>60. && ptPhot2>25. && category==1";
+   } else if( category==2 ) { //VH 0 tag
+     mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==2";
+     mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==2";
+   } else if( category==3 ) { //VH 1 tag
+     mycuts = "mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==3";
+     mycutb = "mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==3";
+   } else if( category==4 ) { //VH 2 tag
+     mycuts = "mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==4";
+     mycutb = "mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==4";
    }
    //TCut mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
    //TCut mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycutb = "abs(var1)<0.5";
@@ -358,8 +375,8 @@ void TMVAClassification( std::string optName, int nbtags, TString myMethodList =
       bookConditions += ":VarProp[1]=FMin"; //abs costhetastar
       bookConditions += ":VarProp[2]=FMax"; //ptJet2
 
-      bookConditions += ":EffSel:SampleSize=200000000"; // this for the actual opt
-      //bookConditions += ":EffSel:SampleSize=500000"; // this for the ranking
+      //bookConditions += ":EffSel:SampleSize=200000000"; // this for the actual opt
+      bookConditions += ":EffSel:SampleSize=500000"; // this for the ranking
 
 
 
@@ -573,7 +590,7 @@ void TMVAClassification( std::string optName, int nbtags, TString myMethodList =
        std::string mkdir_command = "mkdir -p " + optcutsdir;
        system(mkdir_command.c_str());
        char cutsFileName[500];
-       sprintf( cutsFileName, "%s/cuts_%dbtag_Seff%d.txt", optcutsdir.c_str(), nbtags, 10*iEff );
+       sprintf( cutsFileName, "%s/cuts_cat%d_Seff%d.txt", optcutsdir.c_str(), category, 10*iEff );
 
        ofstream ofs(cutsFileName);
 
@@ -588,8 +605,13 @@ void TMVAClassification( std::string optName, int nbtags, TString myMethodList =
 
        // preselection cuts (if not optimized):
        ofs << "ptPhot1 60. 100000." << std::endl;
+       ofs << "ptPhot2 25. 100000." << std::endl;
+       if( category==2 )
+         ofs << "mjj 60. 120." << std::endl;
+       if( category==3 || category==4 )
+         ofs << "mjj 70. 120." << std::endl;
        char btagcutline[300];
-       sprintf( btagcutline, "btagCategory %d %d", nbtags, nbtags+1);
+       sprintf( btagcutline, "category %d %d", category, category+1);
        std::string btagcutline_str(btagcutline);
        ofs << btagcutline_str << std::endl;
 
