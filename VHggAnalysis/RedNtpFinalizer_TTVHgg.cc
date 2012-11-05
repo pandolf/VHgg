@@ -422,7 +422,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_weights->Branch( "etaPhot2", &etaPhot2_t, "etaPhot2_t/F" );
    tree_weights->Branch( "mgg", &mgg_t, "mgg_t/F" );
    tree_weights->Branch( "ptgg", &ptgg_t, "ptgg_t/F" );
-
+   tree_weights->Branch( "pt_scaled_2D_weight", &pt_scaled_2D_weight_t, "pt_scaled_2D_weight_t/F" );
+   tree_weights->Branch( "eta_scaled_2D_weight", &eta_scaled_2D_weight_t, "eta_scaled_2D_weight_t/F" );
 
    //   std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
    std::string qglFileName="/afs/cern.ch/user/m/micheli/public/ttH/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
@@ -442,7 +443,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
    TH1F* h1_ptweight_phot1=(TH1F*)ptweightPhot1File->Get("h_phot1_straight");
    TH1F* h1_ptweight_phot2=(TH1F*)ptweightPhot2File->Get("h_phot2_straight");
-   TH1F* h2_ptweight=(TH1F*)ptweight2DFile->Get("h2D_pt_straight");
+   TH2F* h2_ptweight=(TH2F*)ptweight2DFile->Get("h2D_pt_straight");
 
    //eta reweight for photons
    std::string etaweightPhot1FileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_etaphot1_01binning.root";
@@ -457,7 +458,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
    TH1F* h1_etaweight_phot1=(TH1F*)etaweightPhot1File->Get("h_phot1_eta_straight");
    TH1F* h1_etaweight_phot2=(TH1F*)etaweightPhot2File->Get("h_phot2_eta_straight");
-   TH1F* h2_etaweight=(TH1F*)etaweight2DFile->Get("h2D_eta_straight");
+   TH2F* h2_etaweight=(TH2F*)etaweight2DFile->Get("h2D_eta_straight");
 
 
    QGLikelihoodCalculator *qglikeli = new QGLikelihoodCalculator( qglFileName );
@@ -628,6 +629,13 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	 ptgg_t = diphot.Pt();
 	 double ptweight2D=h2_ptweight->GetBinContent(h2_ptweight->GetXaxis()->FindBin(ptphot2),h2_ptweight->GetYaxis()->FindBin(ptphot1));
 	 double etaweight2D=h2_etaweight->GetBinContent(h2_etaweight->GetXaxis()->FindBin(etaphot2),h2_etaweight->GetYaxis()->FindBin(etaphot1));
+	 if(!invert_photonCuts_){
+	   pt_scaled_2D_weight_t=eventWeight;
+	   eta_scaled_2D_weight_t=eventWeight;
+	 }else{
+	   pt_scaled_2D_weight_t=eventWeight*ptweight2D;
+	   eta_scaled_2D_weight_t=eventWeight*ptweight2D;
+	 }
 	 tree_weights->Fill();
 	 continue;
        }
@@ -1160,10 +1168,10 @@ void RedNtpFinalizer_TTVHgg::finalize()
        double etaweight2D=h2_etaweight->GetBinContent(h2_etaweight->GetXaxis()->FindBin(etaphot2),h2_etaweight->GetYaxis()->FindBin(etaphot1));
 
 
-       if(selectionType_.find("inverted")!=string::npos){//if not inverted do not apply corrections. useful for plots
-
+       //       if(selectionType_.find("inverted")!=string::npos){//if not inverted do not apply corrections. useful for plots
+       if(invert_photonCuts_){
          h1_mgg_scaled->Fill( massggnewvtx, eventWeight*ptweightPhot1*ptweightPhot2 );
-        
+	 
          pt_scaled_weight_t=eventWeight*ptweightPhot1*ptweightPhot2;
          ptPhot1_scaled_weight_t=eventWeight*ptweightPhot1;
          ptPhot2_scaled_weight_t=eventWeight*ptweightPhot2;
