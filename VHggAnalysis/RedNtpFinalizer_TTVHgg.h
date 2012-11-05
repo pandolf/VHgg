@@ -413,6 +413,10 @@ public :
    Float_t         photmuloose2;
    Float_t         puptmuloose1;
    Float_t         puptmuloose2;
+   Int_t hasPassedSinglePhot;
+   Int_t hasPassedDoublePhot;
+
+
 
    // List of branches
    TBranch        *b_run;   //!
@@ -805,6 +809,10 @@ public :
    TBranch        *b_photmuloose2;   //!
    TBranch        *b_puptmuloose1;   //!
    TBranch        *b_puptmuloose2;   //!
+   TBranch *b_hasPassedSinglePhot;
+   TBranch *b_hasPassedDoublePhot;
+
+
 
    //RedNtpFinalizer_TTVHgg(TTree *tree=0);
    RedNtpFinalizer_TTVHgg( const std::string& dataset, const std::string& selectionType, const std::string& bTaggerType="JP" );
