@@ -995,7 +995,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
 
 
-       if( invert_photonCuts_ ) {
+       if( !invert_photonCuts_ ) {
 
 
        // SM Higgs CATEGORIES:
