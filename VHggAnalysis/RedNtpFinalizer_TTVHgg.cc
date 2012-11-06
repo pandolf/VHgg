@@ -320,10 +320,12 @@ void RedNtpFinalizer_TTVHgg::finalize()
    float mgg_t;
    float pt_scaled_weight_t;
    float pt_scaled_2D_weight_t;
+   float pt_scaled_2D_weight_data_t;
    float ptPhot1_scaled_weight_t;
    float ptPhot2_scaled_weight_t;
    float eta_scaled_weight_t;
    float eta_scaled_2D_weight_t;
+   float eta_scaled_2D_weight_data_t;
    float etaPhot1_scaled_weight_t;
    float etaPhot2_scaled_weight_t;
    float ptgg_t;
@@ -352,6 +354,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
    int hasPassedSinglePhot_t;
    int hasPassedDoublePhot_t;
 
+   float m3_t;
+
    float eventWeight = 1.;
 
    TTree* tree_passedEvents = new TTree();
@@ -374,10 +378,12 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "ptPhot2_scaled_weight", &ptPhot2_scaled_weight_t, "ptPhot2_scaled_weight_t/F" );
    tree_passedEvents->Branch( "pt_scaled_weight", &pt_scaled_weight_t, "pt_scaled_weight_t/F" );
    tree_passedEvents->Branch( "pt_scaled_2D_weight", &pt_scaled_2D_weight_t, "pt_scaled_2D_weight_t/F" );
+   tree_passedEvents->Branch( "pt_scaled_2D_weight_data", &pt_scaled_2D_weight_data_t, "pt_scaled_2D_weight_data_t/F" );
    tree_passedEvents->Branch( "etaPhot1_scaled_weight", &etaPhot1_scaled_weight_t, "etaPhot1_scaled_weight_t/F" );
    tree_passedEvents->Branch( "etaPhot2_scaled_weight", &etaPhot2_scaled_weight_t, "etaPhot2_scaled_weight_t/F" );
    tree_passedEvents->Branch( "eta_scaled_weight", &eta_scaled_weight_t, "eta_scaled_weight_t/F" );
    tree_passedEvents->Branch( "eta_scaled_2D_weight", &eta_scaled_2D_weight_t, "eta_scaled_2D_weight_t/F" );
+   tree_passedEvents->Branch( "eta_scaled_2D_weight_data", &eta_scaled_2D_weight_data_t, "eta_scaled_2D_weight_data_t/F" );
    tree_passedEvents->Branch( "ptgg", &ptgg_t, "ptgg_t/F" );
    tree_passedEvents->Branch( "ptJet", ptJet_t, "ptJet_t[njets_t]/F" );
    tree_passedEvents->Branch( "etaJet", etaJet_t, "etaJet_t[njets_t]/F" );
@@ -412,6 +418,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch("epfMet", &epfMet, "epfMet");
    tree_passedEvents->Branch( "hasPassedSinglePhot", &hasPassedSinglePhot_t, "hasPassedSinglePhot_t/I" );
    tree_passedEvents->Branch( "hasPassedDoublePhot", &hasPassedDoublePhot_t, "hasPassedDoublePhot_t/I" );
+   tree_passedEvents->Branch( "m3", &m3_t, "m3_t/F" );
 
    TTree* tree_weights=new TTree();
    tree_weights->SetName("tree_weights");
@@ -423,9 +430,11 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_weights->Branch( "mgg", &mgg_t, "mgg_t/F" );
    tree_weights->Branch( "ptgg", &ptgg_t, "ptgg_t/F" );
    tree_weights->Branch( "pt_scaled_2D_weight", &pt_scaled_2D_weight_t, "pt_scaled_2D_weight_t/F" );
+   tree_weights->Branch( "pt_scaled_2D_weight_data", &pt_scaled_2D_weight_data_t, "pt_scaled_2D_weight_data_t/F" );
    tree_weights->Branch( "eta_scaled_2D_weight", &eta_scaled_2D_weight_t, "eta_scaled_2D_weight_t/F" );
-
-   //   std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
+   tree_weights->Branch( "eta_scaled_2D_weight_data", &eta_scaled_2D_weight_data_t, "eta_scaled_2D_weight_data_t/F" );
+ 
+//   std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
    std::string qglFileName="/afs/cern.ch/user/m/micheli/public/ttH/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
 
    //pt reweight for photons
@@ -434,16 +443,20 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
    //2D weights 
    std::string ptweight2DFileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_pt_preselectionCS_onlyPhotonCuts_4GeVbinning.root";
+   //2D data
+   std::string ptweight2DFileName_data="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_pt_data_4GeVbinning.root";
 
 
    TFile* ptweightPhot1File=TFile::Open(ptweightPhot1FileName.c_str());
    TFile* ptweightPhot2File=TFile::Open(ptweightPhot2FileName.c_str());
    TFile* ptweight2DFile=TFile::Open(ptweight2DFileName.c_str());
+   TFile* ptweight2DFile_data=TFile::Open(ptweight2DFileName_data.c_str());
 
 
    TH1F* h1_ptweight_phot1=(TH1F*)ptweightPhot1File->Get("h_phot1_straight");
    TH1F* h1_ptweight_phot2=(TH1F*)ptweightPhot2File->Get("h_phot2_straight");
    TH2F* h2_ptweight=(TH2F*)ptweight2DFile->Get("h2D_pt_straight");
+   TH2F* h2_ptweight_data=(TH2F*)ptweight2DFile_data->Get("h2D_pt_data");
 
    //eta reweight for photons
    std::string etaweightPhot1FileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_etaphot1_01binning.root";
@@ -451,15 +464,19 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
    //2D weights
    std::string etaweight2DFileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_eta_preselectionCS_onlyPhotonCuts_01binning.root";
+   //2D data
+   std::string etaweight2DFileName_data="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_eta_data_01binning.root";
+
 
    TFile* etaweightPhot1File=TFile::Open(etaweightPhot1FileName.c_str());
    TFile* etaweightPhot2File=TFile::Open(etaweightPhot2FileName.c_str());
    TFile* etaweight2DFile=TFile::Open(etaweight2DFileName.c_str());
+   TFile* etaweight2DFile_data=TFile::Open(etaweight2DFileName_data.c_str());
 
    TH1F* h1_etaweight_phot1=(TH1F*)etaweightPhot1File->Get("h_phot1_eta_straight");
    TH1F* h1_etaweight_phot2=(TH1F*)etaweightPhot2File->Get("h_phot2_eta_straight");
    TH2F* h2_etaweight=(TH2F*)etaweight2DFile->Get("h2D_eta_straight");
-
+   TH2F* h2_etaweight_data=(TH2F*)etaweight2DFile_data->Get("h2D_eta_data");
 
    QGLikelihoodCalculator *qglikeli = new QGLikelihoodCalculator( qglFileName );
 
@@ -628,13 +645,21 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	 mgg_t = diphot.M();
 	 ptgg_t = diphot.Pt();
 	 double ptweight2D=h2_ptweight->GetBinContent(h2_ptweight->GetXaxis()->FindBin(ptphot2),h2_ptweight->GetYaxis()->FindBin(ptphot1));
+	 double ptweight2D_data=h2_ptweight_data->GetBinContent(h2_ptweight_data->GetXaxis()->FindBin(ptphot2),h2_ptweight_data->GetYaxis()->FindBin(ptphot1));
 	 double etaweight2D=h2_etaweight->GetBinContent(h2_etaweight->GetXaxis()->FindBin(etaphot2),h2_etaweight->GetYaxis()->FindBin(etaphot1));
+	 double etaweight2D_data=h2_etaweight_data->GetBinContent(h2_etaweight_data->GetXaxis()->FindBin(etaphot2),h2_etaweight_data->GetYaxis()->FindBin(etaphot1));
 	 if(!invert_photonCuts_){
 	   pt_scaled_2D_weight_t=eventWeight;
 	   eta_scaled_2D_weight_t=eventWeight;
+	   pt_scaled_2D_weight_data_t=eventWeight;
+	   eta_scaled_2D_weight_data_t=eventWeight;
+
 	 }else{
 	   pt_scaled_2D_weight_t=eventWeight*ptweight2D;
-	   eta_scaled_2D_weight_t=eventWeight*ptweight2D;
+	   eta_scaled_2D_weight_t=eventWeight*etaweight2D;
+	   pt_scaled_2D_weight_data_t=eventWeight*ptweight2D_data;
+	   eta_scaled_2D_weight_data_t=eventWeight*etaweight2D_data;
+
 	 }
 	 tree_weights->Fill();
 	 continue;
@@ -711,6 +736,28 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
        } //for jets
 
+
+
+       // define m3:
+       float triJetPtMax=0.;
+       float m3=0.;
+       for( unsigned i=0; i<index_selected.size(); ++i ) {
+	 for( unsigned j=i+1; j<index_selected.size(); ++j ) {
+	   for( unsigned k=j+1; k<index_selected.size(); ++k ) {
+	     TLorentzVector jet1,jet2,jet3;
+	     jet1.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
+	     jet2.SetPtEtaPhiE(ptcorrjet[j],etajet[j],phijet[j],ecorrjet[j]);
+	     jet3.SetPtEtaPhiE(ptcorrjet[k],etajet[k],phijet[k],ecorrjet[k]);
+	     TLorentzVector triJet = jet1 + jet2 + jet3;
+	     if( triJet.Pt() > triJetPtMax ) {
+	       triJetPtMax=triJet.Pt();
+	       m3 = triJet.M();
+	     }
+	   }
+	 }
+       }
+
+       m3_t=m3;
 
 
 
