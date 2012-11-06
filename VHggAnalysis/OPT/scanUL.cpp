@@ -19,20 +19,24 @@
 
 int main( int argc, char* argv[] ) {
 
+
+  if( argc!= 3 ) {
+    std::cout << "USAGE: ./scanUL [optType] [category]" << std::endl;
+    exit(11);
+  }
+
   std::string selectionType = "prova";
-  if( argc>1 ) {
-    std::string selectionType_str(argv[1]);
-    selectionType = selectionType_str;
-  }
+  std::string selectionType_str(argv[1]);
+  selectionType = selectionType_str;
 
-  int nbtags = -1;
-  if( argc>2 ) {
-    std::string nbtags_str(argv[2]);
-    nbtags = atoi(nbtags_str.c_str());
-  }
 
-  if( nbtags!=0 && nbtags!=1 && nbtags!=2 ) {
-    std::cout << "nbtags must be 0, 1, or 2. Exiting." << std::endl;
+  int category = -1;
+  std::string category_str(argv[2]);
+  category = atoi(category_str.c_str());
+
+
+  if( category<0 || category>5 ) {
+    std::cout << "category must be between 0 and 5. Exiting." << std::endl;
     exit(11);
   }
 
@@ -46,13 +50,17 @@ int main( int argc, char* argv[] ) {
     
 
   std::string optcutsdir = "optcuts_" + selectionType;
-  std::string ULFileName = optcutsdir + "/ULscan.txt";
+  char ULFileName_char[500];
+  sprintf( ULFileName_char, "%s/ULscan_%d.txt", optcutsdir.c_str(), category);
+  std::string ULFileName(ULFileName_char);
 
   ofstream ofs_UL(ULFileName.c_str());
   ofs_UL << "Expected for 30 fb-1:" << std::endl;
   ofs_UL << "Seff   \tS     \tB +- s(B)\t" << std::endl;
 
   TGraphErrors* gr_UL = new TGraphErrors(0);
+  TGraphErrors* gr_UL_bgave = new TGraphErrors(0);
+  TGraphErrors* gr_UL_bgMCave = new TGraphErrors(0);
   float UL_max = 0.;
   float UL_min = 999.;
   float effS_UL_min = 0.;
@@ -64,25 +72,34 @@ int main( int argc, char* argv[] ) {
 
   // optimized working point chosen when looking only at VH (and ttH) signal:
   TChain* signalTree = new TChain("tree_passedEvents");
-  signalTree->Add("../VHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_presel_JP.root");
-  signalTree->Add("../VHgg_TTH_HToGG_M-125_8TeV-pythia6_presel_JP.root");
+  if( category>1 ) // VH
+    signalTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_JP.root");
+  else // ttH
+    signalTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_JP.root");
 
 
   TChain* backgroundTree = new TChain("tree_passedEvents");
-  backgroundTree->Add("../VHgg_DiPhoton_8TeV-pythia6_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("../VHgg_GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("../VHgg_VV_8TeV_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("../VHgg_VGG_8TeV_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("../VHgg_TT_8TeV_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("../VHgg_QCD_doubleEMEnriched_TuneZ2star_8TeV-pythia6_presel_JP.root/tree_passedEvents");
+  backgroundTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_DiPhoton_8TeV-pythia6_presel_JP.root/tree_passedEvents");
+  backgroundTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6_presel_JP.root/tree_passedEvents");
+  backgroundTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_VV_8TeV_presel_JP.root/tree_passedEvents");
+  backgroundTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_VGG_8TeV_presel_JP.root/tree_passedEvents");
+  backgroundTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_TT_8TeV_presel_JP.root/tree_passedEvents");
+  backgroundTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_QCD_doubleEMEnriched_TuneZ2star_8TeV-pythia6_presel_JP.root/tree_passedEvents");
 
+
+  TChain* backgroundTree_data = new TChain("tree_passedEvents");
+  backgroundTree_data->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_DATA_Run2012ABC_presel_JP.root");
+  //backgroundTree_data->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_DATA_Run2012ABC_presel_invertedPhotID_JP.root");
 
 
 
   for( unsigned iEff=1; iEff<10; ++iEff ) {
 
+    // use category 5 only for VH 2 and 1 tags
+    int category_forFile = (category==2 || category==3) ? 5 : category;
+
     char infileName[300];
-    sprintf( infileName, "%s/cuts_%dbtag_Seff%d.txt", optcutsdir.c_str(), nbtags, iEff*10);
+    sprintf( infileName, "%s/cuts_cat%d_Seff%d.txt", optcutsdir.c_str(), category_forFile, iEff*10);
     ifstream ifs(infileName);
     std::cout << "-> Opening Seff file: " << infileName << std::endl;
   
@@ -96,6 +113,8 @@ int main( int argc, char* argv[] ) {
       float cutMin, cutmin;
 
       ifs >> varName >> cutMin >> cutmin;
+    
+      if( varName=="category" ) continue;
 
       varNames.push_back( varName );
       cutsMin.push_back( cutMin );
@@ -111,6 +130,7 @@ int main( int argc, char* argv[] ) {
     cutsmin.pop_back();
 
 
+
     std::string selection = "eventWeight*( ";
     for( unsigned ivar=0; ivar<varNames.size(); ++ivar ) {
       if( ivar!=0 ) selection += " && ";
@@ -120,88 +140,172 @@ int main( int argc, char* argv[] ) {
       selection += thisCut_str;
     }
 
+    // category:
+    char categoryCut[300];
+    sprintf( categoryCut, " && category==%d", category );
+    std::string categoryCut_str(categoryCut);
+    selection += categoryCut_str;
+
+    // just to be sure, add mgg cut by hand:
+    selection += " && mgg>100. && mgg<180. ";
+
+    std::string selection_bg(selection);
+    std::string selection_sig(selection);
+
+    // for signal: consider only signal region
+    selection_sig += " && (mgg>120. && mgg<130.) ";
+
+    // for BG: blind signal region (will then extrapolate from sidebands)
+    selection_bg += " && (mgg<120. || mgg>130.) ";
+
 //  char btagCut[200];
-//  if( nbtags==2 )
-//    sprintf( btagCut, "nbjets_loose >= %d", nbtags );
+//  if( category==2 )
+//    sprintf( btagCut, "nbjets_loose >= %d", category );
 //  else
-//    sprintf( btagCut, "nbjets_loose == %d", nbtags );
+//    sprintf( btagCut, "nbjets_loose == %d", category );
 //  std::string btagCut_str(btagCut);
 //  selection += btagCut_str;
+
+    // close parenthesis, you motherfucka
     selection += " )";
+    selection_bg += " )";
+    selection_sig += " )";
 
-std::cout << "selection: " << selection << std::endl;
+std::cout << "selection: " << selection_bg << std::endl;
 
-    TH1F* h1_bg = new TH1F("bg", "", 80, 100., 180.);
+    int nbinsx = 80.;
+    TH1F* h1_bg = new TH1F("bg", "", nbinsx, 100., 180.);
     h1_bg->Sumw2();
-    TH1F* h1_signal = new TH1F("signal", "", 80, 100., 180.);
+    TH1F* h1_bgMC = new TH1F("bgMC", "", nbinsx, 100., 180.);
+    h1_bgMC->Sumw2();
+    TH1F* h1_signal = new TH1F("signal", "", nbinsx, 100., 180.);
     h1_signal->Sumw2();
    
-    signalTree->Project( "signal", "mgg", selection.c_str() );
-    backgroundTree->Project( "bg", "mgg", selection.c_str() );
+    signalTree         ->Project( "signal", "mgg", selection_sig.c_str() );
+    backgroundTree     ->Project( "bgMC", "mgg", selection.c_str() );
+    backgroundTree_data->Project( "bg", "mgg", selection_bg.c_str() );
 
+////TFile* file = TFile::Open("prova.root", "recreate");
+////file->cd();
+////h1_bg->Write();
+////h1_signal->Write();
+////h1_bgMC->Write();
+////file->Close();
+////exit(9);
     double lumi = 30000.;
     
-    int mggbinmin = h1_signal->FindBin(120.);
-    int mggbinmax = h1_signal->FindBin(130.);
+    //int mggbinmin = h1_signal->FindBin(120.);
+    //int mggbinmax = h1_signal->FindBin(130.);
 
-    double signal = h1_signal->Integral(mggbinmin,mggbinmax);
-    double background_error;
-    double background = h1_bg->IntegralAndError( mggbinmin, mggbinmax, background_error );
-   
+    double signal = h1_signal->Integral();
+
+
+    //double background_error;
+    //double background = h1_bg->IntegralAndError( 1, nbinsx, background_error );
+
+    // background from data: scaled from sidebands, assuming flat distribution:
+    double background_ave_error;
+    double background_ave = h1_bg->IntegralAndError( 1, nbinsx, background_ave_error );
+    background_ave *= (10./70.); 
+    background_ave_error *= (10./70.);
+
+    // background from MC: integrate over full range, assume flat, average:
+    double backgroundMC_ave_error;
+    double backgroundMC_ave = h1_bgMC->IntegralAndError( 1, nbinsx, backgroundMC_ave_error );
+    backgroundMC_ave *= (10./80.); 
+    backgroundMC_ave_error *= (10./80.);
+
     signal *= lumi;
-    background *= lumi;
-    background_error *= lumi;
+    //background *= lumi;
+    //background_error *= lumi;
 
+    // dont scale BG from data:
+    //background_ave *= lumi;
+    //background_ave_error *= lumi;
+
+    backgroundMC_ave *= lumi;
+    backgroundMC_ave_error *= lumi;
+
+
+
+//std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$         bg: " << background << " bg_ave: " << background_ave << std::endl;
+std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$         bg_ave: " << background_ave << " bgMC_ave: " << backgroundMC_ave << std::endl;
+if( background_ave==0. && backgroundMC_ave==0. ) continue;
+   
     //float signal_xsec = 2.28E-03*(19.37 + 1.573 + 0.6966 + 0.3943 + 0.1302); 
     // VH cross section only:
-    float signal_xsec = 2.28E-03*(0.6966); 
+    float signal_xsec;
+    if( category>1 ) // VH:
+      signal_xsec = 2.28E-03*(0.6966 + 0.3943); 
+    else // ttH
+      signal_xsec = 2.28E-03*(0.1302);
     float total_signal = signal_xsec*db->get_lumi();
     float effS = signal/total_signal;
     //float UL = StatTools::computeUL( signal+background, background, background_error );
-    float UL = CLA( db->get_lumi(), 0., effS, 0., background, 0. );
-    float ULSM = UL/signal_xsec;
+    //float UL = CLA( db->get_lumi(), 0., effS, 0., background, 0. );
+    //float ULSM = UL/signal_xsec;
+
+    float UL_bgave = CLA( db->get_lumi(), 0., effS, 0., background_ave, 0. );
+    float ULSM_bgave = UL_bgave/signal_xsec;
+
+    float UL_bgMCave = CLA( db->get_lumi(), 0., effS, 0., backgroundMC_ave, 0. );
+    float ULSM_bgMCave = UL_bgMCave/signal_xsec;
 
 
-std::cout << "signal: " << signal << " bg: " << background << " +- " << background_error << std::endl;
+//std::cout << "signal: " << signal << " bg: " << background << " +- " << background_error << std::endl;
+std::cout << "signal: " << signal << " bg: " << background_ave << " +- " << background_ave_error << std::endl;
 
 
     if( effS > effmax )
       effmax = effS;
 
-    gr_UL->SetPoint( iEff-1, 100.*effS, ULSM );
+    //gr_UL->SetPoint( iEff-1, 100.*effS, ULSM );
+    gr_UL_bgave->SetPoint( iEff-1, 100.*effS, ULSM_bgave );
+    gr_UL_bgMCave->SetPoint( iEff-1, 100.*effS, ULSM_bgMCave );
 
-    if( ULSM > UL_max ) {
-      UL_max = ULSM;
+    if( ULSM_bgave > UL_max ) {
+      UL_max = ULSM_bgave;
     }
 
-    if( ULSM < UL_min ) {
-      UL_min = ULSM;
+    if( ULSM_bgave < UL_min ) {
+      UL_min = ULSM_bgave;
       effS_UL_min = effS;
     }
 
     float ymax = h1_signal->GetMaximum() + h1_bg->GetMaximum();
     ymax*=1.5;
 
-//  THStack* stack = new THStack();
-//  stack->Add( h1_bg );
-//  stack->Add( h1_signal );
 
-//  TH2D* h2_axes = new TH2D("axes", "", 3, -0.5, 2.5, 10, 0., ymin);
-//  h2_axes->GetXaxis()->SetLabelSize(0.085);
-//  h2_axes->GetXaxis()->SetBinLabel(1, "#mu#mu");
-//  h2_axes->GetXaxis()->SetBinLabel(2, "e#mu");
-//  h2_axes->GetXaxis()->SetBinLabel(3, "ee");
-//  h2_axes->SetYTitle("Events");
+    h1_bgMC->Scale(30000.);
+    h1_signal->Scale(30000.);
+
+    h1_bgMC->SetFillColor(38);
+    h1_signal->SetFillColor(46);
+    h1_bg->SetMarkerStyle(20);
+    h1_bg->SetMarkerSize(1.5);
+
+    h1_bgMC->Rebin(5.);
+    h1_signal->Rebin(5.);
+    h1_bg->Rebin(5.);
+
+    THStack* stack = new THStack();
+    stack->Add( h1_bgMC );
+    stack->Add( h1_signal );
+
+    TH2D* h2_axes = new TH2D("axes", "", 10, 100., 180., 10, 0., h1_bgMC->GetMaximum()*1.5);
+    h2_axes->SetXTitle("DiPhoton Invariant Mass [GeV]");
+    h2_axes->SetYTitle("Events");
 
 
-//  TLegend* legend = new TLegend(0.6, 0.75, 0.88, 0.88);
-//  legend->SetFillColor(0);
-//  legend->SetTextSize(0.035);
-//  legend->AddEntry( h1_signal, "Signal", "F");
-//  legend->AddEntry( h1_bg, "Background", "F");
+    TLegend* legend = new TLegend(0.65, 0.65, 0.9, 0.88);
+    legend->SetFillColor(0);
+    legend->SetTextSize(0.035);
+    legend->AddEntry( h1_signal, "Signal", "F");
+    legend->AddEntry( h1_bgMC, "BG (MC)", "F");
+    legend->AddEntry( h1_bg, "BG (Data)", "P");
 
-//  char canvasName[250];
-//  sprintf( canvasName, "%s/yieldPlot_Seff%d.eps", optcutsdir.c_str(), iEff*10);
+    char canvasName[250];
+    sprintf( canvasName, "%s/yieldPlot_Seff%d.eps", optcutsdir.c_str(), iEff*10);
 
     //TPaveText* label = new TPaveText( 0.15, 0.65, 0.45, 0.85, "brNDC");
     //label->SetFillColor(0);
@@ -230,31 +334,32 @@ std::cout << "signal: " << signal << " bg: " << background << " +- " << backgrou
 //  label_UL->AddText(obs_text);
 //  label_UL->AddText(UL_text);
 
-//  TCanvas* c1 = new TCanvas("c1", "c1", 600., 600.);
-//  c1->cd();
-//  h2_axes->Draw();
-//  //h1_signal->Draw("same");
-//  stack->Draw("histo same");
-//  h1_bg->Draw("0 E2 same");
-//  legend->Draw("same");
-//  //label->Draw("same");
-//  label_UL->Draw("same");
-//  label_sqrt->Draw("same");
-//  gPad->RedrawAxis();
-//  c1->SaveAs(canvasName);
+    TCanvas* c1 = new TCanvas("c1", "c1", 600., 600.);
+    c1->cd();
+    h2_axes->Draw();
+    //h1_signal->Draw("same");
+    stack->Draw("histo same");
+    h1_bg->Draw("E same");
+    legend->Draw("same");
+    //label->Draw("same");
+    //label_UL->Draw("same");
+    //label_sqrt->Draw("same");
+    gPad->RedrawAxis();
+    c1->SaveAs(canvasName);
 
-//  delete c1;
-//  delete legend;
-//  delete h2_axes;
+    delete c1;
+    delete legend;
+    delete h2_axes;
     //delete stack;
     
 
-    ofs_UL << effS << "\t" << signal << "\t" << background << " +- " << background_error << "\t" << UL << std::endl;
+    ofs_UL << effS << "\t" << signal << "\t" << background_ave << " +- " << background_ave_error << "\t" << UL_bgave << std::endl;
 
     delete h1_signal;
     delete h1_bg;
+    delete h1_bgMC;
 
-std::cout << "### " << iEff << "   UL: " << UL << "  UL/SM: " << UL/signal_xsec << std::endl;
+std::cout << "### " << iEff << "   UL: " << UL_bgave << "  UL/SM: " << UL_bgave/signal_xsec << std::endl;
   } // for iEff
 
   std::cout << "> > >   BEST UL: " << UL_min << std::endl;
@@ -264,9 +369,17 @@ std::cout << "### " << iEff << "   UL: " << UL << "  UL/SM: " << UL/signal_xsec 
 
   db->resetStyle();
 
-  gr_UL->SetMarkerSize(2.);
-  gr_UL->SetMarkerStyle(21);
-  gr_UL->SetMarkerColor(kRed+3);
+//gr_UL->SetMarkerSize(2.);
+//gr_UL->SetMarkerStyle(21);
+//gr_UL->SetMarkerColor(kRed+3);
+
+  gr_UL_bgave->SetMarkerSize(2.);
+  gr_UL_bgave->SetMarkerStyle(20);
+  gr_UL_bgave->SetMarkerColor(kRed+2);
+
+  gr_UL_bgMCave->SetMarkerSize(2.);
+  gr_UL_bgMCave->SetMarkerStyle(29);
+  gr_UL_bgMCave->SetMarkerColor(kOrange+1);
 
 
   TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1.3*effmax*100., 10, 0., 1.6*UL_max ); 
@@ -280,11 +393,13 @@ std::cout << "### " << iEff << "   UL: " << UL << "  UL/SM: " << UL/signal_xsec 
 
   
   h2_axes_gr->Draw();
-  gr_UL->Draw("P same");
+  //gr_UL->Draw("P same");
+  gr_UL_bgave->Draw("P same");
+  gr_UL_bgMCave->Draw("P same");
   label_sqrt->Draw("same");
 
   char UL_vs_Seff_name[250];
-  sprintf(UL_vs_Seff_name, "%s/UL_vs_Seff_%dbtag.eps", optcutsdir.c_str(), nbtags );
+  sprintf(UL_vs_Seff_name, "%s/UL_vs_Seff_cat%d.eps", optcutsdir.c_str(), category );
   c_gr->SaveAs(UL_vs_Seff_name);
 
 }
