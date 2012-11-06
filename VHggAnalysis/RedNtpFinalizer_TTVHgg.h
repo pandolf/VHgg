@@ -840,18 +840,18 @@ public :
    float ptphot1cut_;
    float ptphot2cut_;
 
-   bool ebeb_0btag_thresh_;
+   bool ebeb_VH0btag_thresh_;
 
-   float ptgg_0btag_thresh_;
-   float ptgg_1btag_thresh_;
-   float ptgg_2btag_thresh_;
+   float ptgg_VH0btag_thresh_;
+   float ptgg_VH1btag_thresh_;
+   float ptgg_VH2btag_thresh_;
 
    float ptjetthresh_count_;
    float etajetthresh_count_;
 
-   float ptjet_0btag_thresh_;
-   float ptjet_1btag_thresh_;
-   float ptjet_2btag_thresh_;
+   float ptjet_VH0btag_thresh_;
+   float ptjet_VH1btag_thresh_;
+   float ptjet_VH2btag_thresh_;
 
    int njets_thresh_;
    int njets_upper_thresh_;
@@ -862,19 +862,21 @@ public :
 
    float zeppenfeld_thresh_;
 
-   float costhetastar_0btag_thresh_;
-   float costhetastar_1btag_thresh_;
-   float costhetastar_2btag_thresh_;
+   float costhetastar_VH0btag_thresh_;
+   float costhetastar_VH1btag_thresh_;
+   float costhetastar_VH2btag_thresh_;
 
    float mjj_min_thresh_;
    float mjj_max_thresh_;
 
-   float mjj_min_0btag_thresh_;
-   float mjj_max_0btag_thresh_;
+   float mjj_min_VH0btag_thresh_;
+   float mjj_max_VH0btag_thresh_;
 
    float   Ht_thresh_;
    bool  invert_photonCuts_;
    bool use_PUID_;
+
+   bool BLIND_;
 
 };
 
