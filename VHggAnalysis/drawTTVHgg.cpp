@@ -9,6 +9,8 @@
 
 bool separate_signals = true;
 bool use_all_bkg=true;
+bool draw_rw;//true if selection is onlyPhoton
+
 
 void printYields( DrawBase* db, const std::string& suffix, bool doUL=false );
 
@@ -31,7 +33,7 @@ int main(int argc, char* argv[]) {
     bTaggerType = bTaggerType_str;
   }
 
-
+  bool draw_rw= (selType=="onlyPhotonCuts");
 
 
   DrawBase* db_nostack = new DrawBase("TTVHgg_nostack");
@@ -39,6 +41,11 @@ int main(int argc, char* argv[]) {
   DrawBase* db_stack_UL = new DrawBase("TTVHgg_stack_UL");
   //data stack
   DrawBase* db_stack_data = new DrawBase("TTVHgg_stack");
+  //data stack for reweighted
+  DrawBase* db_stack_data_rw = new DrawBase("TTVHgg_stack_rw");
+
+
+
   //stack for cs
   DrawBase* db_stack_cs = new DrawBase("TTVHgg_stack_cs");
 
@@ -58,6 +65,9 @@ int main(int argc, char* argv[]) {
   db_stack_data->set_lumiNormalization(9300.);
   db_stack_data->set_noStack(false);
 
+  db_stack_data_rw->set_lumiOnRightSide();
+  db_stack_data_rw->set_lumiNormalization(9300.);
+  db_stack_data_rw->set_noStack(false);
 
 
   db_stack_cs->set_lumiOnRightSide();	      
@@ -76,6 +86,7 @@ int main(int argc, char* argv[]) {
 
   std::string outputdir_str_data = "TTVHgg_plots/"+redntpProdVersion+"/TTVHggPlots_DATA_" + selType + "_" + bTaggerType;
   db_stack_data->set_outputdir(outputdir_str_data);
+  db_stack_data_rw->set_outputdir(outputdir_str_data);
 
   std::string outputdir_str_cs = "TTVHgg_plots/CSvsMC/"+redntpProdVersion+"/TTVHggPlots_MConly_" + selType + "_" + bTaggerType;
   db_stack_cs->set_outputdir(outputdir_str_cs);
@@ -127,20 +138,29 @@ int main(int argc, char* argv[]) {
     // inclusive signal file for stack plot
     std::string HToGGFileName = inputDir +  "TTVHgg_HToGG_M-125_8TeV-pythia6";
     HToGGFileName += "_" + selType;
+    std::string HToGGFileName_inverted=HToGGFileName+"_inverted_"+bTaggerType+".root";
     HToGGFileName += "_" + bTaggerType;
     std::string HToGGFileName_scaled=HToGGFileName+"_scaled.root";
+
     HToGGFileName += ".root";
     TFile* HToGGFile = TFile::Open(HToGGFileName.c_str());
     TFile* HToGGFile_scaled = TFile::Open(HToGGFileName_scaled.c_str());
+
     db_stack_UL->add_mcFile( HToGGFile, "HToGG", "H (125)", signalFillColor, 0);
     db_stack_cs->add_mcFile( HToGGFile_scaled, "HToGG", "H (125)", signalFillColor, 0);
     db_stack_data->add_mcFile( HToGGFile_scaled, "HToGG", "H (125)", signalFillColor, 0);
-
+    if(draw_rw){
+      TFile* HToGGFile_inverted = TFile::Open(HToGGFileName_inverted.c_str());
+      db_stack_data_rw->add_mcFile( HToGGFile_inverted, "HToGG", "H (125)", signalFillColor, 0);
+    }
 
   std::string DiPhotonFileName = inputDir +  "TTVHgg_DiPhoton_8TeV-pythia6";
   DiPhotonFileName += "_" + selType;
+  std::string DiPhotonFileName_inverted=DiPhotonFileName+"_inverted_"+bTaggerType+".root";
   DiPhotonFileName += "_" + bTaggerType;
+
   std::string DiPhotonFileName_scaled=DiPhotonFileName+"_scaled.root";
+
   DiPhotonFileName += ".root";
   TFile* DiPhotonFile = TFile::Open(DiPhotonFileName.c_str());
   TFile* DiPhotonFile_scaled = TFile::Open(DiPhotonFileName_scaled.c_str());
@@ -148,12 +168,18 @@ int main(int argc, char* argv[]) {
   db_stack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
   db_stack_UL->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
   db_stack_data->add_mcFile( DiPhotonFile_scaled, "DiPhoton", "Diphoton", 29);
+  if(draw_rw){
+  TFile* DiPhotonFile_inverted = TFile::Open(DiPhotonFileName_inverted.c_str());
+  db_stack_data_rw->add_mcFile( DiPhotonFile_inverted, "DiPhoton", "Diphoton", 29);
+  }
   db_stack_cs->add_mcFile( DiPhotonFile_scaled, "DiPhoton", "Diphoton", 29);
 
   std::string GammaJetFileName = inputDir +  "TTVHgg_GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6";
   GammaJetFileName += "_" + selType;
+  std::string GammaJetFileName_inverted=GammaJetFileName+"_inverted_"+bTaggerType+".root";
   GammaJetFileName += "_" + bTaggerType;
   std::string GammaJetFileName_scaled=GammaJetFileName+"_scaled.root";
+
   GammaJetFileName += ".root";
   TFile* GammaJetFile = TFile::Open(GammaJetFileName.c_str());
   TFile* GammaJetFile_scaled = TFile::Open(GammaJetFileName_scaled.c_str());
@@ -161,12 +187,18 @@ int main(int argc, char* argv[]) {
   db_stack->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
   db_stack_UL->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
   db_stack_data->add_mcFile( GammaJetFile_scaled, "GammaJet", "#gamma + Jet", 38);
+  if(draw_rw){
+  TFile* GammaJetFile_inverted = TFile::Open(GammaJetFileName_inverted.c_str());
+  db_stack_data_rw->add_mcFile( GammaJetFile_inverted, "GammaJet", "#gamma + Jet", 38);
+  }
   db_stack_cs->add_mcFile( GammaJetFile_scaled, "GammaJet", "#gamma + Jet", 38);
 
   std::string DiBosonFileName = inputDir +  "TTVHgg_VV_8TeV";
   DiBosonFileName += "_" + selType;
+  std::string DiBosonFileName_inverted=DiBosonFileName+"_inverted_"+bTaggerType+".root";
   DiBosonFileName += "_" + bTaggerType;
   std::string DiBosonFileName_scaled=DiBosonFileName+"_scaled.root";
+
   TFile* DiBosonFile_scaled = TFile::Open(DiBosonFileName_scaled.c_str());
   DiBosonFileName += ".root";
   TFile* DiBosonFile = TFile::Open(DiBosonFileName.c_str());
@@ -174,17 +206,23 @@ int main(int argc, char* argv[]) {
 
   std::string TriBosonFileName = inputDir +  "TTVHgg_VGG_8TeV";
   TriBosonFileName += "_" + selType;
+  std::string TriBosonFileName_inverted=TriBosonFileName+"_inverted_"+bTaggerType+".root";
+
   TriBosonFileName += "_" + bTaggerType;
   std::string TriBosonFileName_scaled=TriBosonFileName+"_scaled.root";
+
   TFile* TriBosonFile_scaled = TFile::Open(TriBosonFileName_scaled.c_str());
   TriBosonFileName += ".root";
   TFile* TriBosonFile = TFile::Open(TriBosonFileName.c_str());
+  TFile* TriBosonFile_inverted = TFile::Open(TriBosonFileName_inverted.c_str());
 
 
   std::string TTFileName = inputDir +  "TTVHgg_TT_8TeV";
   TTFileName += "_" + selType;
+  std::string TTFileName_inverted=TTFileName+"_inverted_"+bTaggerType+".root";
   TTFileName += "_" + bTaggerType;
   std::string TTFileName_scaled=TTFileName+"_scaled.root";
+
   TFile* TTFile_scaled = TFile::Open(TTFileName_scaled.c_str());
   TTFileName += ".root";
   TFile* TTFile = TFile::Open(TTFileName.c_str());
@@ -192,9 +230,13 @@ int main(int argc, char* argv[]) {
 
   std::string QCDFileName = inputDir +  "TTVHgg_QCD_doubleEMEnriched_TuneZ2star_8TeV-pythia6";
   QCDFileName += "_" + selType;
+  std::string QCDFileName_inverted=QCDFileName+"_inverted_"+bTaggerType+".root";
   QCDFileName += "_" + bTaggerType;
   std::string QCDFileName_scaled=QCDFileName+"_scaled.root";
   TFile* QCDFile_scaled = TFile::Open(QCDFileName_scaled.c_str());
+
+
+
   QCDFileName += ".root";
   TFile* QCDFile = TFile::Open(QCDFileName.c_str());
 
@@ -212,6 +254,14 @@ int main(int argc, char* argv[]) {
   db_stack_data->add_mcFile( QCDFile_scaled, "QCD", "QCD", 41);
   db_stack_data->add_mcFile( TTFile_scaled, "TT", "Top", 44);
 
+  if(draw_rw){
+  TFile* DiBosonFile_inverted = TFile::Open(DiBosonFileName_inverted.c_str());
+  TFile* QCDFile_inverted = TFile::Open(QCDFileName_inverted.c_str());
+  TFile* TTFile_inverted = TFile::Open(TTFileName_inverted.c_str());
+  db_stack_data_rw->add_mcFile( DiBosonFile_inverted, "DiBoson", "Diboson", 39);
+  db_stack_data_rw->add_mcFile( QCDFile_inverted, "QCD", "QCD", 41);
+  db_stack_data_rw->add_mcFile( TTFile_inverted, "TT", "Top", 44);
+  }
 
   db_stack_cs->add_mcFile( DiBosonFile_scaled, "DiBoson", "Diboson", 39);
   db_stack_cs->add_mcFile( QCDFile_scaled, "QCD", "QCD", 41);
@@ -229,11 +279,13 @@ int main(int argc, char* argv[]) {
   std::string dataFileName =inputDir +  "TTVHgg_DATA_Run2012ABC";
   dataFileName += "_" + selType;
   dataFileName += "_" + bTaggerType;
-  dataFileName += "_scaled.root";
-
+  std::string  dataFileName_scaled =dataFileName + "_scaled.root";
+  dataFileName += ".root";
   TFile* dataFile = TFile::Open(dataFileName.c_str());
-  db_stack_data->add_dataFile( dataFile, "Data","Data");
+  TFile* dataFile_scaled = TFile::Open(dataFileName_scaled.c_str());
 
+  db_stack_data->add_dataFile( dataFile_scaled, "Data","Data");
+  db_stack_data_rw->add_dataFile( dataFile, "Data","Data");
 
 
 
@@ -347,8 +399,8 @@ int main(int argc, char* argv[]) {
   db_stack->drawHisto("mgg_presel", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "presel");
 
-    bool doUL = (selType != "presel" );
-  //  bool doUL=false;
+  //    bool doUL = (selType != "presel" );
+    bool doUL=false;
 
   db_stack->drawHisto("mgg", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "incl", doUL );
@@ -420,8 +472,15 @@ int main(int argc, char* argv[]) {
     db_stack_cs->drawHisto("ptphot1", "Sublead Photon p_{T}", "GeV");
     */
   }
+  db_stack_data->reset();
 
+  if(draw_rw){
+  db_stack_data_rw->drawHisto_fromTree("tree_weights","mgg","eventWeight*(mgg>100 && mgg<180)*(mgg<120 ||mgg>130)",16,100,180,"mgg", "DiPhoton Invariant Mass", "GeV");
 
+  db_stack_data_rw->drawHisto_fromTree("tree_weights","ptPhot1","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*pt_scaled_2D_weight",50,60,260,"ptphot0_scaled_2D_ptBoth","Lead Photon p_{T}", "GeV");	  
+  db_stack_data_rw->drawHisto_fromTree("tree_weights","ptPhot2","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*pt_scaled_2D_weight",25,20,120,"ptphot1_scaled_2D_ptBoth","Sublead Photon p_{T}", "GeV"); 
+  db_stack_data_rw->drawHisto_fromTree("tree_weights","mgg","pt_scaled_2D_weight*(mgg<120 || mgg>130)",16,100,180,"mgg_scaled_2D_ptBoth", "DiPhoton Invariant Mass", "GeV");                       
+  }
 
 
   return 0;
