@@ -822,6 +822,7 @@ public :
    virtual void     Init();
    void setSelectionType( const std::string& selectionType );
    void setPreselectionType( const std::string& preselectionType );
+   void invertPhotID() { invert_photonCuts_ = true; };
    virtual void     finalize();
 
 

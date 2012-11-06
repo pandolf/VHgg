@@ -995,12 +995,14 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
 
 
+       if( invert_photonCuts_ ) {
+
+
        // SM Higgs CATEGORIES:
 
        // *****   ttH leptonic category: 
        // *****   (3 jets, 1 btag medium, 1 lepton)
 
-       if( selectionType_!="cs_selection" ){
        if(  isLeptonic && njets_selected>=3 && njets_selected_btagmedium>0 ) {
 
          category_t = 0;
@@ -1113,18 +1115,17 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
        }
 
-       }else{//cs selection no btag requirement
-
-       // SM Higgs CATEGORIES:
-
-       // *****   ttH leptonic category: 
-       // *****   (3 jets, 1 btag medium, 1 lepton)
+       } else { // cs selection inverted photon ID and no btag
 
 	 if(hasPassedDoublePhot==1)continue;
 
 	 if(hasPassedSinglePhot==1){
 	   if(!(hasPassedSinglePhot==1 && hasPassedDoublePhot==0))continue; 
 	 }
+
+
+       // *****   ttH leptonic category: 
+       // *****   (3 jets, 1 btag medium, 1 lepton)
 	   if(  isLeptonic && njets_selected>=3  ) {
 	     
 	     category_t = 0;
@@ -2003,34 +2004,6 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
    mjj_min_0btag_thresh_ = 60.;
    mjj_max_0btag_thresh_ = 120.;
 
-  } else if( selectionType=="cs_selection" ) {
-
-   njets_ttH_hadronic_thresh_ = 5;
-
-    //opt sel 1 with photon id inverted on 2nd photon
-    invert_photonCuts_=true;
-    ptphot1cut_ = 60.;
-    ptphot2cut_ = 25.;
-    
-    ebeb_0btag_thresh_ = true;
-    
-    ptgg_0btag_thresh_ = 117.;
-    ptgg_1btag_thresh_ = 103.;
-    ptgg_2btag_thresh_ = 93.;
-
-    ptjet_0btag_thresh_ = 36.;
-    ptjet_1btag_thresh_ = 23.;
-    ptjet_2btag_thresh_ = 25.;
-    
-    costhetastar_0btag_thresh_ = 0.74;
-    costhetastar_1btag_thresh_ = 0.52;
-    costhetastar_2btag_thresh_ = 0.58;
-    
-    mjj_min_thresh_ = 60.;
-    mjj_max_thresh_ = 120.;
-    
-    mjj_min_0btag_thresh_ = 60.;
-    mjj_max_0btag_thresh_ = 120.;
 
   }else if( selectionType=="optsel1_noPUID" ) {
 

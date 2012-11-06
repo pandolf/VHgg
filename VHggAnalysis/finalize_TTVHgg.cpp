@@ -13,6 +13,8 @@ struct RedntpDirStruct {
 };
 
 
+bool use_inverted_photID = false;
+
 
 void finalize_oneDataset(const std::string& redntpVersion,  const std::string& dataset, const std::string& selectionType, const std::string& bTaggerType, std::vector<std::string> *datasets );
 void do_haddCommand( const std::string& redntpVersion, const std::string& dataset, std::vector<std::string> *datasets, const std::string& selectionType, const std::string& bTaggerType );
@@ -24,8 +26,8 @@ RedntpDirStruct get_dirs( const std::string& prodVersion );
 
 int main( int argc, char* argv[] ) {
 
-  if( argc!=4 && argc!=5 ) {
-    std::cout << "USAGE: ./finalize_TTVHgg [redntpVersion] [dataset] [selectionType] [bTaggerType=\"JP\"]" <<std::endl;
+  if( argc!=5 && argc!=6 ) {
+    std::cout << "USAGE: ./finalize_TTVHgg [redntpVersion] [dataset] [selectionType] [use_inverted_photID=\"false\"] [bTaggerType=\"JP\"]" <<std::endl;
     return 13;
   }
 
@@ -33,10 +35,18 @@ int main( int argc, char* argv[] ) {
   std::string redntpVersion(argv[1]);
   std::string dataset(argv[2]);
   std::string selectionType(argv[3]);
+  if( argc>4 ) {
+    std::string invPhotID_str(argv[4]);
+    use_inverted_photID = (invPhotID_str=="true");
+  }
+
+  if( use_inverted_photID )  
+    std::cout << std::endl << "-> INVERTING PHOTON ID." << std::endl;
+
 
   std::string bTaggerType="JP";
-  if( argc>4 ) {
-    std::string bTaggerType_str(argv[4]);
+  if( argc>5 ) {
+    std::string bTaggerType_str(argv[5]);
     bTaggerType = bTaggerType_str;
   }
 
@@ -171,6 +181,8 @@ void finalize_oneDataset( const std::string& redntpProdVersion, const std::strin
   rf->set_redNtpDir(redNtpDir);
   rf->set_outputDir("finalizedTrees_"+redntpProdVersion);
   rf->addFile(dataset);
+  if( use_inverted_photID ) 
+    rf->invertPhotID();
   rf->finalize();
   delete rf;
 
