@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.4 2012/11/05 14:34:55 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.5 2012/11/05 15:06:43 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -183,11 +183,12 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
      //factory->AddVariable( "ptJet1"            , "Lead Jet p_{T}", "GeV", 'F');
      factory->AddVariable( "absCosThetaStar"            , "|cos(#theta*)|", "", 'F');
      factory->AddVariable( "ptJet2"            , "Sublead Jet p_{T}", "GeV", 'F');
-   } else {
+   } else { //ttH
      factory->AddVariable( "Alt$(ptJet[2],0)"            , "Third Jet p_{T}", "GeV", 'F');
      factory->AddVariable( "Alt$(ptJet[3],0)"            , "Fourth Jet p_{T}", "GeV", 'F');
      factory->AddVariable( "Alt$(ptJet[4],0)"            , "Fifth Jet p_{T}", "GeV", 'F');
-     factory->AddVariable( "Ht"            , "H_{T}", "GeV", 'F');
+     factory->AddVariable( "m3"            , "M3", "GeV", 'F');
+     //factory->AddVariable( "Ht"            , "H_{T}", "GeV", 'F');
    }
    //factory->AddVariable( "ptjj"            , "DiJet p_{T}", "GeV", 'F');
 
@@ -232,7 +233,7 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
 
       
 
-      std::string treeDir = "/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/presel/";
+      std::string treeDir = "/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/";
 
       
       std::string signalFileName = treeDir;
@@ -242,7 +243,9 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
       TTree *signal     = (TTree*)signalFile->Get("tree_passedEvents");
 
       TChain* background = new TChain("tree_passedEvents");
-      std::string bgFileName = treeDir + "/TTVHgg_DiPhoton_8TeV-pythia6_presel_JP.root";
+      std::string bgFileName = treeDir;
+      if( category==0 ) bgFileName += "/TTVHgg_TT_8TeV_presel_JP.root";
+      else              bgFileName += "/TTVHgg_DiPhoton_8TeV-pythia6_presel_JP.root";
       background->Add(bgFileName.c_str());
 
       //TFile* file_TTJ = TFile::Open("../TTZTrilepton_TTJ_Fall11_highstat_presel_TCHE_ALL.root");
@@ -323,20 +326,23 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
    TCut mycuts;
    TCut mycutb;
    if( category==0 ) { //ttH leptonic
-     mycuts = "ptPhot1>60. && ptPhot2>25. && category==0";
-     mycutb = "ptPhot1>60. && ptPhot2>25. && category==0";
+     mycuts = "mgg>100. && mgg<180. && ptPhot1>60. && ptPhot2>25. && category==0";
+     mycutb = "mgg>100. && mgg<180. && ptPhot1>60. && ptPhot2>25. && category==0";
    } else if( category==1 ) { //ttH hadronic
-     mycuts = "ptPhot1>60. && ptPhot2>25. && category==1";
-     mycutb = "ptPhot1>60. && ptPhot2>25. && category==1";
+     mycuts = "mgg>100. && mgg<180. && ptPhot1>60. && ptPhot2>25. && category==1";
+     mycutb = "mgg>100. && mgg<180. && ptPhot1>60. && ptPhot2>25. && category==1";
    } else if( category==2 ) { //VH 2 tag
-     mycuts = "mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==2";
-     mycutb = "mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==2";
+     mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==2";
+     mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==2";
    } else if( category==3 ) { //VH 1 tag
-     mycuts = "mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==3";
-     mycutb = "mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==3";
+     mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==3";
+     mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==3";
    } else if( category==4 ) { //VH 0 tag
-     mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==4";
-     mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==4";
+     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==4";
+     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==4";
+   } else if( category==5 ) { //VH 0+1+2 tag
+     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category>=2";
+     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category>=2";
    }
    //TCut mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
    //TCut mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycutb = "abs(var1)<0.5";
