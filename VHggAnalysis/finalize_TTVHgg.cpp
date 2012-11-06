@@ -106,7 +106,7 @@ int main( int argc, char* argv[] ) {
     finalize_oneDataset(redntpVersion, "TTbarGG_0Jet_Summer12-PU_S7_START52_V9-v1" , selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "TTGJets_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
     //    finalize_oneDataset(redntpVersion, "TTJets_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1", selectionType, bTaggerType, datasets);
+    //    finalize_oneDataset(redntpVersion, "TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "TT_CT10_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v2", selectionType, bTaggerType, datasets);
 
   //} else if( dataset=="VG_8TeV" ) {
