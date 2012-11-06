@@ -1010,7 +1010,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
        // *****   ttH hadronic category: 
        // *****   (5 jets, 1 btag medium, no lepton)
-       } else if(  !isLeptonic && njets_selected>=5 && njets_selected_btagmedium>0 ) {
+       } else if(  !isLeptonic && njets_selected>=njets_ttH_hadronic_thresh_ && njets_selected_btagmedium>0 ) {
 
          category_t = 1;
          h1_mgg_ttH_hadronic->Fill( massggnewvtx, eventWeight );
@@ -1072,7 +1072,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
          }
 
 
-       // *****   VH 1-btag category: 
+       // *****   VH 0-btag category: 
        // *****   (2 jets, 0 btag loose)
        } else if(  njets_selected>=2 && njets_selected_btagloose==0 ) {
 
@@ -1086,7 +1086,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
          h1_mjj_0btag->Fill( dijet.M(), eventWeight );
 
          if( fabs(zeppen)>zeppenfeld_thresh_ ) continue;
-         if( dijet.M()<mjj_min_thresh_ || dijet.M()>mjj_max_thresh_ ) continue;
+         if( dijet.M()<mjj_min_0btag_thresh_ || dijet.M()>mjj_max_0btag_thresh_ ) continue;
 
          if( jet1.Pt() < ptjet_0btag_thresh_ ) continue;
          if( fabs(cosThetaStar) > costhetastar_0btag_thresh_ ) continue;
@@ -1155,10 +1155,10 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
          category_t = 3;
 
-       // *****   VH 1-btag category: 
+       // *****   VH 0-btag category: 
        // *****   (2 jets, 0 btag loose)
        } else if(  njets_selected>=2 && diphot.Pt() > ptgg_0btag_thresh_ && (ebeb==ebeb_0btag_thresh_) && fabs(zeppen)<zeppenfeld_thresh_
-		   && dijet.M()>mjj_min_thresh_ && dijet.M()<mjj_max_thresh_ && jet1.Pt() > ptjet_0btag_thresh_ 
+		   && dijet.M()>mjj_min_0btag_thresh_ && dijet.M()<mjj_max_0btag_thresh_ && jet1.Pt() > ptjet_0btag_thresh_ 
 		   && fabs(cosThetaStar) < costhetastar_0btag_thresh_ ) {
          category_t = 4;
 
@@ -1931,10 +1931,15 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   mjj_min_thresh_ = 0.;
   mjj_max_thresh_ = 10000.;
 
+  mjj_min_0btag_thresh_ = 0.;
+  mjj_max_0btag_thresh_ = 10000.;
+
   njets_thresh_=0;
   njets_upper_thresh_=1000;
   nbtagloose_thresh_=0;
   nbtagmedium_thresh_=0;
+
+  njets_ttH_hadronic_thresh_ = 4;
 
   Ht_thresh_=0;
   invert_photonCuts_=false;
@@ -1952,6 +1957,9 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
    mjj_min_thresh_ = 60.;
    mjj_max_thresh_ = 120.;
 
+   mjj_min_0btag_thresh_ = 60.;
+   mjj_max_0btag_thresh_ = 120.;
+
   } else if( selectionType=="sel1" ) {
 
    ptphot1cut_ = 60.;
@@ -1964,8 +1972,14 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
    mjj_min_thresh_ = 60.;
    mjj_max_thresh_ = 120.;
 
+   mjj_min_0btag_thresh_ = 60.;
+   mjj_max_0btag_thresh_ = 120.;
+
+
   } else if( selectionType=="optsel1" ) {
     
+   njets_ttH_hadronic_thresh_ = 5;
+
    ptphot1cut_ = 60.;
    ptphot2cut_ = 25.;
    
@@ -1986,7 +2000,13 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
    mjj_min_thresh_ = 60.;
    mjj_max_thresh_ = 120.;
 
+   mjj_min_0btag_thresh_ = 60.;
+   mjj_max_0btag_thresh_ = 120.;
+
   } else if( selectionType=="cs_selection" ) {
+
+   njets_ttH_hadronic_thresh_ = 5;
+
     //opt sel 1 with photon id inverted on 2nd photon
     invert_photonCuts_=true;
     ptphot1cut_ = 60.;
@@ -2009,7 +2029,13 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
     mjj_min_thresh_ = 60.;
     mjj_max_thresh_ = 120.;
     
+    mjj_min_0btag_thresh_ = 60.;
+    mjj_max_0btag_thresh_ = 120.;
+
   }else if( selectionType=="optsel1_noPUID" ) {
+
+   njets_ttH_hadronic_thresh_ = 5;
+
     //opt sel 1 without pu id
    use_PUID_=false;    
    ptphot1cut_ = 60.;
@@ -2032,14 +2058,21 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
    mjj_min_thresh_ = 60.;
    mjj_max_thresh_ = 120.;
 
+   mjj_min_0btag_thresh_ = 60.;
+   mjj_max_0btag_thresh_ = 120.;
+
   } else if(selectionType=="onlyPhotonCuts"){
     
+   njets_ttH_hadronic_thresh_ = 5;
+
     ptphot1cut_ = 60.;
     ptphot2cut_ = 25.;
 
 
   }else if( selectionType=="onlyPhotonCuts_inverted" ) {
     
+   njets_ttH_hadronic_thresh_ = 5;
+
     invert_photonCuts_=true;
     ptphot1cut_ = 60.;
     ptphot2cut_ = 25.;
@@ -2056,6 +2089,10 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
 
    mjj_min_thresh_ = 55.;
    mjj_max_thresh_ = 115.;
+
+   mjj_min_0btag_thresh_ = 55.;
+   mjj_max_0btag_thresh_ = 115.;
+
   } else if ( selectionType=="ttHsel" ){
 
     ptphot1cut_ = 33.;

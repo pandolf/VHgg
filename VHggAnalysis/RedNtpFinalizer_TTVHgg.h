@@ -856,6 +856,8 @@ public :
    int njets_upper_thresh_;
    int nbtagloose_thresh_;
    int nbtagmedium_thresh_;
+   int njets_ttH_hadronic_thresh_;
+
 
    float zeppenfeld_thresh_;
 
@@ -865,6 +867,9 @@ public :
 
    float mjj_min_thresh_;
    float mjj_max_thresh_;
+
+   float mjj_min_0btag_thresh_;
+   float mjj_max_0btag_thresh_;
 
    float   Ht_thresh_;
    bool  invert_photonCuts_;
