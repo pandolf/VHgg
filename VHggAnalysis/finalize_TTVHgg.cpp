@@ -26,7 +26,7 @@ RedntpDirStruct get_dirs( const std::string& prodVersion );
 
 int main( int argc, char* argv[] ) {
 
-  if( argc!=5 && argc!=6 ) {
+  if( argc!=4 && argc!=5 && argc!=6 ) {
     std::cout << "USAGE: ./finalize_TTVHgg [redntpVersion] [dataset] [selectionType] [use_inverted_photID=\"false\"] [bTaggerType=\"JP\"]" <<std::endl;
     return 13;
   }
