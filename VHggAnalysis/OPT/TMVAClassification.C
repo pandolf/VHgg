@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.5 2012/11/05 15:06:43 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.6 2012/11/06 11:14:23 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -175,15 +175,16 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
    // note that you may also use variable expressions, such as: "3*var1/var2*abs(var3)"
    // [all types of expressions that can also be parsed by TTree::Draw( "expression" )]
    //factory->AddVariable( "ptLept3"       , "Third Lepton p_{T}", "GeV", 'F');
-   factory->AddVariable( "njets"         , "N Jets", "", 'I');
    factory->AddVariable( "ptgg"            , "DiPhoton p_{T}", "GeV", 'F');
    if( category>1 ) { // VH stuff:
-     factory->AddVariable( "ptPhot1"            , "Lead Photon p_{T}", "GeV", 'F');
-     factory->AddVariable( "ptPhot2"            , "Sublead Photon p_{T}", "GeV", 'F');
+     //factory->AddVariable( "njets"         , "N Jets", "", 'I');
+     //factory->AddVariable( "ptPhot1"            , "Lead Photon p_{T}", "GeV", 'F');
+     //factory->AddVariable( "ptPhot2"            , "Sublead Photon p_{T}", "GeV", 'F');
      //factory->AddVariable( "ptJet1"            , "Lead Jet p_{T}", "GeV", 'F');
      factory->AddVariable( "absCosThetaStar"            , "|cos(#theta*)|", "", 'F');
      factory->AddVariable( "ptJet2"            , "Sublead Jet p_{T}", "GeV", 'F');
    } else { //ttH
+     factory->AddVariable( "njets"         , "N Jets", "", 'I');
      factory->AddVariable( "Alt$(ptJet[2],0)"            , "Third Jet p_{T}", "GeV", 'F');
      factory->AddVariable( "Alt$(ptJet[3],0)"            , "Fourth Jet p_{T}", "GeV", 'F');
      factory->AddVariable( "Alt$(ptJet[4],0)"            , "Fifth Jet p_{T}", "GeV", 'F');
@@ -340,9 +341,9 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
    } else if( category==4 ) { //VH 0 tag
      mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==4";
      mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==4";
-   } else if( category==5 ) { //VH 0+1+2 tag
-     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category>=2";
-     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category>=2";
+   } else if( category==5 ) { //VH 0+1+2 tag but with mjj>70, to be used for VH 1 and 2 tag (assume ptgg and costhetastar dont depend on btag)
+     mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category>=2";
+     mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category>=2";
    }
    //TCut mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
    //TCut mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycutb = "abs(var1)<0.5";
@@ -381,8 +382,8 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
       bookConditions += ":VarProp[1]=FMin"; //abs costhetastar
       bookConditions += ":VarProp[2]=FMax"; //ptJet2
 
-      //bookConditions += ":EffSel:SampleSize=200000000"; // this for the actual opt
-      bookConditions += ":EffSel:SampleSize=500000"; // this for the ranking
+      bookConditions += ":EffSel:SampleSize=200000000"; // this for the actual opt
+      //bookConditions += ":EffSel:SampleSize=500000"; // this for the ranking
 
 
 
@@ -612,7 +613,7 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
        // preselection cuts (if not optimized):
        ofs << "ptPhot1 60. 100000." << std::endl;
        ofs << "ptPhot2 25. 100000." << std::endl;
-       if( category==2 || category==3 )
+       if( category==2 || category==3 || category==5 )
          ofs << "mjj 70. 120." << std::endl;
        if( category==4 )
          ofs << "mjj 60. 120." << std::endl;
