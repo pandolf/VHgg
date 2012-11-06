@@ -41,7 +41,13 @@ void RedNtpFinalizer_TTVHgg::finalize()
    this->Init();
 
 
-   std::string fullFlags = selectionType_ + "_" + bTaggerType_;
+   std::string fullFlags = selectionType_ + "_";
+   if(!invert_photonCuts_){
+     fullFlags+=bTaggerType_;
+   }else{
+     fullFlags+="invertedPhotID_"+bTaggerType_;
+
+   }
    this->set_flags(fullFlags); //this is for the outfile name
    this->createOutputFile();
 
