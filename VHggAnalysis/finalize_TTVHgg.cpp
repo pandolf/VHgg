@@ -216,7 +216,13 @@ void do_haddCommand( const std::string& redntpVersion, const std::string& datase
 
 std::string getSingleFileName( const std::string& redntpVersion, const std::string& dataset, const std::string& selectionType, const std::string& bTaggerType ) {
 
-  std::string fileName = "finalizedTrees_" + redntpVersion + "/TTVHgg_" + dataset + "_" + selectionType + "_" + bTaggerType + ".root";
+  std::string fileName;
+
+  if(!use_inverted_photID){
+    fileName = "finalizedTrees_" + redntpVersion + "/TTVHgg_" + dataset + "_" + selectionType + "_" + bTaggerType + ".root";
+  }else{
+    fileName = "finalizedTrees_" + redntpVersion + "/TTVHgg_" + dataset + "_" + selectionType + "_invertedPhotID_" + bTaggerType + ".root";
+  }
   return fileName;
 
 }
