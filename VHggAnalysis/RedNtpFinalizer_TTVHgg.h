@@ -876,6 +876,8 @@ public :
    bool  invert_photonCuts_;
    bool use_PUID_;
 
+   int njets_PUID_thresh_;
+
    bool BLIND_;
 
 };
