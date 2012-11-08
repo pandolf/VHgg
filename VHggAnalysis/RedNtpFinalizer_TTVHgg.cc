@@ -1,5 +1,3 @@
-
-
 #include "RedNtpFinalizer_TTVHgg.h"
 
 #include "QGLikelihood/interface/QGLikelihoodCalculator.h"
@@ -133,6 +131,17 @@ void RedNtpFinalizer_TTVHgg::finalize()
    //MET
    TH1D* h1_pfMet = new TH1D("pfMet", "", 150, 0., 150.);
    h1_pfMet->Sumw2();
+
+
+   //invariant mass
+   TH1D* h1_minv_lnu= new TH1D("minv_lnu", "", 500, 0., 500.);
+   h1_minv_lnu->Sumw2();
+   TH1D* h1_minv_blnu= new TH1D("minv_blnu", "", 1000, 0., 1000.);
+   h1_minv_blnu->Sumw2();
+   TH1D* h1_minv_bgg= new TH1D("minv_bgg", "", 1000, 0., 1000.);
+   h1_minv_bgg->Sumw2();
+
+
 
    //HT
    TH1D* h1_Ht = new TH1D("Ht", "", 200, 0., 2000.);
@@ -350,7 +359,11 @@ void RedNtpFinalizer_TTVHgg::finalize()
    int hasPassedSinglePhot_t;
    int hasPassedDoublePhot_t;
 
+   float cosThetaStar_t,etaVstar_t,cosTheta1_t;
    float m3_t;
+   float minv_lnu_t;
+   float minv_blnu_t;
+   float minv_bgg_t;
 
    float eventWeight = 1.;
 
@@ -415,6 +428,13 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "hasPassedSinglePhot", &hasPassedSinglePhot_t, "hasPassedSinglePhot_t/I" );
    tree_passedEvents->Branch( "hasPassedDoublePhot", &hasPassedDoublePhot_t, "hasPassedDoublePhot_t/I" );
    tree_passedEvents->Branch( "m3", &m3_t, "m3_t/F" );
+   tree_passedEvents->Branch( "minv_lnu", &minv_lnu_t, "minv_lnu_t/F" );
+   tree_passedEvents->Branch( "minv_blnu", &minv_blnu_t, "minv_blnu_t/F" );
+   tree_passedEvents->Branch( "minv_bgg", &minv_bgg_t, "minv_bgg_t/F" );
+   tree_passedEvents->Branch( "cosThetaStar", &cosThetaStar_t, "cosThetaStar_t/F" );
+   tree_passedEvents->Branch( "cosTheta1", &cosTheta1_t, "cosTheta1_t/F" );
+   tree_passedEvents->Branch( "etaVstar", &etaVstar_t, "etaVstar_t/F" );
+
 
    TTree* tree_weights=new TTree();
    tree_weights->SetName("tree_weights");
@@ -563,11 +583,14 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
       bool ebeb = TMath::Abs(etascphot1)<1.4442 && TMath::Abs(etascphot2)<1.4442;
 
+      float triggerThreshPhot1=33.;
+      float triggerThreshPhot2=25.;
 
-      if(ptphot1 < ptphot1cut_) continue; //pt first photon
-      if(ptphot2 < ptphot2cut_) continue; //pt second photon
+      if(ptphot1 < triggerThreshPhot1) continue; //pt first photon
+      if(ptphot2 < triggerThreshPhot2) continue; //pt second photon
 
-//       if(ptphot2<ptphot2cut* massggnewvtx/120.) continue; //pt second photon
+      if(ptphot1 < ptphot1cut_*massggnewvtx/120.) continue; //pt first photon
+      if(ptphot2 < ptphot2cut_* massggnewvtx/120.) continue; //pt second photon
 
       //if(ptgg_thresh_>0 && diphot.Pt()< pthiggsmincut_) continue; //pt higgs min
 
@@ -683,15 +706,17 @@ void RedNtpFinalizer_TTVHgg::finalize()
          //jet PU ID:
          bool passedPUID = true;
 	 if(use_PUID_){
-         if(TMath::Abs(etajet[ijet]) < 2.5) {
-           if(betastarjet[ijet] > 0.2 * log( nvtx - 0.67 ) ) passedPUID = false;
-           if(rmsjet[ijet] > 0.06) passedPUID = false;
-         } else if(TMath::Abs(etajet[ijet]) < 3.){
-           if(rmsjet[ijet] > 0.05) passedPUID = false;
-         } else {
-           if(rmsjet[ijet] > 0.055) passedPUID = false;
-         }
-         if( !passedPUID )continue;
+	   if(ijet>=njets_PUID_thresh_){
+	     if(TMath::Abs(etajet[ijet]) < 2.5) {
+	       if(betastarjet[ijet] > 0.2 * log( nvtx - 0.67 ) ) passedPUID = false;
+	       if(rmsjet[ijet] > 0.06) passedPUID = false;
+	     } else if(TMath::Abs(etajet[ijet]) < 3.){
+	       if(rmsjet[ijet] > 0.05) passedPUID = false;
+	     } else {
+	       if(rmsjet[ijet] > 0.055) passedPUID = false;
+	     }
+	     if( !passedPUID )continue;
+	   }
 	 }
 
          if( isMC ) {
@@ -758,13 +783,44 @@ void RedNtpFinalizer_TTVHgg::finalize()
        m3_t=m3;
 
 
+       int isLeptonic= (ptele1>0 || ptmu1>0);
+       int isMu=ptmu1>0;
+
+
+       //invariant mass
+       TLorentzVector l,nu,lnu,b,blnu,bgg;
+
+       if(isLeptonic){
+       float ptlep=ptmu1;
+       float etalep=etamu1;
+       float philep=phimu1;
+       float energylep=enemu1;
+       if(!isMu){
+	 ptlep=ptele1;
+	 etalep=etaele1;
+	 philep=phiele1;
+	 energylep=eneele1;
+       }
+
+       l.SetPtEtaPhiE(ptlep,etalep,philep,energylep);
+       nu.SetPtEtaPhiE(epfMet,0,phipfMet,epfMet);
+       lnu=l+nu;
+
+
+       minv_lnu_t=lnu.Mt();
+
+       h1_minv_lnu->Fill(minv_lnu_t,eventWeight);
+       }
+
+
+
 
        //       cout<<njets_selected<<"------"<<endl;
        if(njets_selected<njets_thresh_) continue;
        if(njets_selected>njets_upper_thresh_)continue;
        if(njets_selected_btagloose<nbtagloose_thresh_) continue;
        if(njets_selected_btagmedium<nbtagmedium_thresh_) continue;
-       int isLeptonic= (ptele1>0 || ptmu1>0);
+
        if(Ht_t<Ht_thresh_)continue;
 
 
@@ -841,6 +897,21 @@ void RedNtpFinalizer_TTVHgg::finalize()
        jet1.SetPtEtaPhiE( ptcorrjet[indexjet1], etajet[indexjet1], phijet[indexjet1], ecorrjet[indexjet1] );
        AnalysisJet dijet = jet0 + jet1;
 
+       if(firstjet_isbtaggedloose){
+	 b.SetPtEtaPhiE( ptcorrjet[indexjet0], etajet[indexjet0], phijet[indexjet0], ecorrjet[indexjet0] );
+	 if(isLeptonic){
+	   blnu=b+lnu;
+	   minv_blnu_t=blnu.Mt();
+	   h1_minv_blnu->Fill(minv_blnu_t,eventWeight);
+	 }
+	 bgg=b+diphot;
+	 minv_bgg_t=bgg.M();
+	 h1_minv_bgg->Fill(minv_bgg_t,eventWeight);
+       }
+
+
+
+
 
        h1_ptjet0->Fill( jet0.Pt(), eventWeight );
        h1_ptjet1->Fill( jet1.Pt(), eventWeight );
@@ -893,13 +964,16 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
        
        float cosThetaStar = hangles.helCosThetaStar;
+       cosThetaStar_t=cosThetaStar;
        h1_cosThetaStar->Fill( hangles.helCosThetaStar, eventWeight );
        h1_cosTheta1->Fill( hangles.helCosTheta1, eventWeight );
+       cosTheta1_t=hangles.helCosTheta1;
        h1_cosTheta2->Fill( hangles.helCosTheta2, eventWeight );
        h1_helphi->Fill( hangles.helPhi, eventWeight );
        h1_helphi1->Fill( hangles.helPhi1, eventWeight );
 
        TLorentzVector Vstar = dijet + diphot;
+
 
        // boost stuff in Vstar frame
        TLorentzVector Vstar_Vstar(Vstar);
@@ -1246,6 +1320,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
        h1_mVstar->Fill( Vstar.M(), eventWeight );
        h1_ptVstar->Fill( Vstar.Pt(), eventWeight );
        h1_etaVstar->Fill( Vstar.Eta(), eventWeight );
+       etaVstar_t=Vstar.Eta();
        h1_phiVstar->Fill( Vstar.Phi(), eventWeight );
 
        h1_mVstar_kinfit->Fill( Vstar_kinfit.M(), eventWeight );
@@ -1289,6 +1364,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
        absCosThetaStar_t = fabs(cosThetaStar);
        hasPassedSinglePhot_t=hasPassedSinglePhot;
        hasPassedDoublePhot_t=hasPassedDoublePhot;
+
 
        tree_passedEvents->Fill();
 
@@ -1346,6 +1422,13 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
    h1_pfMet->Write();
    h1_Ht->Write();
+
+
+   h1_minv_lnu->Write();
+   h1_minv_blnu->Write();
+   h1_minv_bgg->Write();
+
+
 
    h1_kinfit_chiSquareProbMax->Write();
    h1_kinfit_chiSquareProbMax_mjjWindow->Write();
@@ -1931,6 +2014,8 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   invert_photonCuts_=false;
   use_PUID_=true;
 
+  njets_PUID_thresh_=0;
+
   if( selectionType=="presel" ) {
 
     // leave all cuts to default
@@ -1993,9 +2078,37 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   }else if( selectionType=="optsel1_noPUID" ) {
 
    njets_ttH_hadronic_thresh_ = 5;
-
     //opt sel 1 without pu id
    use_PUID_=false;    
+   ptphot1cut_ = 60.;
+   ptphot2cut_ = 25.;
+   
+   ebeb_VH0btag_thresh_ = true;
+   
+   ptgg_VH0btag_thresh_ = 117.;
+   ptgg_VH1btag_thresh_ = 103.;
+   ptgg_VH2btag_thresh_ = 93.;
+
+   ptjet_VH0btag_thresh_ = 36.;
+   ptjet_VH1btag_thresh_ = 23.;
+   ptjet_VH2btag_thresh_ = 25.;
+
+   costhetastar_VH0btag_thresh_ = 0.74;
+   costhetastar_VH1btag_thresh_ = 0.52;
+   costhetastar_VH2btag_thresh_ = 0.58;
+
+   mjj_min_thresh_ = 60.;
+   mjj_max_thresh_ = 120.;
+
+   mjj_min_VH0btag_thresh_ = 60.;
+   mjj_max_VH0btag_thresh_ = 120.;
+
+  }else if( selectionType=="optsel1_noPUID_3rdJet" ) {
+
+
+   njets_ttH_hadronic_thresh_ = 5;
+    //opt sel 1 without pu id from 3rd jet
+   njets_PUID_thresh_=3;
    ptphot1cut_ = 60.;
    ptphot2cut_ = 25.;
    
