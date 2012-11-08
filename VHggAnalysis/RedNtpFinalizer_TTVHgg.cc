@@ -666,7 +666,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	 if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) ){
 	   mgg_t = diphot.M();
 	 }else{
-	   mgg_t =0;
+	   mgg_t =-1;
 	 }
 	 ptgg_t = diphot.Pt();
 	 double ptweight2D=h2_ptweight->GetBinContent(h2_ptweight->GetXaxis()->FindBin(ptphot2),h2_ptweight->GetYaxis()->FindBin(ptphot1));
@@ -1378,7 +1378,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) ){
 	 mgg_t = diphot.M();
        }else{
-	 mgg_t = 0;
+	 mgg_t = -1;
        }
        ptgg_t = diphot.Pt();
        ptJet1_t = jet0.Pt();
