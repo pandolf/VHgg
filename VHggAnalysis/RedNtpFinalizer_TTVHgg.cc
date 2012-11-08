@@ -652,34 +652,45 @@ void RedNtpFinalizer_TTVHgg::finalize()
        }
 
 
-       if( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130. ) continue;
+       //       if( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130. ) continue;
 
-       h1_mgg_prepresel->Fill( massggnewvtx, eventWeight );
+       if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_prepresel->Fill( massggnewvtx, eventWeight );
 
 
-       if(selectionType_=="onlyPhotonCuts" || selectionType_=="onlyPhotonCuts_inverted"){
+       if(selectionType_=="onlyPhotonCuts" ){
 	 if(diphot.M()<100 || diphot.M()>180) continue;
 	 ptPhot1_t = ptphot1;
 	 ptPhot2_t = ptphot2;
 	 etaPhot1_t = etaphot1;
 	 etaPhot2_t = etaphot2;
-	 mgg_t = diphot.M();
+	 if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) ){
+	   mgg_t = diphot.M();
+	 }else{
+	   mgg_t =0;
+	 }
 	 ptgg_t = diphot.Pt();
 	 double ptweight2D=h2_ptweight->GetBinContent(h2_ptweight->GetXaxis()->FindBin(ptphot2),h2_ptweight->GetYaxis()->FindBin(ptphot1));
-	 double ptweight2D_data=h2_ptweight_data->GetBinContent(h2_ptweight_data->GetXaxis()->FindBin(ptphot2),h2_ptweight_data->GetYaxis()->FindBin(ptphot1));
 	 double etaweight2D=h2_etaweight->GetBinContent(h2_etaweight->GetXaxis()->FindBin(etaphot2),h2_etaweight->GetYaxis()->FindBin(etaphot1));
+	 double ptweight2D_data=h2_ptweight_data->GetBinContent(h2_ptweight_data->GetXaxis()->FindBin(ptphot2),h2_ptweight_data->GetYaxis()->FindBin(ptphot1));
 	 double etaweight2D_data=h2_etaweight_data->GetBinContent(h2_etaweight_data->GetXaxis()->FindBin(etaphot2),h2_etaweight_data->GetYaxis()->FindBin(etaphot1));
 	 if(!invert_photonCuts_){
 	   pt_scaled_2D_weight_t=eventWeight;
 	   eta_scaled_2D_weight_t=eventWeight;
 	   pt_scaled_2D_weight_data_t=eventWeight;
 	   eta_scaled_2D_weight_data_t=eventWeight;
-
+	   
 	 }else{
 	   pt_scaled_2D_weight_t=eventWeight*ptweight2D;
 	   eta_scaled_2D_weight_t=eventWeight*etaweight2D;
-	   pt_scaled_2D_weight_data_t=eventWeight*ptweight2D_data;
-	   eta_scaled_2D_weight_data_t=eventWeight*etaweight2D_data;
+	   
+	   if(ptweight2D_data!=0){
+	     pt_scaled_2D_weight_data_t=eventWeight*ptweight2D_data;
+	     eta_scaled_2D_weight_data_t=eventWeight*etaweight2D_data;
+	   }else{
+	     pt_scaled_2D_weight_data_t=eventWeight;
+	     eta_scaled_2D_weight_data_t=eventWeight;
+	   }
+
 
 	 }
 	 tree_weights->Fill();
@@ -857,7 +868,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       
 
        if( index_selected.size()<2 ) continue;
-       h1_mgg_presel->Fill( massggnewvtx, eventWeight );
+       if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_presel->Fill( massggnewvtx, eventWeight );
 
 
        // try with simply the two leading ones:
@@ -1060,7 +1071,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
          isBSMEvent_t = true;
 
-         h1_mgg_bsm->Fill( massggnewvtx, eventWeight );
+	 if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_bsm->Fill( massggnewvtx, eventWeight );
 
        }
 
@@ -1078,7 +1089,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
        if(  isLeptonic && njets_selected>=3 && njets_selected_btagmedium>0 ) {
 
          category_t = 0;
-         h1_mgg_ttH_leptonic->Fill( massggnewvtx, eventWeight );
+	 if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_ttH_leptonic->Fill( massggnewvtx, eventWeight );
 
 
 
@@ -1087,7 +1098,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
        } else if(  !isLeptonic && njets_selected>=njets_ttH_hadronic_thresh_ && njets_selected_btagmedium>0 ) {
 
          category_t = 1;
-         h1_mgg_ttH_hadronic->Fill( massggnewvtx, eventWeight );
+	 if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_ttH_hadronic->Fill( massggnewvtx, eventWeight );
 
 
 
@@ -1109,7 +1120,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
          if( jet1.Pt() < ptjet_VH2btag_thresh_ ) continue;
          if( fabs(cosThetaStar) > costhetastar_VH2btag_thresh_ ) continue;
 
-         h1_mgg_VH2btag->Fill( massggnewvtx, eventWeight );
+	 if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_VH2btag->Fill( massggnewvtx, eventWeight );
 
 
 
@@ -1132,7 +1143,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
          if( fabs(cosThetaStar) > costhetastar_VH1btag_thresh_ ) continue;
 
 
-         h1_mgg_VH1btag->Fill( massggnewvtx, eventWeight );
+	 if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_VH1btag->Fill( massggnewvtx, eventWeight );
 
          // qg only for non-btagged jet:
          if( firstjet_isbtaggedloose ) {
@@ -1161,7 +1172,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
          if( jet1.Pt() < ptjet_VH0btag_thresh_ ) continue;
          if( fabs(cosThetaStar) > costhetastar_VH0btag_thresh_ ) continue;
 
-          h1_mgg_VH0btag->Fill( massggnewvtx, eventWeight );
+	 if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )          h1_mgg_VH0btag->Fill( massggnewvtx, eventWeight );
 
           h1_qgljet0_VH0btag->Fill( qgljet0, eventWeight );
           h1_qgljet1_VH0btag->Fill( qgljet1, eventWeight );
@@ -1195,7 +1206,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	   if(  isLeptonic && njets_selected>=3  ) {
 	     
 	     category_t = 0;
-	     h1_mgg_ttH_leptonic->Fill( massggnewvtx, eventWeight );
+	     if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )	     h1_mgg_ttH_leptonic->Fill( massggnewvtx, eventWeight );
 	     
 	     
 	     
@@ -1204,7 +1215,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	   } else if(  !isLeptonic && njets_selected>=5  ) {
 	     
 	     category_t = 1;
-	     h1_mgg_ttH_hadronic->Fill( massggnewvtx, eventWeight );
+	     if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )	     h1_mgg_ttH_hadronic->Fill( massggnewvtx, eventWeight );
 	
        // *****   VH 2-btag category: 
        // *****   (2 jets, 2 btag loose)
@@ -1272,7 +1283,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
        h1_deltaFabsEtaJets_kinfit->Fill( fabs(jet0_kinfit.Eta())-fabs(jet1_kinfit.Eta()), eventWeight );
 
 
-       h1_mgg->Fill( massggnewvtx, eventWeight );
+       if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg->Fill( massggnewvtx, eventWeight );
        double ptweightPhot1=h1_ptweight_phot1->GetBinContent(h1_ptweight_phot1->GetXaxis()->FindBin(ptphot1));
        double ptweightPhot2=h1_ptweight_phot2->GetBinContent(h1_ptweight_phot2->GetXaxis()->FindBin(ptphot2));
        double ptweight2D=h2_ptweight->GetBinContent(h2_ptweight->GetXaxis()->FindBin(ptphot2),h2_ptweight->GetYaxis()->FindBin(ptphot1));
@@ -1281,10 +1292,13 @@ void RedNtpFinalizer_TTVHgg::finalize()
        double etaweightPhot2=h1_etaweight_phot2->GetBinContent(h1_etaweight_phot2->GetXaxis()->FindBin(etaphot2));
        double etaweight2D=h2_etaweight->GetBinContent(h2_etaweight->GetXaxis()->FindBin(etaphot2),h2_etaweight->GetYaxis()->FindBin(etaphot1));
 
+       double ptweight2D_data=h2_ptweight_data->GetBinContent(h2_ptweight_data->GetXaxis()->FindBin(ptphot2),h2_ptweight_data->GetYaxis()->FindBin(ptphot1));
+       double etaweight2D_data=h2_etaweight_data->GetBinContent(h2_etaweight_data->GetXaxis()->FindBin(etaphot2),h2_etaweight_data->GetYaxis()->FindBin(etaphot1));
+
 
        //       if(selectionType_.find("inverted")!=string::npos){//if not inverted do not apply corrections. useful for plots
        if(invert_photonCuts_){
-         h1_mgg_scaled->Fill( massggnewvtx, eventWeight*ptweightPhot1*ptweightPhot2 );
+	 if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_scaled->Fill( massggnewvtx, eventWeight*ptweightPhot1*ptweightPhot2 );
 	 
          pt_scaled_weight_t=eventWeight*ptweightPhot1*ptweightPhot2;
          ptPhot1_scaled_weight_t=eventWeight*ptweightPhot1;
@@ -1296,9 +1310,19 @@ void RedNtpFinalizer_TTVHgg::finalize()
          etaPhot2_scaled_weight_t=eventWeight*etaweightPhot2;
          eta_scaled_2D_weight_t=eventWeight*etaweight2D;
 
+	 if(ptweight2D_data!=0){
+	   pt_scaled_2D_weight_data_t=eventWeight*ptweight2D_data;
+	   eta_scaled_2D_weight_data_t=eventWeight*etaweight2D_data;
+	 }else{
+	   pt_scaled_2D_weight_data_t=eventWeight;
+	   eta_scaled_2D_weight_data_t=eventWeight;
+	 }
+	 
+
+
        } else {
 
-         h1_mgg_scaled->Fill(massggnewvtx, eventWeight );
+	 if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_scaled->Fill(massggnewvtx, eventWeight );
          pt_scaled_weight_t=eventWeight;
          ptPhot1_scaled_weight_t=eventWeight;
          ptPhot2_scaled_weight_t=eventWeight;
@@ -1308,6 +1332,10 @@ void RedNtpFinalizer_TTVHgg::finalize()
          etaPhot1_scaled_weight_t=eventWeight;
          etaPhot2_scaled_weight_t=eventWeight;
          eta_scaled_2D_weight_t=eventWeight;
+
+	 pt_scaled_2D_weight_data_t=eventWeight;
+	 eta_scaled_2D_weight_data_t=eventWeight;
+	   
 
        }
 
@@ -1347,7 +1375,11 @@ void RedNtpFinalizer_TTVHgg::finalize()
        ptPhot2_t = ptphot2;
        etaPhot1_t = etaphot1;
        etaPhot2_t = etaphot2;
-       mgg_t = diphot.M();
+       if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) ){
+	 mgg_t = diphot.M();
+       }else{
+	 mgg_t = 0;
+       }
        ptgg_t = diphot.Pt();
        ptJet1_t = jet0.Pt();
        ptJet2_t = jet1.Pt();
