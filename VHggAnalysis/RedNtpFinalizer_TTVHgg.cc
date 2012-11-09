@@ -320,6 +320,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
    int nbjets_medium_t;
    float ptPhot1_t;
    float ptPhot2_t;
+   float ptRunPhot1_t;
+   float ptRunPhot2_t;
    float etaPhot1_t;
    float etaPhot2_t;
    float mgg_t;
@@ -334,6 +336,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    float etaPhot1_scaled_weight_t;
    float etaPhot2_scaled_weight_t;
    float ptgg_t;
+   float ptRungg_t;
    // these are just leading 20 jets in event:
    float ptJet_t[20];
    float etaJet_t[20];
@@ -380,9 +383,13 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "nbjets_medium", &nbjets_medium_t, "nbjets_medium_t/I" );
    tree_passedEvents->Branch( "ptPhot1", &ptPhot1_t, "ptPhot1_t/F" );
    tree_passedEvents->Branch( "ptPhot2", &ptPhot2_t, "ptPhot2_t/F" );
+   tree_passedEvents->Branch( "ptRunPhot1", &ptRunPhot1_t, "ptRunPhot1_t/F" );
+   tree_passedEvents->Branch( "ptRunPhot2", &ptRunPhot2_t, "ptRunPhot2_t/F" );
    tree_passedEvents->Branch( "etaPhot1", &etaPhot1_t, "etaPhot1_t/F" );
    tree_passedEvents->Branch( "etaPhot2", &etaPhot2_t, "etaPhot2_t/F" );
    tree_passedEvents->Branch( "mgg", &mgg_t, "mgg_t/F" );
+   tree_passedEvents->Branch( "ptgg", &ptgg_t, "ptgg_t/F" );
+   tree_passedEvents->Branch( "ptRungg", &ptRungg_t, "ptRungg_t/F" );
    tree_passedEvents->Branch( "ptPhot1_scaled_weight", &ptPhot1_scaled_weight_t, "ptPhot1_scaled_weight_t/F" );
    tree_passedEvents->Branch( "ptPhot2_scaled_weight", &ptPhot2_scaled_weight_t, "ptPhot2_scaled_weight_t/F" );
    tree_passedEvents->Branch( "pt_scaled_weight", &pt_scaled_weight_t, "pt_scaled_weight_t/F" );
@@ -393,7 +400,6 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "eta_scaled_weight", &eta_scaled_weight_t, "eta_scaled_weight_t/F" );
    tree_passedEvents->Branch( "eta_scaled_2D_weight", &eta_scaled_2D_weight_t, "eta_scaled_2D_weight_t/F" );
    tree_passedEvents->Branch( "eta_scaled_2D_weight_data", &eta_scaled_2D_weight_data_t, "eta_scaled_2D_weight_data_t/F" );
-   tree_passedEvents->Branch( "ptgg", &ptgg_t, "ptgg_t/F" );
    tree_passedEvents->Branch( "ptJet", ptJet_t, "ptJet_t[njets_t]/F" );
    tree_passedEvents->Branch( "etaJet", etaJet_t, "etaJet_t[njets_t]/F" );
    tree_passedEvents->Branch( "btaggedLooseJet", btaggedLooseJet_t, "btaggedLooseJet_t[njets_t]/O" );
@@ -659,16 +665,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
        if(selectionType_=="onlyPhotonCuts" ){
 	 if(diphot.M()<100 || diphot.M()>180) continue;
-	 ptPhot1_t = ptphot1;
-	 ptPhot2_t = ptphot2;
-	 etaPhot1_t = etaphot1;
-	 etaPhot2_t = etaphot2;
-	 if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) ){
-	   mgg_t = diphot.M();
-	 }else{
-	   mgg_t =-1;
-	 }
-	 ptgg_t = diphot.Pt();
+
 	 double ptweight2D=h2_ptweight->GetBinContent(h2_ptweight->GetXaxis()->FindBin(ptphot2),h2_ptweight->GetYaxis()->FindBin(ptphot1));
 	 double etaweight2D=h2_etaweight->GetBinContent(h2_etaweight->GetXaxis()->FindBin(etaphot2),h2_etaweight->GetYaxis()->FindBin(etaphot1));
 	 double ptweight2D_data=h2_ptweight_data->GetBinContent(h2_ptweight_data->GetXaxis()->FindBin(ptphot2),h2_ptweight_data->GetYaxis()->FindBin(ptphot1));
@@ -1161,7 +1158,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
 
          if( diphot.Pt() < ptgg_VH0btag_thresh_ ) continue;
-         if( (ebeb!=ebeb_VH0btag_thresh_) ) continue;
+         if( (ebeb_VH0btag_thresh_ && !ebeb) ) continue;
 
          // fill before mjj cut:
          h1_mjj_VH0btag->Fill( dijet.M(), eventWeight );
@@ -1373,6 +1370,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
        nbjets_medium_t = njets_selected_btagmedium;
        ptPhot1_t = ptphot1;
        ptPhot2_t = ptphot2;
+       ptRunPhot1_t = ptphot1*120./massggnewvtx;
+       ptRunPhot2_t = ptphot2*120./massggnewvtx;
        etaPhot1_t = etaphot1;
        etaPhot2_t = etaphot2;
        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) ){
@@ -1381,6 +1380,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	 mgg_t = -1;
        }
        ptgg_t = diphot.Pt();
+       ptRungg_t = diphot.Pt()*120./massggnewvtx;
+
        ptJet1_t = jet0.Pt();
        ptJet2_t = jet1.Pt();
        etaJet1_t = jet0.Eta();
