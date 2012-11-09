@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.8 2012/11/09 11:50:08 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.9 2012/11/09 12:41:17 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -234,7 +234,7 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
 
       
 
-      std::string treeDir = "../";
+      std::string treeDir = "../finalizedTrees_micheli_noPUID/";
 
       
       std::string signalFileName = treeDir;
