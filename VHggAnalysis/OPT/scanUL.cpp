@@ -59,7 +59,7 @@ int main( int argc, char* argv[] ) {
   ofs_UL << "Seff   \tS     \tB +- s(B)\t" << std::endl;
 
   TGraphErrors* gr_UL = new TGraphErrors(0);
-  TGraphErrors* gr_UL_bgave = new TGraphErrors(0);
+  TGraphErrors* gr_UL_bgDATAave = new TGraphErrors(0);
   TGraphErrors* gr_UL_bgMCave = new TGraphErrors(0);
   float UL_max = 0.;
   float UL_min = 999.;
@@ -73,27 +73,27 @@ int main( int argc, char* argv[] ) {
   // optimized working point chosen when looking only at VH (and ttH) signal:
   TChain* signalTree = new TChain("tree_passedEvents");
   if( category>1 ) // VH
-    signalTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_JP.root");
+    signalTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_JP.root");
   else // ttH
-    signalTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_JP.root");
+    signalTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_JP.root");
 
 
   TChain* backgroundTree = new TChain("tree_passedEvents");
-  backgroundTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_DiPhoton_8TeV-pythia6_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_VV_8TeV_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_VGG_8TeV_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_TT_8TeV_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_QCD_doubleEMEnriched_TuneZ2star_8TeV-pythia6_presel_JP.root/tree_passedEvents");
+  backgroundTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_DiPhoton_8TeV-pythia6_presel_JP.root/tree_passedEvents");
+  backgroundTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6_presel_JP.root/tree_passedEvents");
+  backgroundTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_VV_8TeV_presel_JP.root/tree_passedEvents");
+  backgroundTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_VGG_8TeV_presel_JP.root/tree_passedEvents");
+  backgroundTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_TT_8TeV_presel_JP.root/tree_passedEvents");
+  backgroundTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_QCD_doubleEMEnriched_TuneZ2star_8TeV-pythia6_presel_JP.root/tree_passedEvents");
 
 
   TChain* backgroundTree_data = new TChain("tree_passedEvents");
-  backgroundTree_data->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_DATA_Run2012ABC_presel_JP.root");
+  backgroundTree_data->Add("../finalizedTrees_micheli_noPUID/TTVHgg_DATA_Run2012ABC_presel_JP.root");
   //backgroundTree_data->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_DATA_Run2012ABC_presel_invertedPhotID_JP.root");
 
 
 
-  for( unsigned iEff=1; iEff<10; ++iEff ) {
+  for( unsigned iEff=1; iEff<=10; ++iEff ) {
 
     // use category 5 only for VH 2 and 1 tags
     int category_forFile = (category==2 || category==3) ? 5 : category;
@@ -174,8 +174,8 @@ int main( int argc, char* argv[] ) {
 std::cout << "selection: " << selection_bg << std::endl;
 
     int nbinsx = 80.;
-    TH1F* h1_bg = new TH1F("bg", "", nbinsx, 100., 180.);
-    h1_bg->Sumw2();
+    TH1F* h1_bgDATA = new TH1F("bgDATA", "", nbinsx, 100., 180.);
+    h1_bgDATA->Sumw2();
     TH1F* h1_bgMC = new TH1F("bgMC", "", nbinsx, 100., 180.);
     h1_bgMC->Sumw2();
     TH1F* h1_signal = new TH1F("signal", "", nbinsx, 100., 180.);
@@ -183,7 +183,9 @@ std::cout << "selection: " << selection_bg << std::endl;
    
     signalTree         ->Project( "signal", "mgg", selection_sig.c_str() );
     backgroundTree     ->Project( "bgMC", "mgg", selection.c_str() );
-    backgroundTree_data->Project( "bg", "mgg", selection_bg.c_str() );
+    backgroundTree_data->Project( "bgDATA", "mgg", selection_bg.c_str() );
+
+std::cout << "entries in BG(data): " << h1_bgDATA->GetEntries() << std::endl;
 
 ////TFile* file = TFile::Open("prova.root", "recreate");
 ////file->cd();
@@ -204,10 +206,10 @@ std::cout << "selection: " << selection_bg << std::endl;
     //double background = h1_bg->IntegralAndError( 1, nbinsx, background_error );
 
     // background from data: scaled from sidebands, assuming flat distribution:
-    double background_ave_error;
-    double background_ave = h1_bg->IntegralAndError( 1, nbinsx, background_ave_error );
-    background_ave *= (10./70.); 
-    background_ave_error *= (10./70.);
+    double backgroundDATA_ave_error;
+    double backgroundDATA_ave = h1_bgDATA->IntegralAndError( 1, nbinsx, backgroundDATA_ave_error );
+    backgroundDATA_ave *= (10./70.); 
+    backgroundDATA_ave_error *= (10./70.);
 
     // background from MC: integrate over full range, assume flat, average:
     double backgroundMC_ave_error;
@@ -219,9 +221,9 @@ std::cout << "selection: " << selection_bg << std::endl;
     //background *= lumi;
     //background_error *= lumi;
 
-    // dont scale BG from data:
-    //background_ave *= lumi;
-    //background_ave_error *= lumi;
+    // BG from data corresponds to 12 fb-1
+    backgroundDATA_ave *= lumi/12000.;
+    backgroundDATA_ave_error *= lumi/12000.;
 
     backgroundMC_ave *= lumi;
     backgroundMC_ave_error *= lumi;
@@ -229,8 +231,8 @@ std::cout << "selection: " << selection_bg << std::endl;
 
 
 //std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$         bg: " << background << " bg_ave: " << background_ave << std::endl;
-std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$         bg_ave: " << background_ave << " bgMC_ave: " << backgroundMC_ave << std::endl;
-if( background_ave==0. && backgroundMC_ave==0. ) continue;
+std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$         bg_ave: " << backgroundDATA_ave << " bgMC_ave: " << backgroundMC_ave << std::endl;
+if( backgroundDATA_ave==0. && backgroundMC_ave==0. ) continue;
    
     //float signal_xsec = 2.28E-03*(19.37 + 1.573 + 0.6966 + 0.3943 + 0.1302); 
     // VH cross section only:
@@ -245,48 +247,49 @@ if( background_ave==0. && backgroundMC_ave==0. ) continue;
     //float UL = CLA( db->get_lumi(), 0., effS, 0., background, 0. );
     //float ULSM = UL/signal_xsec;
 
-    float UL_bgave = CLA( db->get_lumi(), 0., effS, 0., background_ave, 0. );
-    float ULSM_bgave = UL_bgave/signal_xsec;
+    float UL_bgDATAave = CLA( db->get_lumi(), 0., effS, 0., backgroundDATA_ave, 0. );
+    float ULSM_bgDATAave = UL_bgDATAave/signal_xsec;
 
     float UL_bgMCave = CLA( db->get_lumi(), 0., effS, 0., backgroundMC_ave, 0. );
     float ULSM_bgMCave = UL_bgMCave/signal_xsec;
 
 
 //std::cout << "signal: " << signal << " bg: " << background << " +- " << background_error << std::endl;
-std::cout << "signal: " << signal << " bg: " << background_ave << " +- " << background_ave_error << std::endl;
+std::cout << "signal: " << signal << " bg: " << backgroundDATA_ave << " +- " << backgroundDATA_ave_error << std::endl;
 
 
     if( effS > effmax )
       effmax = effS;
 
     //gr_UL->SetPoint( iEff-1, 100.*effS, ULSM );
-    gr_UL_bgave->SetPoint( iEff-1, 100.*effS, ULSM_bgave );
+    gr_UL_bgDATAave->SetPoint( iEff-1, 100.*effS, ULSM_bgDATAave );
     gr_UL_bgMCave->SetPoint( iEff-1, 100.*effS, ULSM_bgMCave );
 
-    if( ULSM_bgave > UL_max ) {
-      UL_max = ULSM_bgave;
+    if( ULSM_bgDATAave > UL_max ) {
+      UL_max = ULSM_bgDATAave;
     }
 
-    if( ULSM_bgave < UL_min ) {
-      UL_min = ULSM_bgave;
+    if( ULSM_bgDATAave < UL_min ) {
+      UL_min = ULSM_bgDATAave;
       effS_UL_min = effS;
     }
 
-    float ymax = h1_signal->GetMaximum() + h1_bg->GetMaximum();
+    float ymax = h1_signal->GetMaximum() + h1_bgDATA->GetMaximum();
     ymax*=1.5;
 
 
+    h1_bgDATA->Scale(30000./12000.);
     h1_bgMC->Scale(30000.);
     h1_signal->Scale(30000.);
 
     h1_bgMC->SetFillColor(38);
     h1_signal->SetFillColor(46);
-    h1_bg->SetMarkerStyle(20);
-    h1_bg->SetMarkerSize(1.5);
+    h1_bgDATA->SetMarkerStyle(20);
+    h1_bgDATA->SetMarkerSize(1.5);
 
     h1_bgMC->Rebin(5.);
     h1_signal->Rebin(5.);
-    h1_bg->Rebin(5.);
+    h1_bgDATA->Rebin(5.);
 
     THStack* stack = new THStack();
     stack->Add( h1_bgMC );
@@ -302,7 +305,7 @@ std::cout << "signal: " << signal << " bg: " << background_ave << " +- " << back
     legend->SetTextSize(0.035);
     legend->AddEntry( h1_signal, "Signal", "F");
     legend->AddEntry( h1_bgMC, "BG (MC)", "F");
-    legend->AddEntry( h1_bg, "BG (Data)", "P");
+    legend->AddEntry( h1_bgDATA, "BG (Data)", "P");
 
     char canvasName[250];
     sprintf( canvasName, "%s/yieldPlot_Seff%d.eps", optcutsdir.c_str(), iEff*10);
@@ -339,7 +342,7 @@ std::cout << "signal: " << signal << " bg: " << background_ave << " +- " << back
     h2_axes->Draw();
     //h1_signal->Draw("same");
     stack->Draw("histo same");
-    h1_bg->Draw("E same");
+    h1_bgDATA->Draw("E same");
     legend->Draw("same");
     //label->Draw("same");
     //label_UL->Draw("same");
@@ -353,13 +356,13 @@ std::cout << "signal: " << signal << " bg: " << background_ave << " +- " << back
     //delete stack;
     
 
-    ofs_UL << effS << "\t" << signal << "\t" << background_ave << " +- " << background_ave_error << "\t" << UL_bgave << std::endl;
+    ofs_UL << effS << "\t" << signal << "\t" << backgroundDATA_ave << " +- " << backgroundDATA_ave_error << "\t" << UL_bgDATAave << std::endl;
 
     delete h1_signal;
-    delete h1_bg;
+    delete h1_bgDATA;
     delete h1_bgMC;
 
-std::cout << "### " << iEff << "   UL: " << UL_bgave << "  UL/SM: " << UL_bgave/signal_xsec << std::endl;
+std::cout << "### " << iEff << "   UL: " << UL_bgDATAave << "  UL/SM: " << UL_bgDATAave/signal_xsec << std::endl;
   } // for iEff
 
   std::cout << "> > >   BEST UL: " << UL_min << std::endl;
@@ -373,14 +376,32 @@ std::cout << "### " << iEff << "   UL: " << UL_bgave << "  UL/SM: " << UL_bgave/
 //gr_UL->SetMarkerStyle(21);
 //gr_UL->SetMarkerColor(kRed+3);
 
-  gr_UL_bgave->SetMarkerSize(2.);
-  gr_UL_bgave->SetMarkerStyle(20);
-  gr_UL_bgave->SetMarkerColor(kRed+2);
+  gr_UL_bgDATAave->SetMarkerSize(2.);
+  gr_UL_bgDATAave->SetMarkerStyle(20);
+  gr_UL_bgDATAave->SetMarkerColor(kRed+2);
 
   gr_UL_bgMCave->SetMarkerSize(2.);
   gr_UL_bgMCave->SetMarkerStyle(29);
   gr_UL_bgMCave->SetMarkerColor(kOrange+1);
 
+
+  std::string categoryText;
+  if( category==0 )
+    categoryText = "ttH Leptonic";
+  else if( category==1 )
+    categoryText = "ttH Hadronic";
+  else if( category==2 )
+    categoryText = "VH 2 b-tag";
+  else if( category==3 )
+    categoryText = "VH 1 b-tag";
+  else if( category==4 )
+    categoryText = "VH 0 b-tag";
+
+  TLegend* legendUL = new TLegend(0.5, 0.65, 0.9, 0.9, categoryText.c_str());
+  legendUL->SetFillColor(0);
+  legendUL->SetTextSize(0.04);
+  legendUL->AddEntry(gr_UL_bgDATAave, "BG from Data", "P");
+  legendUL->AddEntry(gr_UL_bgMCave, "BG from MC", "P");
 
   TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1.3*effmax*100., 10, 0., 1.6*UL_max ); 
   //TH2D* h2_axes_gr = new TH2D("axes_gr", "", 10, 0., 1., 10, 0., 5.);
@@ -394,9 +415,10 @@ std::cout << "### " << iEff << "   UL: " << UL_bgave << "  UL/SM: " << UL_bgave/
   
   h2_axes_gr->Draw();
   //gr_UL->Draw("P same");
-  gr_UL_bgave->Draw("P same");
+  gr_UL_bgDATAave->Draw("P same");
   gr_UL_bgMCave->Draw("P same");
   label_sqrt->Draw("same");
+  legendUL->Draw("same");
 
   char UL_vs_Seff_name[250];
   sprintf(UL_vs_Seff_name, "%s/UL_vs_Seff_cat%d.eps", optcutsdir.c_str(), category );
