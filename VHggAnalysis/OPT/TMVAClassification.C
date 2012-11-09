@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.6 2012/11/06 11:14:23 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.7 2012/11/06 14:12:34 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -175,7 +175,7 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
    // note that you may also use variable expressions, such as: "3*var1/var2*abs(var3)"
    // [all types of expressions that can also be parsed by TTree::Draw( "expression" )]
    //factory->AddVariable( "ptLept3"       , "Third Lepton p_{T}", "GeV", 'F');
-   factory->AddVariable( "ptgg"            , "DiPhoton p_{T}", "GeV", 'F');
+   factory->AddVariable( "ptRungg"            , "Running DiPhoton p_{T}", "GeV", 'F');
    if( category>1 ) { // VH stuff:
      //factory->AddVariable( "njets"         , "N Jets", "", 'I');
      //factory->AddVariable( "ptPhot1"            , "Lead Photon p_{T}", "GeV", 'F');
@@ -327,23 +327,23 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
    TCut mycuts;
    TCut mycutb;
    if( category==0 ) { //ttH leptonic
-     mycuts = "mgg>100. && mgg<180. && ptPhot1>60. && ptPhot2>25. && category==0";
-     mycutb = "mgg>100. && mgg<180. && ptPhot1>60. && ptPhot2>25. && category==0";
+     mycuts = "mgg>100. && mgg<180. && ptRunPhot1>60. && ptRunPhot2>25. && category==0";
+     mycutb = "mgg>100. && mgg<180. && ptRunPhot1>60. && ptRunPhot2>25. && category==0";
    } else if( category==1 ) { //ttH hadronic
-     mycuts = "mgg>100. && mgg<180. && ptPhot1>60. && ptPhot2>25. && category==1";
-     mycutb = "mgg>100. && mgg<180. && ptPhot1>60. && ptPhot2>25. && category==1";
+     mycuts = "mgg>100. && mgg<180. && ptRunPhot1>60. && ptRunPhot2>25. && category==1";
+     mycutb = "mgg>100. && mgg<180. && ptRunPhot1>60. && ptRunPhot2>25. && category==1";
    } else if( category==2 ) { //VH 2 tag
-     mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==2";
-     mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==2";
+     mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==2";
+     mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==2";
    } else if( category==3 ) { //VH 1 tag
-     mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==3";
-     mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==3";
+     mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==3";
+     mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==3";
    } else if( category==4 ) { //VH 0 tag
-     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==4";
-     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category==4";
+     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==4";
+     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==4";
    } else if( category==5 ) { //VH 0+1+2 tag but with mjj>70, to be used for VH 1 and 2 tag (assume ptgg and costhetastar dont depend on btag)
-     mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category>=2";
-     mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptPhot1>60. && ptPhot2>25. && category>=2";
+     mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category>=2";
+     mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category>=2";
    }
    //TCut mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
    //TCut mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycutb = "abs(var1)<0.5";
@@ -382,8 +382,8 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
       bookConditions += ":VarProp[1]=FMin"; //abs costhetastar
       bookConditions += ":VarProp[2]=FMax"; //ptJet2
 
-      bookConditions += ":EffSel:SampleSize=200000000"; // this for the actual opt
-      //bookConditions += ":EffSel:SampleSize=500000"; // this for the ranking
+      //bookConditions += ":EffSel:SampleSize=200000000"; // this for the actual opt
+      bookConditions += ":EffSel:SampleSize=50000"; // this for the ranking
 
 
 
@@ -611,8 +611,8 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
        }
 
        // preselection cuts (if not optimized):
-       ofs << "ptPhot1 60. 100000." << std::endl;
-       ofs << "ptPhot2 25. 100000." << std::endl;
+       ofs << "ptRunPhot1 60. 100000." << std::endl;
+       ofs << "ptRunPhot2 25. 100000." << std::endl;
        if( category==2 || category==3 || category==5 )
          ofs << "mjj 70. 120." << std::endl;
        if( category==4 )
