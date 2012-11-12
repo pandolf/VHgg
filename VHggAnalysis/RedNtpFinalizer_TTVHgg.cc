@@ -360,12 +360,11 @@ void RedNtpFinalizer_TTVHgg::finalize()
    float zeppen_t;
    float chiSquareProbMax_t;
    float absCosThetaStar_t;
-   float absCosTheta1_t;
 
    int hasPassedSinglePhot_t;
    int hasPassedDoublePhot_t;
 
-   float cosThetaStar_t, cosTheta1_t;
+   float cosThetaStar_t, cosTheta2_t;
    float etaVstar_t;
    float m3_t;
    float minv_lnu_t;
@@ -422,7 +421,6 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "zeppen", &zeppen_t, "zeppen_t/F" );
    tree_passedEvents->Branch( "chiSquareProbMax", &chiSquareProbMax_t, "chiSquareProbMax_t/F" );
    tree_passedEvents->Branch( "absCosThetaStar", &absCosThetaStar_t, "absCosThetaStar_t/F" );
-   tree_passedEvents->Branch( "absCosTheta1", &absCosTheta1_t, "absCosTheta1_t/F" );
    tree_passedEvents->Branch("ptele1", &ptele1, "ptele1/F");
    tree_passedEvents->Branch("etaele1", &etaele1, "etaele1/F");
    tree_passedEvents->Branch("phiele1", &phiele1, "phiele1/F");
@@ -443,7 +441,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "minv_blnu", &minv_blnu_t, "minv_blnu_t/F" );
    tree_passedEvents->Branch( "minv_bgg", &minv_bgg_t, "minv_bgg_t/F" );
    tree_passedEvents->Branch( "cosThetaStar", &cosThetaStar_t, "cosThetaStar_t/F" );
-   tree_passedEvents->Branch( "cosTheta1", &cosTheta1_t, "cosTheta1_t/F" );
+   tree_passedEvents->Branch( "cosTheta2", &cosTheta2_t, "cosTheta2_t/F" );
    tree_passedEvents->Branch( "etaVstar", &etaVstar_t, "etaVstar_t/F" );
 
 
@@ -981,10 +979,9 @@ void RedNtpFinalizer_TTVHgg::finalize()
        
        float cosThetaStar = hangles.helCosThetaStar;
        cosThetaStar_t=cosThetaStar;
-       cosTheta1_t=hangles.helCosTheta1;
+       cosTheta2_t=hangles.helCosTheta2;
        h1_cosThetaStar->Fill( hangles.helCosThetaStar, eventWeight );
        h1_cosTheta1->Fill( hangles.helCosTheta1, eventWeight );
-       cosTheta1_t=hangles.helCosTheta1;
        h1_cosTheta2->Fill( hangles.helCosTheta2, eventWeight );
        h1_helphi->Fill( hangles.helPhi, eventWeight );
        h1_helphi1->Fill( hangles.helPhi1, eventWeight );
@@ -1377,7 +1374,6 @@ void RedNtpFinalizer_TTVHgg::finalize()
        zeppen_t = zeppen;
        chiSquareProbMax_t = chiSquareProbMax;
        absCosThetaStar_t = fabs(cosThetaStar);
-       absCosTheta1_t = fabs(cosTheta1_t);
        hasPassedSinglePhot_t=hasPassedSinglePhot;
        hasPassedDoublePhot_t=hasPassedDoublePhot;
 
