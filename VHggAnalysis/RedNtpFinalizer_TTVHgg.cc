@@ -100,6 +100,10 @@ void RedNtpFinalizer_TTVHgg::finalize()
    h1_ptphot0->Sumw2();
    TH1D* h1_ptphot1 = new TH1D("ptphot1", "", 200, 0., 200.);
    h1_ptphot1->Sumw2();
+   TH1D* h1_ptrunphot0 = new TH1D("ptrunphot0", "",200, 0., 200.);
+   h1_ptrunphot0->Sumw2();
+   TH1D* h1_ptrunphot1 = new TH1D("ptrunphot1", "", 200, 0., 200.);
+   h1_ptrunphot1->Sumw2();
    TH1D* h1_etaphot0 = new TH1D("etaphot0", "", 100, -5., 5.);
    h1_etaphot0->Sumw2();
    TH1D* h1_etaphot1 = new TH1D("etaphot1", "", 100, -5., 5.);
@@ -213,6 +217,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
    TH1D*  h1_ptDiphot = new TH1D("ptDiphot", "", 100, 0., 500.);
    h1_ptDiphot->Sumw2();
+   TH1D*  h1_ptRunDiphot = new TH1D("ptRunDiphot", "", 100, 0., 500.);
+   h1_ptRunDiphot->Sumw2();
 
    TH1D*  h1_deltaPhi = new TH1D("deltaPhi", "", 100, 0., 3.1416);
    h1_deltaPhi->Sumw2();
@@ -358,11 +364,13 @@ void RedNtpFinalizer_TTVHgg::finalize()
    float zeppen_t;
    float chiSquareProbMax_t;
    float absCosThetaStar_t;
+   float absCosTheta1_t;
 
    int hasPassedSinglePhot_t;
    int hasPassedDoublePhot_t;
 
-   float cosThetaStar_t,etaVstar_t,cosTheta1_t;
+   float cosThetaStar_t, cosTheta1_t;
+   float etaVstar_t;
    float m3_t;
    float minv_lnu_t;
    float minv_blnu_t;
@@ -418,6 +426,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "zeppen", &zeppen_t, "zeppen_t/F" );
    tree_passedEvents->Branch( "chiSquareProbMax", &chiSquareProbMax_t, "chiSquareProbMax_t/F" );
    tree_passedEvents->Branch( "absCosThetaStar", &absCosThetaStar_t, "absCosThetaStar_t/F" );
+   tree_passedEvents->Branch( "absCosTheta1", &absCosTheta1_t, "absCosTheta1_t/F" );
    tree_passedEvents->Branch("ptele1", &ptele1, "ptele1/F");
    tree_passedEvents->Branch("etaele1", &etaele1, "etaele1/F");
    tree_passedEvents->Branch("phiele1", &phiele1, "phiele1/F");
@@ -839,6 +848,9 @@ void RedNtpFinalizer_TTVHgg::finalize()
        h1_ptphot0->Fill(ptphot1, eventWeight);
        h1_ptphot1->Fill(ptphot2, eventWeight);
 
+       h1_ptrunphot0->Fill(ptphot1*120/massggnewvtx, eventWeight);
+       h1_ptrunphot1->Fill(ptphot2*120/massggnewvtx, eventWeight);
+
        h1_etaphot0->Fill(etaphot1, eventWeight);
        h1_etaphot1->Fill(etaphot2, eventWeight);
 
@@ -973,6 +985,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
        
        float cosThetaStar = hangles.helCosThetaStar;
        cosThetaStar_t=cosThetaStar;
+       cosTheta1_t=hangles.helCosTheta1;
        h1_cosThetaStar->Fill( hangles.helCosThetaStar, eventWeight );
        h1_cosTheta1->Fill( hangles.helCosTheta1, eventWeight );
        cosTheta1_t=hangles.helCosTheta1;
@@ -1256,6 +1269,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
        // inclusive plots:
 
        h1_ptDiphot->Fill( diphot.Pt(), eventWeight );
+       h1_ptRunDiphot->Fill( diphot.Pt()*120./massggnewvtx, eventWeight );
 
 
        float deltaphi = fabs(dijet.DeltaPhi(diphot));
@@ -1395,6 +1409,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
        zeppen_t = zeppen;
        chiSquareProbMax_t = chiSquareProbMax;
        absCosThetaStar_t = fabs(cosThetaStar);
+       absCosTheta1_t = fabs(cosTheta1_t);
        hasPassedSinglePhot_t=hasPassedSinglePhot;
        hasPassedDoublePhot_t=hasPassedDoublePhot;
 
@@ -1440,6 +1455,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
    h1_ptphot0->Write();
    h1_ptphot1->Write();
+   h1_ptrunphot0->Write();
+   h1_ptrunphot1->Write();
    h1_etaphot0->Write();
    h1_etaphot1->Write();
 
@@ -1479,6 +1496,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    h1_mjj_incorrect->Write();
 
    h1_ptDiphot->Write();
+   h1_ptRunDiphot->Write();
 
    h1_deltaPhi->Write();
    h1_ptDijet->Write();
