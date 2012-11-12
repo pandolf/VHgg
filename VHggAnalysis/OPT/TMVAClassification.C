@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.9 2012/11/09 12:41:17 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.10 2012/11/09 12:42:08 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -339,8 +339,10 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
      mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==3";
      mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==3";
    } else if( category==4 ) { //VH 0 tag
-     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==4";
-     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==4";
+     //mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==4";
+     //mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==4";
+     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && abs(etaPhot1)<1.4442 && abs(etaPhot2)<1.4442 && category==4";
+     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && abs(etaPhot1)<1.4442 && abs(etaPhot2)<1.4442 && category==4";
    } else if( category==5 ) { //VH 0+1+2 tag but with mjj>70, to be used for VH 1 and 2 tag (assume ptgg and costhetastar dont depend on btag)
      mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category>=2";
      mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category>=2";
@@ -382,8 +384,8 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
       bookConditions += ":VarProp[1]=FMin"; //abs costhetastar
       bookConditions += ":VarProp[2]=FMax"; //ptJet2
 
-      //bookConditions += ":EffSel:SampleSize=200000000"; // this for the actual opt
-      bookConditions += ":EffSel:SampleSize=50000"; // this for the ranking
+      bookConditions += ":EffSel:SampleSize=200000000"; // this for the actual opt
+      //bookConditions += ":EffSel:SampleSize=50000"; // this for the ranking
 
 
 
@@ -611,12 +613,16 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
        }
 
        // preselection cuts (if not optimized):
+       ofs << "mgg 100. 180." << std::endl;
        ofs << "ptRunPhot1 60. 100000." << std::endl;
        ofs << "ptRunPhot2 25. 100000." << std::endl;
        if( category==2 || category==3 || category==5 )
          ofs << "mjj 70. 120." << std::endl;
-       if( category==4 )
+       if( category==4 ) { //VH 0 tag
          ofs << "mjj 60. 120." << std::endl;
+         ofs << "etaPhot1 -1.4442 1.4442" << std::endl;
+         ofs << "etaPhot2 -1.4442 1.4442" << std::endl;
+       }
        char btagcutline[300];
        sprintf( btagcutline, "category %d %d", category, category+1);
        std::string btagcutline_str(btagcutline);
