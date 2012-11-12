@@ -275,7 +275,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
    TH1D* h1_cosTheta1 = new TH1D("cosTheta1", "", 100, -1.0001, 1.0001);
    h1_cosTheta1->Sumw2();
-   TH1D* h1_cosTheta2 = new TH1D("cosTheta2", "", 100, -1.0001, 1.0001);
+   TH1D* h1_cosTheta2 = new TH1D("cosTheta2", "", 50, 0., 1.0001);
    h1_cosTheta2->Sumw2();
    TH1D* h1_cosThetaStar = new TH1D("cosThetaStar", "", 100, -1.0001, 1.0001);
    h1_cosThetaStar->Sumw2();
