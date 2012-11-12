@@ -740,22 +740,43 @@ void RedNtpFinalizer_TTVHgg::finalize()
            }
          }
 
-         if( btagjprobjet[ijet]>0.275 ) {
-           njets_selected_btagloose++;
-           index_selected_btagloose.push_back(ijet);
-         }
-         if( btagjprobjet[ijet]>0.545 ) {
-           njets_selected_btagmedium++;
-           index_selected_btagmedium.push_back(ijet);
-         }
+	 if(bTaggerType_=="JP"){
+	   if( btagjprobjet[ijet]>0.275 ) {
+	     njets_selected_btagloose++;
+	     index_selected_btagloose.push_back(ijet);
+	   }
+	   if( btagjprobjet[ijet]>0.545 ) {
+	     njets_selected_btagmedium++;
+	     index_selected_btagmedium.push_back(ijet);
+	   }
+	 }else if(bTaggerType_=="CSV") {
+	   if( btagvtxjet[ijet]>0.244){
+	     njets_selected_btagloose++;
+	     index_selected_btagloose.push_back(ijet);
+	   }
+	   if( btagvtxjet[ijet]>0.679){
+	     njets_selected_btagmedium++;
+	     index_selected_btagmedium.push_back(ijet);
+	   }	   
+
+	 }else{
+
+	   std::cout<<"WARNING: btag type "<<bTaggerType_<<"not found"<<std::endl;
+	 }
 
          index_selected.push_back(ijet);
 
          if( njets_selected<20 ) {
            ptJet_t[njets_selected] = ptcorrjet[ijet];
            etaJet_t[njets_selected] = etajet[ijet];
-           btaggedLooseJet_t[njets_selected] = btagjprobjet[ijet]>0.275;
-           btaggedMediumJet_t[njets_selected] = btagjprobjet[ijet]>0.545;
+	   if(bTaggerType_=="JP"){
+	     btaggedLooseJet_t[njets_selected] = btagjprobjet[ijet]>0.275;
+	     btaggedMediumJet_t[njets_selected] = btagjprobjet[ijet]>0.545;
+	   }else if(bTaggerType_=="CSV") {
+	     btaggedLooseJet_t[njets_selected] = btagvtxjet[ijet]>0.244;
+	     btaggedMediumJet_t[njets_selected] = btagvtxjet[ijet]>0.679;
+	   }
+
          }
 
          njets_selected++;
