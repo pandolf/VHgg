@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.10 2012/11/09 12:42:08 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.11 2012/11/12 11:57:02 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -178,11 +178,13 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
    factory->AddVariable( "ptRungg"            , "Running DiPhoton p_{T}", "GeV", 'F');
    if( category>1 ) { // VH stuff:
      //factory->AddVariable( "njets"         , "N Jets", "", 'I');
-     //factory->AddVariable( "ptPhot1"            , "Lead Photon p_{T}", "GeV", 'F');
-     //factory->AddVariable( "ptPhot2"            , "Sublead Photon p_{T}", "GeV", 'F');
-     //factory->AddVariable( "ptJet1"            , "Lead Jet p_{T}", "GeV", 'F');
+     factory->AddVariable( "ptPhot1"            , "Lead Photon p_{T}", "GeV", 'F');
+     factory->AddVariable( "ptPhot2"            , "Sublead Photon p_{T}", "GeV", 'F');
+     factory->AddVariable( "ptJet1"            , "Lead Jet p_{T}", "GeV", 'F');
      factory->AddVariable( "absCosThetaStar"            , "|cos(#theta*)|", "", 'F');
+     factory->AddVariable( "absCosTheta2"            , "|cos(#theta_1)|", "", 'F');
      factory->AddVariable( "ptJet2"            , "Sublead Jet p_{T}", "GeV", 'F');
+     factory->AddVariable( "ptjj"            , "DiJet p_{T}", "GeV", 'F');
    } else { //ttH
      factory->AddVariable( "njets"         , "N Jets", "", 'I');
      factory->AddVariable( "Alt$(ptJet[2],0)"            , "Third Jet p_{T}", "GeV", 'F');
@@ -191,7 +193,6 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
      factory->AddVariable( "m3"            , "M3", "GeV", 'F');
      //factory->AddVariable( "Ht"            , "H_{T}", "GeV", 'F');
    }
-   //factory->AddVariable( "ptjj"            , "DiJet p_{T}", "GeV", 'F');
 
    // You can add so-called "Spectator variables", which are not used in the MVA training, 
    // but will appear in the final "TestTree" produced by TMVA. This TestTree will contain the 
@@ -332,18 +333,15 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
    } else if( category==1 ) { //ttH hadronic
      mycuts = "mgg>100. && mgg<180. && ptRunPhot1>60. && ptRunPhot2>25. && category==1";
      mycutb = "mgg>100. && mgg<180. && ptRunPhot1>60. && ptRunPhot2>25. && category==1";
-   } else if( category==2 ) { //VH 2 tag
+   } else if( category==2 ) { //VH b-tagged
      mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==2";
      mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==2";
-   } else if( category==3 ) { //VH 1 tag
-     mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==3";
-     mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==3";
-   } else if( category==4 ) { //VH 0 tag
+   } else if( category==3 ) { //VH no-tag
      //mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==4";
      //mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==4";
-     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && abs(etaPhot1)<1.4442 && abs(etaPhot2)<1.4442 && category==4";
-     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && abs(etaPhot1)<1.4442 && abs(etaPhot2)<1.4442 && category==4";
-   } else if( category==5 ) { //VH 0+1+2 tag but with mjj>70, to be used for VH 1 and 2 tag (assume ptgg and costhetastar dont depend on btag)
+     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && abs(etaPhot1)<1.4442 && abs(etaPhot2)<1.4442 && category==3";
+     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && abs(etaPhot1)<1.4442 && abs(etaPhot2)<1.4442 && category==3";
+   } else if( category==4 ) { //VH tag+notag but with mjj>70, to be used for VH tag (assume ptgg and costhetastar dont depend on btag)
      mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category>=2";
      mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category>=2";
    }
@@ -384,8 +382,8 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
       bookConditions += ":VarProp[1]=FMin"; //abs costhetastar
       bookConditions += ":VarProp[2]=FMax"; //ptJet2
 
-      bookConditions += ":EffSel:SampleSize=200000000"; // this for the actual opt
-      //bookConditions += ":EffSel:SampleSize=50000"; // this for the ranking
+      //bookConditions += ":EffSel:SampleSize=200000000"; // this for the actual opt
+      bookConditions += ":EffSel:SampleSize=50000"; // this for the ranking
 
 
 

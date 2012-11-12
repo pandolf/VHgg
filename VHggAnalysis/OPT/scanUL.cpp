@@ -100,18 +100,17 @@ int main( int argc, char* argv[] ) {
   else if( category==1 )
     categoryText = "ttH Hadronic";
   else if( category==2 )
-    categoryText = "VH 2 b-tag";
+    categoryText = "VH b-tagged";
   else if( category==3 )
-    categoryText = "VH 1 b-tag";
-  else if( category==4 )
-    categoryText = "VH 0 b-tag";
+    categoryText = "VH no tag";
 
 
 
   for( unsigned iEff=1; iEff<=10; ++iEff ) {
 
     // use category 5 only for VH 2 and 1 tags
-    int category_forFile = (category==2 || category==3 || category>4) ? 5 : category;
+    //int category_forFile = (category==2 || category>4) ? 5 : category;
+    int category_forFile = category;
 
     char infileName[300];
     sprintf( infileName, "%s/cuts_cat%d_Seff%d.txt", optcutsdir.c_str(), category_forFile, iEff*10);
@@ -160,7 +159,7 @@ int main( int argc, char* argv[] ) {
     sprintf( categoryCut, " && category==%d", category );
     std::string categoryCut_str(categoryCut);
 
-    if( category<5 ) {
+    if( category<4 ) {
       selection += categoryCut_str;
     } else { //tried also these other btag combinations:
       if( category==6 ) selection += " && nbjets_medium>=1 && nbjets_loose>=2 ";
