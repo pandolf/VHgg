@@ -27,6 +27,8 @@ public :
    Int_t           event;
    Int_t           lumi;
    Bool_t          H_event;
+   Bool_t          WH_event;
+   Bool_t          ZH_event;
    Bool_t          V_event;
    Bool_t          Zbb_event;
    Bool_t          Vqq_event;
@@ -423,6 +425,8 @@ public :
    TBranch        *b_event;   //!
    TBranch        *b_lumi;   //!
    TBranch        *b_H_event;   //!
+   TBranch        *b_WH_event;   //!
+   TBranch        *b_ZH_event;   //!
    TBranch        *b_V_event;   //!
    TBranch        *b_Zbb_event;   //!
    TBranch        *b_Vqq_event;   //!

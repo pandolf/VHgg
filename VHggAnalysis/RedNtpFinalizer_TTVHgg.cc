@@ -443,6 +443,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "cosThetaStar", &cosThetaStar_t, "cosThetaStar_t/F" );
    tree_passedEvents->Branch( "cosTheta2", &cosTheta2_t, "cosTheta2_t/F" );
    tree_passedEvents->Branch( "etaVstar", &etaVstar_t, "etaVstar_t/F" );
+   tree_passedEvents->Branch( "WH_event", &WH_event, "WH_event_t/O" );
+   tree_passedEvents->Branch( "ZH_event", &ZH_event, "ZH_event_t/O" );
 
 
    TTree* tree_weights=new TTree();
@@ -1602,6 +1604,8 @@ void RedNtpFinalizer_TTVHgg::Init()
    tree_->SetBranchAddress("event", &event, &b_event);
    tree_->SetBranchAddress("lumi", &lumi, &b_lumi);
    tree_->SetBranchAddress("H_event", &H_event, &b_H_event);
+   tree_->SetBranchAddress("WH_event", &WH_event, &b_WH_event);
+   tree_->SetBranchAddress("ZH_event", &ZH_event, &b_ZH_event);
    tree_->SetBranchAddress("V_event", &V_event, &b_V_event);
    tree_->SetBranchAddress("Vqq_event", &Vqq_event, &b_Vqq_event);
    tree_->SetBranchAddress("Zbb_event", &Zbb_event, &b_Zbb_event);
