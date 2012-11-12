@@ -8,6 +8,7 @@
 #include "cl95cms.C"
 
 bool separate_signals = true;
+bool include_ttH = false;
 
 
 void printYields( DrawBase* db, const std::string& suffix, bool doUL=false );
@@ -77,7 +78,8 @@ int main(int argc, char* argv[]) {
   ttHFileName += "_" + bTaggerType;
   ttHFileName += ".root";
   TFile* ttHFile = TFile::Open(ttHFileName.c_str());
-  db_nostack->add_mcFile( ttHFile, "TTH", "ttH (125)", signalFillColor+8, 0);
+  if( include_ttH )
+    db_nostack->add_mcFile( ttHFile, "TTH", "ttH (125)", signalFillColor+8, 0);
   db_stack->add_mcFile( ttHFile, "TTH", "ttH (125)", signalFillColor+8, 0);
 
 
@@ -87,8 +89,8 @@ int main(int argc, char* argv[]) {
   VHFileName += "_" + bTaggerType;
   VHFileName += ".root";
   TFile* VHFile = TFile::Open(VHFileName.c_str());
-  db_nostack->add_mcFile( VHFile, "VH", "VH ", signalFillColor+4, 0);
-  db_stack->add_mcFile( VHFile, "VH", "VH ", signalFillColor+4, 0);
+  db_nostack->add_mcFile( VHFile, "VH", "VH (125)", kRed+3, 0);
+  db_stack->add_mcFile( VHFile, "VH", "VH (125)", kRed+3, 0);
 
   
   std::string GluGluHFileName = inputDir +  "TTVHgg_GluGluToHToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1";
@@ -96,8 +98,8 @@ int main(int argc, char* argv[]) {
   GluGluHFileName += "_" + bTaggerType;
   GluGluHFileName += ".root";
   TFile* GluGluHFile = TFile::Open(GluGluHFileName.c_str());
-  db_stack->add_mcFile( GluGluHFile, "GluGluH", "GluGlu H ", signalFillColor+1, 0);
-  db_nostack->add_mcFile( GluGluHFile, "GluGluH", "GluGlu H ", signalFillColor+1, 0);
+  db_stack->add_mcFile( GluGluHFile, "GluGluH", "ggF H (125)", signalFillColor+1, 0);
+  db_nostack->add_mcFile( GluGluHFile, "GluGluH", "ggF H (125) ", signalFillColor+1, 0);
 
   std::string VBFHFileName = inputDir +  "TTVHgg_VBF_HToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1";
   VBFHFileName += "_" + selType;
@@ -123,18 +125,19 @@ int main(int argc, char* argv[]) {
   DiPhotonFileName += "_" + bTaggerType;
   DiPhotonFileName += ".root";
   TFile* DiPhotonFile = TFile::Open(DiPhotonFileName.c_str());
-  db_nostack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
-  db_stack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
-  db_stack_UL->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
+  db_nostack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 38);
+  db_stack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 38);
+  db_stack_UL->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 38);
 
   std::string GammaJetFileName = inputDir +  "TTVHgg_GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6";
   GammaJetFileName += "_" + selType;
   GammaJetFileName += "_" + bTaggerType;
   GammaJetFileName += ".root";
   TFile* GammaJetFile = TFile::Open(GammaJetFileName.c_str());
-  db_nostack->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
-  db_stack->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
-  db_stack_UL->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
+  if( !include_ttH )
+    db_nostack->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 29);
+  db_stack->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 29);
+  db_stack_UL->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 29);
 
   std::string DiBosonFileName = inputDir +  "TTVHgg_VV_8TeV";
   DiBosonFileName += "_" + selType;
@@ -161,7 +164,8 @@ int main(int argc, char* argv[]) {
   TFile* TTFile = TFile::Open(TTFileName.c_str());
   db_stack->add_mcFile( TTFile, "TT", "Top", 44);
   db_stack_UL->add_mcFile( TTFile, "TT", "Top", 44);
-  db_nostack->add_mcFile( TTFile, "TT", "Top", 44);
+  if( include_ttH )
+    db_nostack->add_mcFile( TTFile, "TT", "Top", 44);
 
 
   std::string QCDFileName = inputDir +  "TTVHgg_QCD_doubleEMEnriched_TuneZ2star_8TeV-pythia6";
