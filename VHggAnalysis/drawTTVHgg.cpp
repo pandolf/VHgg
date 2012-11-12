@@ -8,8 +8,6 @@
 #include "cl95cms.C"
 
 bool separate_signals = true;
-bool use_all_bkg=true;
-bool draw_rw;//true if selection is onlyPhoton
 
 
 void printYields( DrawBase* db, const std::string& suffix, bool doUL=false );
@@ -33,21 +31,17 @@ int main(int argc, char* argv[]) {
     bTaggerType = bTaggerType_str;
   }
 
-  bool draw_rw= (selType=="onlyPhotonCuts");
 
-
+  // no stack is used for shape comparisons between signal
+  // and the main backgrounds (diphoton, gammajet and ttbar)
   DrawBase* db_nostack = new DrawBase("TTVHgg_nostack");
+
+  // stack is used for the MC stack after full selection
   DrawBase* db_stack = new DrawBase("TTVHgg_stack");
   DrawBase* db_stack_UL = new DrawBase("TTVHgg_stack_UL");
-  //data stack
-  DrawBase* db_stack_data = new DrawBase("TTVHgg_stack");
-  //data stack for reweighted
-  DrawBase* db_stack_data_rw = new DrawBase("TTVHgg_stack_rw");
 
 
 
-  //stack for cs
-  DrawBase* db_stack_cs = new DrawBase("TTVHgg_stack_cs");
 
   db_nostack->set_lumiOnRightSide();
   db_nostack->set_shapeNormalization();
@@ -61,35 +55,14 @@ int main(int argc, char* argv[]) {
   db_stack_UL->set_noStack(false);            
 
 
-  db_stack_data->set_lumiOnRightSide();
-  db_stack_data->set_lumiNormalization(9300.);
-  db_stack_data->set_noStack(false);
-
-  db_stack_data_rw->set_lumiOnRightSide();
-  db_stack_data_rw->set_lumiNormalization(9300.);
-  db_stack_data_rw->set_noStack(false);
-
-
-  db_stack_cs->set_lumiOnRightSide();	      
-  //  db_stack_cs->set_lumiNormalization(9300.); 
-  db_stack_cs->set_lumiNormalization(9300.);
-  db_stack_cs ->set_noStack(false);            
-
-
 
 
   std::string outputdir_str = "TTVHgg_plots/"+redntpProdVersion+"/TTVHggPlots_MConly_" + selType + "_" + bTaggerType;
-  if(use_all_bkg)outputdir_str+="_all";
   db_nostack->set_outputdir(outputdir_str);
   db_stack->set_outputdir(outputdir_str);
   db_stack_UL->set_outputdir(outputdir_str+"/UL");
 
-  std::string outputdir_str_data = "TTVHgg_plots/"+redntpProdVersion+"/TTVHggPlots_DATA_" + selType + "_" + bTaggerType;
-  db_stack_data->set_outputdir(outputdir_str_data);
-  db_stack_data_rw->set_outputdir(outputdir_str_data);
 
-  std::string outputdir_str_cs = "TTVHgg_plots/CSvsMC/"+redntpProdVersion+"/TTVHggPlots_MConly_" + selType + "_" + bTaggerType;
-  db_stack_cs->set_outputdir(outputdir_str_cs);
 
   int signalFillColor = 46;
 
@@ -118,174 +91,91 @@ int main(int argc, char* argv[]) {
   db_stack->add_mcFile( VHFile, "VH", "VH ", signalFillColor+4, 0);
 
   
-    std::string GluGluHFileName = inputDir +  "TTVHgg_GluGluToHToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1";
-    GluGluHFileName += "_" + selType;
-    GluGluHFileName += "_" + bTaggerType;
-    GluGluHFileName += ".root";
-    TFile* GluGluHFile = TFile::Open(GluGluHFileName.c_str());
-    db_stack->add_mcFile( GluGluHFile, "GluGluH", "GluGlu H ", signalFillColor+1, 0);
-    db_nostack->add_mcFile( GluGluHFile, "GluGluH", "GluGlu H ", signalFillColor+1, 0);
+  std::string GluGluHFileName = inputDir +  "TTVHgg_GluGluToHToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1";
+  GluGluHFileName += "_" + selType;
+  GluGluHFileName += "_" + bTaggerType;
+  GluGluHFileName += ".root";
+  TFile* GluGluHFile = TFile::Open(GluGluHFileName.c_str());
+  db_stack->add_mcFile( GluGluHFile, "GluGluH", "GluGlu H ", signalFillColor+1, 0);
+  db_nostack->add_mcFile( GluGluHFile, "GluGluH", "GluGlu H ", signalFillColor+1, 0);
 
-    std::string VBFHFileName = inputDir +  "TTVHgg_VBF_HToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1";
-    VBFHFileName += "_" + selType;
-    VBFHFileName += "_" + bTaggerType;
-    VBFHFileName += ".root";
-    TFile* VBFHFile = TFile::Open(VBFHFileName.c_str());
-    db_stack->add_mcFile( VBFHFile, "VBFH", "VBF H ", signalFillColor, 0);
-    //    db_nostack->add_mcFile( VBFHFile, "VBFH", "VBF H", signalFillColor, 0);
+  std::string VBFHFileName = inputDir +  "TTVHgg_VBF_HToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1";
+  VBFHFileName += "_" + selType;
+  VBFHFileName += "_" + bTaggerType;
+  VBFHFileName += ".root";
+  TFile* VBFHFile = TFile::Open(VBFHFileName.c_str());
+  db_stack->add_mcFile( VBFHFile, "VBFH", "VBF H ", signalFillColor, 0);
+  //    db_nostack->add_mcFile( VBFHFile, "VBFH", "VBF H", signalFillColor, 0);
 
 
-    // inclusive signal file for stack plot
-    std::string HToGGFileName = inputDir +  "TTVHgg_HToGG_M-125_8TeV-pythia6";
-    HToGGFileName += "_" + selType;
-    std::string HToGGFileName_inverted=HToGGFileName+"_inverted_"+bTaggerType+".root";
-    HToGGFileName += "_" + bTaggerType;
-    std::string HToGGFileName_scaled=HToGGFileName+"_scaled.root";
+  // inclusive signal file for stack plot
+  std::string HToGGFileName = inputDir +  "TTVHgg_HToGG_M-125_8TeV-pythia6";
+  HToGGFileName += "_" + selType;
+  HToGGFileName += "_" + bTaggerType;
+  HToGGFileName += ".root";
+  TFile* HToGGFile = TFile::Open(HToGGFileName.c_str());
+  db_stack_UL->add_mcFile( HToGGFile, "HToGG", "H (125)", signalFillColor, 0);
 
-    HToGGFileName += ".root";
-    TFile* HToGGFile = TFile::Open(HToGGFileName.c_str());
-    TFile* HToGGFile_scaled = TFile::Open(HToGGFileName_scaled.c_str());
 
-    db_stack_UL->add_mcFile( HToGGFile, "HToGG", "H (125)", signalFillColor, 0);
-    db_stack_cs->add_mcFile( HToGGFile_scaled, "HToGG", "H (125)", signalFillColor, 0);
-    db_stack_data->add_mcFile( HToGGFile_scaled, "HToGG", "H (125)", signalFillColor, 0);
-    if(draw_rw){
-      TFile* HToGGFile_inverted = TFile::Open(HToGGFileName_inverted.c_str());
-      db_stack_data_rw->add_mcFile( HToGGFile_inverted, "HToGG", "H (125)", signalFillColor, 0);
-    }
 
   std::string DiPhotonFileName = inputDir +  "TTVHgg_DiPhoton_8TeV-pythia6";
   DiPhotonFileName += "_" + selType;
-  std::string DiPhotonFileName_inverted=DiPhotonFileName+"_inverted_"+bTaggerType+".root";
   DiPhotonFileName += "_" + bTaggerType;
-
-  std::string DiPhotonFileName_scaled=DiPhotonFileName+"_scaled.root";
-
   DiPhotonFileName += ".root";
   TFile* DiPhotonFile = TFile::Open(DiPhotonFileName.c_str());
-  TFile* DiPhotonFile_scaled = TFile::Open(DiPhotonFileName_scaled.c_str());
   db_nostack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
   db_stack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
   db_stack_UL->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
-  db_stack_data->add_mcFile( DiPhotonFile_scaled, "DiPhoton", "Diphoton", 29);
-  if(draw_rw){
-  TFile* DiPhotonFile_inverted = TFile::Open(DiPhotonFileName_inverted.c_str());
-  db_stack_data_rw->add_mcFile( DiPhotonFile_inverted, "DiPhoton", "Diphoton", 29);
-  }
-  db_stack_cs->add_mcFile( DiPhotonFile_scaled, "DiPhoton", "Diphoton", 29);
 
   std::string GammaJetFileName = inputDir +  "TTVHgg_GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6";
   GammaJetFileName += "_" + selType;
-  std::string GammaJetFileName_inverted=GammaJetFileName+"_inverted_"+bTaggerType+".root";
   GammaJetFileName += "_" + bTaggerType;
-  std::string GammaJetFileName_scaled=GammaJetFileName+"_scaled.root";
-
   GammaJetFileName += ".root";
   TFile* GammaJetFile = TFile::Open(GammaJetFileName.c_str());
-  TFile* GammaJetFile_scaled = TFile::Open(GammaJetFileName_scaled.c_str());
   db_nostack->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
   db_stack->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
   db_stack_UL->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
-  db_stack_data->add_mcFile( GammaJetFile_scaled, "GammaJet", "#gamma + Jet", 38);
-  if(draw_rw){
-  TFile* GammaJetFile_inverted = TFile::Open(GammaJetFileName_inverted.c_str());
-  db_stack_data_rw->add_mcFile( GammaJetFile_inverted, "GammaJet", "#gamma + Jet", 38);
-  }
-  db_stack_cs->add_mcFile( GammaJetFile_scaled, "GammaJet", "#gamma + Jet", 38);
 
   std::string DiBosonFileName = inputDir +  "TTVHgg_VV_8TeV";
   DiBosonFileName += "_" + selType;
-  std::string DiBosonFileName_inverted=DiBosonFileName+"_inverted_"+bTaggerType+".root";
   DiBosonFileName += "_" + bTaggerType;
-  std::string DiBosonFileName_scaled=DiBosonFileName+"_scaled.root";
-
-  TFile* DiBosonFile_scaled = TFile::Open(DiBosonFileName_scaled.c_str());
   DiBosonFileName += ".root";
   TFile* DiBosonFile = TFile::Open(DiBosonFileName.c_str());
+  db_stack->add_mcFile( DiBosonFile, "DiBoson", "Diboson", 39);
+  db_stack_UL->add_mcFile( DiBosonFile, "DiBoson", "Diboson", 39);
 
 
   std::string TriBosonFileName = inputDir +  "TTVHgg_VGG_8TeV";
   TriBosonFileName += "_" + selType;
-  std::string TriBosonFileName_inverted=TriBosonFileName+"_inverted_"+bTaggerType+".root";
-
   TriBosonFileName += "_" + bTaggerType;
-  std::string TriBosonFileName_scaled=TriBosonFileName+"_scaled.root";
-
-  TFile* TriBosonFile_scaled = TFile::Open(TriBosonFileName_scaled.c_str());
   TriBosonFileName += ".root";
   TFile* TriBosonFile = TFile::Open(TriBosonFileName.c_str());
-  TFile* TriBosonFile_inverted = TFile::Open(TriBosonFileName_inverted.c_str());
+  db_stack->add_mcFile( TriBosonFile, "Vgg", "V#gamma#gamma", 40);
+  db_stack_UL->add_mcFile( TriBosonFile, "Vgg", "V#gamma#gamma", 40);
 
 
   std::string TTFileName = inputDir +  "TTVHgg_TT_8TeV";
   TTFileName += "_" + selType;
-  std::string TTFileName_inverted=TTFileName+"_inverted_"+bTaggerType+".root";
   TTFileName += "_" + bTaggerType;
-  std::string TTFileName_scaled=TTFileName+"_scaled.root";
-
-  TFile* TTFile_scaled = TFile::Open(TTFileName_scaled.c_str());
   TTFileName += ".root";
   TFile* TTFile = TFile::Open(TTFileName.c_str());
+  db_stack->add_mcFile( TTFile, "TT", "Top", 44);
+  db_stack_UL->add_mcFile( TTFile, "TT", "Top", 44);
+  db_nostack->add_mcFile( TTFile, "TT", "Top", 44);
 
 
   std::string QCDFileName = inputDir +  "TTVHgg_QCD_doubleEMEnriched_TuneZ2star_8TeV-pythia6";
   QCDFileName += "_" + selType;
-  std::string QCDFileName_inverted=QCDFileName+"_inverted_"+bTaggerType+".root";
   QCDFileName += "_" + bTaggerType;
-  std::string QCDFileName_scaled=QCDFileName+"_scaled.root";
-  TFile* QCDFile_scaled = TFile::Open(QCDFileName_scaled.c_str());
-
-
-
   QCDFileName += ".root";
   TFile* QCDFile = TFile::Open(QCDFileName.c_str());
-
-
-  if(use_all_bkg){
-  db_stack->add_mcFile( DiBosonFile, "DiBoson", "Diboson", 39);
   db_stack->add_mcFile( QCDFile, "QCD", "QCD", 41);
-  db_stack->add_mcFile( TTFile, "TT", "Top", 44);
-
-  db_stack_UL->add_mcFile( DiBosonFile, "DiBoson", "Diboson", 39);
   db_stack_UL->add_mcFile( QCDFile, "QCD", "QCD", 41);
-  db_stack_UL->add_mcFile( TTFile, "TT", "Top", 44);
-
-  db_stack_data->add_mcFile( DiBosonFile_scaled, "DiBoson", "Diboson", 39);
-  db_stack_data->add_mcFile( QCDFile_scaled, "QCD", "QCD", 41);
-  db_stack_data->add_mcFile( TTFile_scaled, "TT", "Top", 44);
-
-  if(draw_rw){
-  TFile* DiBosonFile_inverted = TFile::Open(DiBosonFileName_inverted.c_str());
-  TFile* QCDFile_inverted = TFile::Open(QCDFileName_inverted.c_str());
-  TFile* TTFile_inverted = TFile::Open(TTFileName_inverted.c_str());
-  db_stack_data_rw->add_mcFile( DiBosonFile_inverted, "DiBoson", "Diboson", 39);
-  db_stack_data_rw->add_mcFile( QCDFile_inverted, "QCD", "QCD", 41);
-  db_stack_data_rw->add_mcFile( TTFile_inverted, "TT", "Top", 44);
-  }
-
-  db_stack_cs->add_mcFile( DiBosonFile_scaled, "DiBoson", "Diboson", 39);
-  db_stack_cs->add_mcFile( QCDFile_scaled, "QCD", "QCD", 41);
-  db_stack_cs->add_mcFile( TTFile_scaled, "TT", "Top", 44);
 
 
-  db_nostack->add_mcFile( TTFile, "TT", "Top", 44);
-  }
 
-  //  std::string controlSampleFileName ="cs_total_DATA2012.root";
-  std::string controlSampleFileName ="cs_scaled_DATA2012.root";
-  TFile* controlSampleFile = TFile::Open(controlSampleFileName.c_str());
-  db_stack_cs->add_dataFile( controlSampleFile, "controlSample","CS");
 
-  std::string dataFileName =inputDir +  "TTVHgg_DATA_Run2012ABC";
-  dataFileName += "_" + selType;
-  dataFileName += "_" + bTaggerType;
-  std::string  dataFileName_scaled =dataFileName + "_scaled.root";
-  dataFileName += ".root";
-  TFile* dataFile = TFile::Open(dataFileName.c_str());
-  TFile* dataFile_scaled = TFile::Open(dataFileName_scaled.c_str());
 
-  db_stack_data->add_dataFile( dataFile_scaled, "Data","Data");
-  db_stack_data_rw->add_dataFile( dataFile, "Data","Data");
 
 
 
@@ -303,9 +193,9 @@ int main(int argc, char* argv[]) {
 
   db_nostack->set_rebin(4);
   db_nostack->drawHisto("mjj", "Dijet Mass", "GeV");
-  db_nostack->drawHisto("mjj_0btag", "Dijet Mass", "GeV");
-  db_nostack->drawHisto("mjj_1btag", "Dijet Mass", "GeV");
-  db_nostack->drawHisto("mjj_2btag", "Dijet Mass", "GeV");
+  db_nostack->drawHisto("mjj_VH0btag", "Dijet Mass", "GeV");
+  db_nostack->drawHisto("mjj_VH1btag", "Dijet Mass", "GeV");
+  db_nostack->drawHisto("mjj_VH2btag", "Dijet Mass", "GeV");
   std::vector< HistoAndName > hn;
   HistoAndName hn_qglHI;
   hn_qglHI.histoName = "mjj_qglHI";
@@ -322,10 +212,10 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto("qgljet0", "Lead Jet Q-G LD");
   db_nostack->drawHisto("qgljet1", "Sublead Jet Q-G LD");
   db_stack->set_legendTitle( "0 b-tag Category" );
-  db_nostack->drawHisto("qgljet0_0btag", "Lead Jet Q-G LD");
-  db_nostack->drawHisto("qgljet1_0btag", "Sublead Jet Q-G LD");
+  db_nostack->drawHisto("qgljet0_VH0btag", "Lead Jet Q-G LD");
+  db_nostack->drawHisto("qgljet1_VH0btag", "Sublead Jet Q-G LD");
   db_stack->set_legendTitle( "1 b-tag Category" );
-  db_nostack->drawHisto("qgljet_1btag", "Non b-Tagged Jet Q-G LD");
+  db_nostack->drawHisto("qgljet_VH1btag", "Non b-Tagged Jet Q-G LD");
   db_stack->set_legendTitle( "" );
   db_nostack->set_rebin();
 
@@ -395,27 +285,26 @@ int main(int argc, char* argv[]) {
   //db_nostack->drawHisto_fromTree("tree_passedEvents", "chiSquareProbMax", "eventWeight*(mjj>60. && mjj<120.)", 20, 0., 0.1, "kinfit_chiSquareProbMax_mjjwindow", "KinFit Max #chi^{2} Prob");
 
 
-  db_stack->set_rebin(5);
+  db_stack->set_rebin(2);
 
   db_stack->drawHisto("mgg_prepresel", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "prepresel" );
   db_stack->drawHisto("mgg_presel", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "presel");
 
-  //    bool doUL = (selType != "presel" );
-    bool doUL=false;
+  bool doUL = (selType != "presel" );
 
   db_stack->drawHisto("mgg", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "incl", doUL );
 
   db_stack->set_legendTitle( "VH, 0 b-tag" );
-  db_stack->drawHisto("mgg_0btag", "DiPhoton Invariant Mass", "GeV");
+  db_stack->drawHisto("mgg_VH0btag", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "0tag", doUL );
   db_stack->set_legendTitle( "VH, 1 b-tag" );
-  db_stack->drawHisto("mgg_1btag", "DiPhoton Invariant Mass", "GeV");
+  db_stack->drawHisto("mgg_VH1btag", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "1tag", doUL );
   db_stack->set_legendTitle( "VH, 2 b-tag" );
-  db_stack->drawHisto("mgg_2btag", "DiPhoton Invariant Mass", "GeV");
+  db_stack->drawHisto("mgg_VH2btag", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "2tag", doUL );
   db_stack->set_legendTitle( "BSM Category" );
   db_stack->drawHisto("mgg_bsm", "DiPhoton Invariant Mass", "GeV");
@@ -432,13 +321,13 @@ int main(int argc, char* argv[]) {
   //Upper limits
   db_stack_UL->set_rebin(5);
   db_stack->set_legendTitle( "VH, 0 b-tag" );
-  db_stack_UL->drawHisto("mgg_0btag", "DiPhoton Invariant Mass", "GeV");
+  db_stack_UL->drawHisto("mgg_VH0btag", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack_UL, "0tag", doUL );
   db_stack->set_legendTitle( "VH, 1 b-tag" );
-  db_stack_UL->drawHisto("mgg_1btag", "DiPhoton Invariant Mass", "GeV");
+  db_stack_UL->drawHisto("mgg_VH1btag", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack_UL, "1tag", doUL );
   db_stack->set_legendTitle( "VH, 2 b-tag" ); 
-  db_stack_UL->drawHisto("mgg_2btag", "DiPhoton Invariant Mass", "GeV");
+  db_stack_UL->drawHisto("mgg_VH2btag", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack_UL, "2tag", doUL );
   db_stack_UL->set_legendTitle( "BSM Category" );
   db_stack_UL->drawHisto("mgg_bsm", "DiPhoton Invariant Mass", "GeV");
@@ -450,40 +339,6 @@ int main(int argc, char* argv[]) {
   db_stack_UL->set_legendTitle( "ttH, hadronic" );
   db_stack_UL->drawHisto("mgg_ttH_hadronic", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack_UL, "ttH_hadronic", doUL );
-
-
-  for(int category =0 ; category<5;++category){
-    std::stringstream cat_ss;
-    cat_ss<<category;
-    string cat_str("(category=="+cat_ss.str()+")*(mgg>100 && mgg<180)");
-    string cat_str_blind("(category=="+cat_ss.str()+")*(mgg>100 && mgg<180)*(mgg<120 ||mgg>130)");
-    //    cout<<cat_str<<endl;
-    db_stack_cs->set_flags("category_"+cat_ss.str());
-    cout<<cat_str+"*eventWeight*weight_cat"<<endl;
-    db_stack_cs->drawHisto_fromTree("tree_passedEvents","mgg",cat_str+"*eventWeight*(weight_cat)",16,100,180,"mgg", "DiPhoton Invariant Mass", "GeV");
-
-
-    db_stack_data->set_flags("category_"+cat_ss.str());
-    db_stack_data->drawHisto_fromTree("tree_passedEvents","mgg",cat_str_blind+"*eventWeight*(weight_cat)",16,100,180,"mgg", "DiPhoton Invariant Mass", "GeV");
-
-    /*db_stack_cs->reset();
-    db_stack_cs->set_flags("category_"+cat_ss.str());
-    db_stack_cs->set_rebin(5);
-     db_stack_cs->drawHisto("mgg_presel", "DiPhoton Invariant Mass", "GeV");
-    db_stack_cs->reset();
-    db_stack_cs->drawHisto("ptphot0", "Lead Photon p_{T}", "GeV");
-    db_stack_cs->drawHisto("ptphot1", "Sublead Photon p_{T}", "GeV");
-    */
-  }
-  db_stack_data->reset();
-
-  if(draw_rw){
-  db_stack_data_rw->drawHisto_fromTree("tree_weights","mgg","eventWeight*(mgg>100 && mgg<180)*(mgg<120 ||mgg>130)",16,100,180,"mgg", "DiPhoton Invariant Mass", "GeV");
-
-  db_stack_data_rw->drawHisto_fromTree("tree_weights","ptPhot1","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*pt_scaled_2D_weight",50,60,260,"ptphot0_scaled_2D_ptBoth","Lead Photon p_{T}", "GeV");	  
-  db_stack_data_rw->drawHisto_fromTree("tree_weights","ptPhot2","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*pt_scaled_2D_weight",25,20,120,"ptphot1_scaled_2D_ptBoth","Sublead Photon p_{T}", "GeV"); 
-  db_stack_data_rw->drawHisto_fromTree("tree_weights","mgg","pt_scaled_2D_weight*(mgg<120 || mgg>130)",16,100,180,"mgg_scaled_2D_ptBoth", "DiPhoton Invariant Mass", "GeV");                       
-  }
 
 
   return 0;
@@ -508,8 +363,6 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
 
   int binXmin = histos[0]->FindBin(xMin);
   int binXmax = histos[0]->FindBin(xMax) -1;
-  std::cout <<  binXmin << std::endl;
-  std::cout <<  binXmax << std::endl;
 
   bool foundSignal = false;
   float totalBG = 0.;
