@@ -252,11 +252,11 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto("deltaFabsEtaJets_kinfit", "Jet-Jet #Delta|#eta|");
   db_nostack->drawHisto("zeppen_kinfit", "Zeppenfeld Variable");
 
-  db_nostack->drawHisto("cosTheta1");
-  db_nostack->drawHisto("cosTheta2");
-  db_nostack->drawHisto("cosThetaStar");
-  db_nostack->drawHisto("helphi");
-  db_nostack->drawHisto("helphi1");
+  db_nostack->drawHisto("cosTheta1", "cos(#theta_{1})");
+  db_nostack->drawHisto("cosTheta2", "cos(#theta_{2})");
+  db_nostack->drawHisto("cosThetaStar", "cos(#theta*)");
+  db_nostack->drawHisto("helphi", "#Phi", "rad");
+  db_nostack->drawHisto("helphi1", "#Phi_1", "rad");
 
   db_nostack->set_rebin(20);
   db_nostack->drawHisto("mVstar", "V* Mass", "GeV");
