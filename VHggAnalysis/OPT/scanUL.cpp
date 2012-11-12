@@ -15,6 +15,8 @@
 #include "../cl95cms.C"
 
 
+float data_lumi=9300.;
+
 
 
 int main( int argc, char* argv[] ) {
@@ -35,10 +37,10 @@ int main( int argc, char* argv[] ) {
   category = atoi(category_str.c_str());
 
 
-  if( category<0 || category>5 ) {
-    std::cout << "category must be between 0 and 5. Exiting." << std::endl;
-    exit(11);
-  }
+  //if( category<0 || category>5 ) {
+  //  std::cout << "category must be between 0 and 5. Exiting." << std::endl;
+  //  exit(11);
+  //}
 
 
   // this sets the style:
@@ -92,11 +94,24 @@ int main( int argc, char* argv[] ) {
   //backgroundTree_data->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_DATA_Run2012ABC_presel_invertedPhotID_JP.root");
 
 
+  std::string categoryText;
+  if( category==0 )
+    categoryText = "ttH Leptonic";
+  else if( category==1 )
+    categoryText = "ttH Hadronic";
+  else if( category==2 )
+    categoryText = "VH 2 b-tag";
+  else if( category==3 )
+    categoryText = "VH 1 b-tag";
+  else if( category==4 )
+    categoryText = "VH 0 b-tag";
+
+
 
   for( unsigned iEff=1; iEff<=10; ++iEff ) {
 
     // use category 5 only for VH 2 and 1 tags
-    int category_forFile = (category==2 || category==3) ? 5 : category;
+    int category_forFile = (category==2 || category==3 || category>4) ? 5 : category;
 
     char infileName[300];
     sprintf( infileName, "%s/cuts_cat%d_Seff%d.txt", optcutsdir.c_str(), category_forFile, iEff*10);
@@ -144,7 +159,15 @@ int main( int argc, char* argv[] ) {
     char categoryCut[300];
     sprintf( categoryCut, " && category==%d", category );
     std::string categoryCut_str(categoryCut);
-    selection += categoryCut_str;
+
+    if( category<5 ) {
+      selection += categoryCut_str;
+    } else { //tried also these other btag combinations:
+      if( category==6 ) selection += " && nbjets_medium>=1 && nbjets_loose>=2 ";
+      if( category==7 ) selection += " && nbjets_medium>=2 ";
+      if( category==8 ) selection += " && nbjets_medium>=1 ";
+      if( category==9 ) selection += " && nbjets_loose>=1 ";
+    }
 
     // just to be sure, add mgg cut by hand:
     selection += " && mgg>100. && mgg<180. ";
@@ -222,8 +245,8 @@ std::cout << "entries in BG(data): " << h1_bgDATA->GetEntries() << std::endl;
     //background_error *= lumi;
 
     // BG from data corresponds to 12 fb-1
-    backgroundDATA_ave *= lumi/12000.;
-    backgroundDATA_ave_error *= lumi/12000.;
+    backgroundDATA_ave *= lumi/data_lumi;
+    backgroundDATA_ave_error *= lumi/data_lumi;
 
     backgroundMC_ave *= lumi;
     backgroundMC_ave_error *= lumi;
@@ -278,7 +301,7 @@ std::cout << "signal: " << signal << " bg: " << backgroundDATA_ave << " +- " << 
     ymax*=1.5;
 
 
-    h1_bgDATA->Scale(30000./12000.);
+    h1_bgDATA->Scale(30000./data_lumi);
     h1_bgMC->Scale(30000.);
     h1_signal->Scale(30000.);
 
@@ -300,7 +323,7 @@ std::cout << "signal: " << signal << " bg: " << backgroundDATA_ave << " +- " << 
     h2_axes->SetYTitle("Events");
 
 
-    TLegend* legend = new TLegend(0.65, 0.65, 0.9, 0.88);
+    TLegend* legend = new TLegend(0.6, 0.65, 0.9, 0.88, categoryText.c_str());
     legend->SetFillColor(0);
     legend->SetTextSize(0.035);
     legend->AddEntry( h1_signal, "Signal", "F");
@@ -308,7 +331,9 @@ std::cout << "signal: " << signal << " bg: " << backgroundDATA_ave << " +- " << 
     legend->AddEntry( h1_bgDATA, "BG (Data)", "P");
 
     char canvasName[250];
-    sprintf( canvasName, "%s/yieldPlot_Seff%d.eps", optcutsdir.c_str(), iEff*10);
+    sprintf( canvasName, "%s/yieldPlot_cat%d_Seff%d.eps", optcutsdir.c_str(), category, iEff*10);
+
+    TPaveText* label = db->get_labelTop();
 
     //TPaveText* label = new TPaveText( 0.15, 0.65, 0.45, 0.85, "brNDC");
     //label->SetFillColor(0);
@@ -344,7 +369,7 @@ std::cout << "signal: " << signal << " bg: " << backgroundDATA_ave << " +- " << 
     stack->Draw("histo same");
     h1_bgDATA->Draw("E same");
     legend->Draw("same");
-    //label->Draw("same");
+    label->Draw("same");
     //label_UL->Draw("same");
     //label_sqrt->Draw("same");
     gPad->RedrawAxis();
@@ -383,19 +408,6 @@ std::cout << "### " << iEff << "   UL: " << UL_bgDATAave << "  UL/SM: " << UL_bg
   gr_UL_bgMCave->SetMarkerSize(2.);
   gr_UL_bgMCave->SetMarkerStyle(29);
   gr_UL_bgMCave->SetMarkerColor(kOrange+1);
-
-
-  std::string categoryText;
-  if( category==0 )
-    categoryText = "ttH Leptonic";
-  else if( category==1 )
-    categoryText = "ttH Hadronic";
-  else if( category==2 )
-    categoryText = "VH 2 b-tag";
-  else if( category==3 )
-    categoryText = "VH 1 b-tag";
-  else if( category==4 )
-    categoryText = "VH 0 b-tag";
 
   TLegend* legendUL = new TLegend(0.5, 0.65, 0.9, 0.9, categoryText.c_str());
   legendUL->SetFillColor(0);
