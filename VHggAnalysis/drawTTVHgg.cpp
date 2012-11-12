@@ -8,7 +8,7 @@
 #include "cl95cms.C"
 
 bool separate_signals = true;
-bool include_ttH = false;
+bool include_ttH = true;
 
 
 void printYields( DrawBase* db, const std::string& suffix, bool doUL=false );
@@ -127,7 +127,7 @@ int main(int argc, char* argv[]) {
   TFile* DiPhotonFile = TFile::Open(DiPhotonFileName.c_str());
   db_nostack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 38);
   db_stack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
-  db_stack_UL->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 38);
+  db_stack_UL->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
 
   std::string GammaJetFileName = inputDir +  "TTVHgg_GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6";
   GammaJetFileName += "_" + selType;
@@ -137,7 +137,7 @@ int main(int argc, char* argv[]) {
   if( !include_ttH )
     db_nostack->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 29);
   db_stack->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
-  db_stack_UL->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 29);
+  db_stack_UL->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
 
   std::string DiBosonFileName = inputDir +  "TTVHgg_VV_8TeV";
   DiBosonFileName += "_" + selType;
