@@ -197,9 +197,8 @@ int main(int argc, char* argv[]) {
 
   db_nostack->set_rebin(4);
   db_nostack->drawHisto("mjj", "Dijet Mass", "GeV");
-  db_nostack->drawHisto("mjj_VH0btag", "Dijet Mass", "GeV");
-  db_nostack->drawHisto("mjj_VH1btag", "Dijet Mass", "GeV");
-  db_nostack->drawHisto("mjj_VH2btag", "Dijet Mass", "GeV");
+  db_nostack->drawHisto("mjj_VHnotag", "Dijet Mass", "GeV");
+  db_nostack->drawHisto("mjj_VHbtag", "Dijet Mass", "GeV");
   std::vector< HistoAndName > hn;
   HistoAndName hn_qglHI;
   hn_qglHI.histoName = "mjj_qglHI";
@@ -216,10 +215,10 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto("qgljet0", "Lead Jet Q-G LD");
   db_nostack->drawHisto("qgljet1", "Sublead Jet Q-G LD");
   db_stack->set_legendTitle( "0 b-tag Category" );
-  db_nostack->drawHisto("qgljet0_VH0btag", "Lead Jet Q-G LD");
-  db_nostack->drawHisto("qgljet1_VH0btag", "Sublead Jet Q-G LD");
+  db_nostack->drawHisto("qgljet0_VHnotag", "Lead Jet Q-G LD");
+  db_nostack->drawHisto("qgljet1_VHnotag", "Sublead Jet Q-G LD");
   db_stack->set_legendTitle( "1 b-tag Category" );
-  db_nostack->drawHisto("qgljet_VH1btag", "Non b-Tagged Jet Q-G LD");
+  db_nostack->drawHisto("qgljet_VHbtag", "Non b-Tagged Jet Q-G LD");
   db_stack->set_legendTitle( "" );
   db_nostack->set_rebin();
 
@@ -301,15 +300,12 @@ int main(int argc, char* argv[]) {
   db_stack->drawHisto("mgg", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "incl", doUL );
 
-  db_stack->set_legendTitle( "VH, 0 b-tag" );
-  db_stack->drawHisto("mgg_VH0btag", "DiPhoton Invariant Mass", "GeV");
+  db_stack->set_legendTitle( "VH, no tag" );
+  db_stack->drawHisto("mgg_VHnotag", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "0tag", doUL );
-  db_stack->set_legendTitle( "VH, 1 b-tag" );
-  db_stack->drawHisto("mgg_VH1btag", "DiPhoton Invariant Mass", "GeV");
+  db_stack->set_legendTitle( "VH, b-tagged" );
+  db_stack->drawHisto("mgg_VHbtag", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "1tag", doUL );
-  db_stack->set_legendTitle( "VH, 2 b-tag" );
-  db_stack->drawHisto("mgg_VH2btag", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack, "2tag", doUL );
   db_stack->set_legendTitle( "BSM Category" );
   db_stack->drawHisto("mgg_bsm", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "mgg_bsm", doUL );
@@ -324,15 +320,12 @@ int main(int argc, char* argv[]) {
 
   //Upper limits
   db_stack_UL->set_rebin(5);
-  db_stack->set_legendTitle( "VH, 0 b-tag" );
-  db_stack_UL->drawHisto("mgg_VH0btag", "DiPhoton Invariant Mass", "GeV");
+  db_stack->set_legendTitle( "VH, no tag" );
+  db_stack_UL->drawHisto("mgg_VHnotag", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack_UL, "0tag", doUL );
-  db_stack->set_legendTitle( "VH, 1 b-tag" );
-  db_stack_UL->drawHisto("mgg_VH1btag", "DiPhoton Invariant Mass", "GeV");
+  db_stack->set_legendTitle( "VH, b-tagged" );
+  db_stack_UL->drawHisto("mgg_VHbtag", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack_UL, "1tag", doUL );
-  db_stack->set_legendTitle( "VH, 2 b-tag" ); 
-  db_stack_UL->drawHisto("mgg_VH2btag", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack_UL, "2tag", doUL );
   db_stack_UL->set_legendTitle( "BSM Category" );
   db_stack_UL->drawHisto("mgg_bsm", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack_UL, "mgg_bsm", doUL );

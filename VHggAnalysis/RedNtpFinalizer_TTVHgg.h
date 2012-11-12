@@ -840,18 +840,16 @@ public :
    float ptphot1cut_;
    float ptphot2cut_;
 
-   bool ebeb_VH0btag_thresh_;
+   bool ebeb_VHnotag_thresh_;
 
-   float ptgg_VH0btag_thresh_;
-   float ptgg_VH1btag_thresh_;
-   float ptgg_VH2btag_thresh_;
+   float ptgg_VHnotag_thresh_;
+   float ptgg_VHbtag_thresh_;
 
    float ptjetthresh_count_;
    float etajetthresh_count_;
 
-   float ptjet_VH0btag_thresh_;
-   float ptjet_VH1btag_thresh_;
-   float ptjet_VH2btag_thresh_;
+   float ptjet_VHnotag_thresh_;
+   float ptjet_VHbtag_thresh_;
 
    int njets_thresh_;
    int njets_upper_thresh_;
@@ -862,15 +860,14 @@ public :
 
    float zeppenfeld_thresh_;
 
-   float costhetastar_VH0btag_thresh_;
-   float costhetastar_VH1btag_thresh_;
-   float costhetastar_VH2btag_thresh_;
+   float costhetastar_VHnotag_thresh_;
+   float costhetastar_VHbtag_thresh_;
 
-   float mjj_min_thresh_;
-   float mjj_max_thresh_;
+   float mjj_min_VHbtag_thresh_;
+   float mjj_max_VHbtag_thresh_;
 
-   float mjj_min_VH0btag_thresh_;
-   float mjj_max_VH0btag_thresh_;
+   float mjj_min_VHnotag_thresh_;
+   float mjj_max_VHnotag_thresh_;
 
    float   Ht_thresh_;
    bool  invert_photonCuts_;
