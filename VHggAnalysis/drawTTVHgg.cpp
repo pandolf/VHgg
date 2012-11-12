@@ -331,12 +331,15 @@ int main(int argc, char* argv[]) {
 
   db_nostack->drawHisto("ptphot0", "Lead Photon p_{T}", "GeV");
   db_nostack->drawHisto("ptphot1", "Sublead Photon p_{T}", "GeV");
+  db_nostack->drawHisto("ptrunphot0", "Running Lead Photon p_{T}", "GeV");
+  db_nostack->drawHisto("ptrunphot1", "Running Sublead Photon p_{T}", "GeV");
   db_nostack->drawHisto("ptjet0", "Lead Jet p_{T}", "GeV");
   db_nostack->drawHisto("ptjet1", "Sublead Jet p_{T}", "GeV");
 
   db_nostack->set_rebin(2);
 
   db_nostack->drawHisto("ptDiphot", "Diphoton p_{T}", "GeV");
+  db_nostack->drawHisto("ptRunDiphot", "Running Diphoton p_{T}", "GeV");
 
   db_nostack->drawHisto("deltaPhi", "#Delta#Phi(dijet-diphoton)", "rad");
   db_nostack->drawHisto("ptDijet", "Dijet p_{T}", "GeV");
