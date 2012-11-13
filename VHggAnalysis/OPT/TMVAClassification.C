@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.11 2012/11/12 11:57:02 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.12 2012/11/12 15:29:48 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -178,11 +178,13 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
    factory->AddVariable( "ptRungg"            , "Running DiPhoton p_{T}", "GeV", 'F');
    if( category>1 ) { // VH stuff:
      //factory->AddVariable( "njets"         , "N Jets", "", 'I');
-     factory->AddVariable( "ptPhot1"            , "Lead Photon p_{T}", "GeV", 'F');
-     factory->AddVariable( "ptPhot2"            , "Sublead Photon p_{T}", "GeV", 'F');
+     factory->AddVariable( "ptRunPhot1"            , "Running Lead Photon p_{T}", "GeV", 'F');
+     factory->AddVariable( "ptRunPhot2"            , "Running Sublead Photon p_{T}", "GeV", 'F');
+     //factory->AddVariable( "ptRunPhot1"            , "Lead Photon p_{T}", "GeV", 'F');
+     //factory->AddVariable( "ptRunPhot2"            , "Sublead Photon p_{T}", "GeV", 'F');
      factory->AddVariable( "ptJet1"            , "Lead Jet p_{T}", "GeV", 'F');
      factory->AddVariable( "absCosThetaStar"            , "|cos(#theta*)|", "", 'F');
-     factory->AddVariable( "absCosTheta2"            , "|cos(#theta_1)|", "", 'F');
+     factory->AddVariable( "cosTheta2"            , "cos(#theta_2)", "", 'F');
      factory->AddVariable( "ptJet2"            , "Sublead Jet p_{T}", "GeV", 'F');
      factory->AddVariable( "ptjj"            , "DiJet p_{T}", "GeV", 'F');
    } else { //ttH
@@ -334,16 +336,16 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
      mycuts = "mgg>100. && mgg<180. && ptRunPhot1>60. && ptRunPhot2>25. && category==1";
      mycutb = "mgg>100. && mgg<180. && ptRunPhot1>60. && ptRunPhot2>25. && category==1";
    } else if( category==2 ) { //VH b-tagged
-     mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==2";
-     mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==2";
+     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==2";
+     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==2";
    } else if( category==3 ) { //VH no-tag
      //mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==4";
      //mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==4";
      mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && abs(etaPhot1)<1.4442 && abs(etaPhot2)<1.4442 && category==3";
      mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && abs(etaPhot1)<1.4442 && abs(etaPhot2)<1.4442 && category==3";
    } else if( category==4 ) { //VH tag+notag but with mjj>70, to be used for VH tag (assume ptgg and costhetastar dont depend on btag)
-     mycuts = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category>=2";
-     mycutb = "mgg>100. && mgg<180. && mjj>70. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category>=2";
+     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category>=2";
+     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category>=2";
    }
    //TCut mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
    //TCut mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycutb = "abs(var1)<0.5";
@@ -614,10 +616,8 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
        ofs << "mgg 100. 180." << std::endl;
        ofs << "ptRunPhot1 60. 100000." << std::endl;
        ofs << "ptRunPhot2 25. 100000." << std::endl;
-       if( category==2 || category==3 || category==5 )
-         ofs << "mjj 70. 120." << std::endl;
-       if( category==4 ) { //VH 0 tag
-         ofs << "mjj 60. 120." << std::endl;
+       ofs << "mjj 60. 120." << std::endl;
+       if( category==3 ) { //VH no tag
          ofs << "etaPhot1 -1.4442 1.4442" << std::endl;
          ofs << "etaPhot2 -1.4442 1.4442" << std::endl;
        }
