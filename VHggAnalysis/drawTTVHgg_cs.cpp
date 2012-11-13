@@ -8,6 +8,9 @@
 #include "cl95cms.C"
 
 bool separate_mechanism = false;
+bool draw_rw;//true if selection is onlyPhoton
+
+
 
 void printYields( DrawBase* db, const std::string& suffix, bool doUL=false );
 
@@ -30,12 +33,17 @@ int main(int argc, char* argv[]) {
   }
 
 
-
+  draw_rw= (selType=="onlyPhotonCuts");
 
 
   DrawBase* db_nostack = new DrawBase("TTVHgg_nostack");
   db_nostack->set_lumiOnRightSide();
   db_nostack->set_shapeNormalization();
+
+  DrawBase* db_nostack_csMC = new DrawBase("TTVHgg_nostack_csMC");
+  db_nostack_csMC->set_lumiOnRightSide();
+  db_nostack_csMC->set_shapeNormalization();
+
 
   DrawBase* db_nostack_rw = new DrawBase("TTVHgg_nostack_rw");
   db_nostack_rw->set_lumiOnRightSide();
@@ -45,8 +53,8 @@ int main(int argc, char* argv[]) {
   std::string outputdir_str = "TTVHgg_plots/CS/"+redntpProdVersion+"/TTVHggPlots_MConly_" + selType + "_" + bTaggerType;
   db_nostack->set_outputdir(outputdir_str);
 
-  db_nostack_rw->set_outputdir(outputdir_str+"_rw/");
-
+  if(draw_rw)  db_nostack_rw->set_outputdir(outputdir_str+"_rw/");
+  db_nostack_csMC->set_outputdir(outputdir_str+"_csMC/");
 
   int signalFillColor = 46;
 
@@ -62,26 +70,36 @@ int main(int argc, char* argv[]) {
   cout<<"using data file"<<dataFileName<<endl;
   TFile* dataFile = TFile::Open(dataFileName.c_str());
   db_nostack->add_dataFile( dataFile, "data");
-  db_nostack_rw->add_dataFile( dataFile, "data"); 
+
+  if(draw_rw)  db_nostack_rw->add_dataFile( dataFile, "data"); 
  
   //Data control sample
   //  std::string controlSampleFileName ="finalizedTrees_micheli_SinglePhoton_preselectionCS/TTVHgg_DATA_Run2012SinglePhoton_cs_selection_"+bTaggerType+".root";
   //  std::string controlSampleFileName ="tree_forcs/control_sample_had.root";
   //  std::string controlSampleFileName ="tree_forcs/control_sample_lep.root";
-  std::string controlSampleFileName ="cs_scaled_DATA2012.root";
+  //  std::string controlSampleFileName ="cs_scaled_DATA2012.root";
+  //  std::string controlSampleFileName ="cs_w2Dweights_DATA2012_new.root";
+    std::string controlSampleFileName ="cs_w2Dweights_DATA2012_new_2.root";
 
   TFile* controlSampleFile = TFile::Open(controlSampleFileName.c_str());
   db_nostack->add_mcFile( controlSampleFile, "controlSample","CS",kRed ); 
+  db_nostack_csMC->add_mcFile( controlSampleFile, "controlSample","CS",kRed ); 
 
   std::string controlSampleFileName_rw =inputDir+"TTVHgg_" + dataDataset;
-  controlSampleFileName_rw += "_" + selType+"_inverted";
+  controlSampleFileName_rw += "_" + selType+"_invertedPhotID";
   controlSampleFileName_rw += "_" + bTaggerType;
   controlSampleFileName_rw += ".root";
 
   TFile* controlSampleFile_rw = TFile::Open(controlSampleFileName_rw.c_str());
-  db_nostack_rw->add_mcFile( controlSampleFile_rw, "controlSample","CS",kRed ); 
+  if(draw_rw)  db_nostack_rw->add_mcFile( controlSampleFile_rw, "controlSample","CS",kRed ); 
   
- 
+  std::string HToGGFileName = inputDir +  "TTVHgg_HToGG_M-125_8TeV-pythia6";
+  HToGGFileName += "_" + selType;
+  HToGGFileName += "_" + bTaggerType;
+  HToGGFileName += ".root";
+  TFile* HToGGFile = TFile::Open(HToGGFileName.c_str());
+  db_nostack_csMC->add_mcFile( HToGGFile, "HToGG", "H (125)", signalFillColor, 0);
+  
   bool log = true;
 
   
@@ -100,7 +118,7 @@ int main(int argc, char* argv[]) {
   db_nostack->set_flags("zoom");
   db_nostack->drawHisto_fromTree("tree_passedEvents","njets",cat_str,8,2,10,"njets", "Number of Jets","","","true");
   db_nostack->reset();
-  db_nostack->drawHisto_fromTree("tree_passedEvents","nbjets_xloose",cat_str,10,0,10,"nbjets_loose", "Number of b-Jets (Loose)");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","nbjets_loose",cat_str,10,0,10,"nbjets_loose", "Number of b-Jets (Loose)");
   db_nostack->drawHisto_fromTree("tree_passedEvents","nbjets_medium",cat_str,10,0,10,"nbjets_medium", "Number of b-Jets (Medium)");
 
 
@@ -108,8 +126,9 @@ int main(int argc, char* argv[]) {
  db_nostack->set_flags("category_"+cat_ss.str());
   db_nostack->drawHisto_fromTree("tree_passedEvents","mjj",cat_str,50,0,500, "mjj","Dijet Mass", "GeV");
   db_nostack->reset();
- db_nostack->set_flags("category_"+cat_ss.str());
+  db_nostack->set_flags("category_"+cat_ss.str());
   db_nostack->drawHisto_fromTree("tree_passedEvents","mgg",cat_str+"*(eventWeight*(mgg<120 || mgg>130))",16,100,180,"mgg", "DiPhoton Invariant Mass", "GeV");
+  db_nostack->drawHisto_fromTree("tree_passedEvents","mgg",cat_str+"*pt_scaled_2D_weight_data*eta_scaled_2D_weight_data*(eventWeight*(mgg<120 || mgg>130))",16,100,180,"mgg_scaled", "DiPhoton Invariant Mass", "GeV");  
   db_nostack->reset();
 
   db_nostack->set_flags("category_"+cat_ss.str());
@@ -136,63 +155,84 @@ int main(int argc, char* argv[]) {
 
   db_nostack->reset();
  
+  //cs vs MC signal events
+  db_nostack_csMC->set_flags("category_"+cat_ss.str());
+  db_nostack_csMC->drawHisto_fromTree("tree_passedEvents","cosThetaStar",cat_str,50,-1,1,"cosThetaStar","cosThetaStar","");
+  db_nostack_csMC->drawHisto_fromTree("tree_passedEvents","cosTheta1",cat_str,50,-1,1,"cosTheta1","cosTheta1","");
+  db_nostack_csMC->drawHisto_fromTree("tree_passedEvents","etaVstar",cat_str,50,-5,5,"etaVstar","etaVstar","");
+  db_nostack_csMC->drawHisto_fromTree("tree_passedEvents","minv_lnu",cat_str,25,0,500,"minv_lnu","Lep-#nu M_{T}","GeV");
+  db_nostack_csMC->drawHisto_fromTree("tree_passedEvents","minv_blnu",cat_str,50,0,1000,"minv_blnu","bjet-Lep-#nu M_{T}","GeV");
+  db_nostack_csMC->drawHisto_fromTree("tree_passedEvents","minv_bgg",cat_str,50,0,1000,"minv_bgg","bjet-DiPhot M_{T}","GeV");
+  db_nostack_csMC->reset();
+    
+
+
   }
 
+  if(draw_rw){
   //plots not divided by category
-  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot1","(mgg>100 && mgg<180)*(mgg<120||mgg>130)",50,60,260,"ptphot0_inclusive","Lead Photon p_{T}", "GeV");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot2","(mgg>100 && mgg<180)*(mgg<120||mgg>130)",25,20,120,"ptphot1_inclusive","Sublead Photon p_{T}", "GeV");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","(mgg<120 || mgg>130)",16,100,180,"mgg_inclusive", "DiPhoton Invariant Mass", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot1","((mgg>100 && mgg<180)||mgg<0)",58.,28.,260,"ptphot0_inclusive","Lead Photon p_{T}", "GeV");
+  //  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot1","(_g>100 && mgg<180)||mgg==0)",58.,28.,260,"ptphot0_inclusive_mgg120_130","Lead Photon p_{T}", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot2","((mgg>100 && mgg<180)||mgg<0)",25,20,120,"ptphot1_inclusive","Sublead Photon p_{T}", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","",32,100,180,"mgg_inclusive", "DiPhoton Invariant Mass", "GeV");
 
-  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot1","(mgg>100 && mgg<180)*(mgg<120||mgg>130)",30,-3,3,"etaphot0_inclusive","Lead Photon #eta", "");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot2","(mgg>100 && mgg<180)*(mgg<120||mgg>130)",30,-3,3,"etaphot1_inclusive","Sublead Photon #eta", "");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot1","((mgg>100 && mgg<180)||mgg<0)",30,-3,3,"etaphot0_inclusive","Lead Photon #eta", "");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot2","((mgg>100 && mgg<180)||mgg<0)",30,-3,3,"etaphot1_inclusive","Sublead Photon #eta", "");
 
 
 
   //eta weight
-  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot1","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*eta_scaled_2D_weight",50,60,260,"ptphot0_scaled_2D_etaBoth","Lead Photon p_{T}", "GeV");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot2","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*eta_scaled_2D_weight",25,20,120,"ptphot1_scaled_2D_etaBoth","Sublead Photon p_{T}", "GeV");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","eta_scaled_2D_weight*(mgg<120 || mgg>130)",16,100,180,"mgg_scaled_2D_etaBoth", "DiPhoton Invariant Mass", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot1","((mgg>100 && mgg<180)||mgg<0)*eta_scaled_2D_weight",58.,28.,260,"ptphot0_scaled_2D_etaBoth","Lead Photon p_{T}", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot2","((mgg>100 && mgg<180)||mgg<0)*eta_scaled_2D_weight",25,20,120,"ptphot1_scaled_2D_etaBoth","Sublead Photon p_{T}", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","eta_scaled_2D_weight*(mgg<120 || mgg>130)",32,100,180,"mgg_scaled_2D_etaBoth", "DiPhoton Invariant Mass", "GeV");
 
   //pt weight
-  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot1","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*pt_scaled_2D_weight",50,60,260,"ptphot0_scaled_2D_ptBoth","Lead Photon p_{T}", "GeV");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot2","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*pt_scaled_2D_weight",25,20,120,"ptphot1_scaled_2D_ptBoth","Sublead Photon p_{T}", "GeV");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","pt_scaled_2D_weight*(mgg<120 || mgg>130)",16,100,180,"mgg_scaled_2D_ptBoth", "DiPhoton Invariant Mass", "GeV");                       
+  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot1","((mgg>100 && mgg<180)||mgg<0)*pt_scaled_2D_weight",58.,28.,260,"ptphot0_scaled_2D_ptBoth","Lead Photon p_{T}", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot2","((mgg>100 && mgg<180)||mgg<0)*pt_scaled_2D_weight",25,20,120,"ptphot1_scaled_2D_ptBoth","Sublead Photon p_{T}", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","pt_scaled_2D_weight*(mgg<120 || mgg>130)",32,100,180,"mgg_scaled_2D_ptBoth", "DiPhoton Invariant Mass", "GeV");                       
   //double weight
-  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot1","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*eta_scaled_2D_weight*pt_scaled_2D_weight",50,60,260,"ptphot0_scaled_2D_ptEtaBoth","Lead Photon p_{T}", "GeV");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot2","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*eta_scaled_2D_weight*pt_scaled_2D_weight",25,20,120,"ptphot1_scaled_2D_ptEtaBoth","Sublead Photon p_{T}", "GeV");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","eta_scaled_2D_weight*pt_scaled_2D_weight*(mgg<120 || mgg>130)",16,100,180,"mgg_scaled_2D_ptEtaBoth", "DiPhoton Invariant Mass", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot1","((mgg>100 && mgg<180)||mgg<0)*eta_scaled_2D_weight*pt_scaled_2D_weight",58.,28.,260,"ptphot0_scaled_2D_ptEtaBoth","Lead Photon p_{T}", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot2","((mgg>100 && mgg<180)||mgg<0)*eta_scaled_2D_weight*pt_scaled_2D_weight",25,20,120,"ptphot1_scaled_2D_ptEtaBoth","Sublead Photon p_{T}", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","eta_scaled_2D_weight*pt_scaled_2D_weight*(mgg<120 || mgg>130)",32,100,180,"mgg_scaled_2D_ptEtaBoth", "DiPhoton Invariant Mass", "GeV");
 
   //data weights
   //eta weight
-  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot1","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*eta_scaled_2D_weight_data",50,60,260,"ptphot0_scaled_2D_etaBoth_data","Lead Photon p_{T}", "GeV");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot2","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*eta_scaled_2D_weight_data",25,20,120,"ptphot1_scaled_2D_etaBoth_data","Sublead Photon p_{T}", "GeV");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","eta_scaled_2D_weight_data*(mgg<120 || mgg>130)",16,100,180,"mgg_scaled_2D_etaBoth_data", "DiPhoton Invariant Mass", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot1","((mgg>100 && mgg<180)||mgg<0)*eta_scaled_2D_weight_data",58.,28.,260,"ptphot0_scaled_2D_etaBoth_data","Lead Photon p_{T}", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot2","((mgg>100 && mgg<180)||mgg<0)*eta_scaled_2D_weight_data",25,20,120,"ptphot1_scaled_2D_etaBoth_data","Sublead Photon p_{T}", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","eta_scaled_2D_weight_data*(mgg<120 || mgg>130)",32,100,180,"mgg_scaled_2D_etaBoth_data", "DiPhoton Invariant Mass", "GeV");
 
   //pt weight
-  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot1","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*pt_scaled_2D_weight_data",50,60,260,"ptphot0_scaled_2D_ptBoth_data","Lead Photon p_{T}", "GeV");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot2","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*pt_scaled_2D_weight_data",25,20,120,"ptphot1_scaled_2D_ptBoth_data","Sublead Photon p_{T}", "GeV");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","pt_scaled_2D_weight_data*(mgg<120 || mgg>130)",16,100,180,"mgg_scaled_2D_ptBoth_data", "DiPhoton Invariant Mass", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot1","((mgg>100 && mgg<180)||mgg<0)*pt_scaled_2D_weight_data",58.,28.,260,"ptphot0_scaled_2D_ptBoth_data","Lead Photon p_{T}", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot2","((mgg>100 && mgg<180)||mgg<0)*pt_scaled_2D_weight_data",25,20,120,"ptphot1_scaled_2D_ptBoth_data","Sublead Photon p_{T}", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","pt_scaled_2D_weight_data*(mgg<120 || mgg>130)",32,100,180,"mgg_scaled_2D_ptBoth_data", "DiPhoton Invariant Mass", "GeV");
 
-  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot1","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*pt_scaled_2D_weight_data",30,-3.,3.,"etaphot0_scaled_2D_ptBoth_data","Lead Photon #eta", "");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot2","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*pt_scaled_2D_weight_data",30,-3.,3.,"etaphot1_scaled_2D_ptBoth_data","Sublead Photon #eta", "");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot1","((mgg>100 && mgg<180)||mgg<0)*pt_scaled_2D_weight_data",30,-3.,3.,"etaphot0_scaled_2D_ptBoth_data","Lead Photon #eta", "");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot2","((mgg>100 && mgg<180)||mgg<0)*pt_scaled_2D_weight_data",30,-3.,3.,"etaphot1_scaled_2D_ptBoth_data","Sublead Photon #eta", "");
 
 
   //eta weight
-  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot1","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*eta_scaled_2D_weight_data",30,-3.,3.,"etaphot0_scaled_2D_etaBoth_data","Lead Photon #eta", "");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot2","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*eta_scaled_2D_weight_data",30,-3.,3.,"etaphot1_scaled_2D_etaBoth_data","Sublead Photon #eta", "");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","eta_scaled_2D_weight_data*(mgg<120 || mgg>130)",16,100,180,"mgg_scaled_2D_etaBoth_data", "DiPhoton Invariant Mass", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot1","((mgg>100 && mgg<180)||mgg<0)*eta_scaled_2D_weight_data",30,-3.,3.,"etaphot0_scaled_2D_etaBoth_data","Lead Photon #eta", "");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot2","((mgg>100 && mgg<180)||mgg<0)*eta_scaled_2D_weight_data",30,-3.,3.,"etaphot1_scaled_2D_etaBoth_data","Sublead Photon #eta", "");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","eta_scaled_2D_weight_data*(mgg<120 || mgg>130)",32,100,180,"mgg_scaled_2D_etaBoth_data", "DiPhoton Invariant Mass", "GeV");
                        
   //double weight
-  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot1","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*eta_scaled_2D_weight_data*pt_scaled_2D_weight_data",50,60,260,"ptphot0_scaled_2D_ptEtaBoth_data","Lead Photon p_{T}", "GeV");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot2","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*eta_scaled_2D_weight_data*pt_scaled_2D_weight_data",25,20,120,"ptphot1_scaled_2D_ptEtaBoth_data","Sublead Photon p_{T}", "GeV");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot1","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*eta_scaled_2D_weight_data*pt_scaled_2D_weight_data",30,-3.,3.,"etaphot0_scaled_2D_ptEtaBoth_data","Lead Photon #eta", "");
-  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot2","(mgg>100 && mgg<180)*(mgg<120||mgg>130)*eta_scaled_2D_weight_data*pt_scaled_2D_weight_data",30,-3.,3.,"etaphot1_scaled_2D_ptEtaBoth_data","Sublead Photon #eta", "");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot1","((mgg>100 && mgg<180)||mgg<0)*eta_scaled_2D_weight_data*pt_scaled_2D_weight_data",58.,28.,260,"ptphot0_scaled_2D_ptEtaBoth_data","Lead Photon p_{T}", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","ptPhot2","((mgg>100 && mgg<180)||mgg<0)*eta_scaled_2D_weight_data*pt_scaled_2D_weight_data",25,20,120,"ptphot1_scaled_2D_ptEtaBoth_data","Sublead Photon p_{T}", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot1","((mgg>100 && mgg<180)||mgg<0)*eta_scaled_2D_weight_data*pt_scaled_2D_weight_data",30,-3.,3.,"etaphot0_scaled_2D_ptEtaBoth_data","Lead Photon #eta", "");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","etaPhot2","((mgg>100 && mgg<180)||mgg<0)*eta_scaled_2D_weight_data*pt_scaled_2D_weight_data",30,-3.,3.,"etaphot1_scaled_2D_ptEtaBoth_data","Sublead Photon #eta", "");
 
 
 
-  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","eta_scaled_2D_weight_data*pt_scaled_2D_weight_data*(mgg<120 || mgg>130)",16,100,180,"mgg_scaled_2D_ptEtaBoth_data", "DiPhoton Invariant Mass", "GeV");
+  db_nostack_rw->drawHisto_fromTree("tree_weights","mgg","eta_scaled_2D_weight_data*pt_scaled_2D_weight_data*(mgg<120 || mgg>130)",32,100,180,"mgg_scaled_2D_ptEtaBoth_data", "DiPhoton Invariant Mass", "GeV");
+  }
 
-
+  //cs vs MC signal events
+  db_nostack_csMC->drawHisto_fromTree("tree_passedEvents","cosThetaStar","eventWeight*(category>=0)*((mgg>100 && mgg<180)||mgg>0)",50,-1,1,"cosThetaStar","cosThetaStar","");
+  db_nostack_csMC->drawHisto_fromTree("tree_passedEvents","cosTheta1","eventWeight*(category>=0)*((mgg>100 && mgg<180)||mgg>0)",50,-1,1,"cosTheta1","cosTheta1","");
+  db_nostack_csMC->drawHisto_fromTree("tree_passedEvents","etaVstar","eventWeight*(category>=0)*((mgg>100 && mgg<180)||mgg>0)",50,-5,5,"etaVstar","etaVstar","");
+  db_nostack_csMC->drawHisto_fromTree("tree_passedEvents","minv_lnu","eventWeight*(category>=0)*((mgg>100 && mgg<180)||mgg>0)",25,0,500,"minv_lnu","Lep-#nu M_{T}","GeV");
+  db_nostack_csMC->drawHisto_fromTree("tree_passedEvents","minv_blnu","eventWeight*(category>=0)*((mgg>100 && mgg<180)||mgg>0)",50,0,1000,"minv_blnu","bjet-Lep-#nu M_{T}","GeV");
+  db_nostack_csMC->drawHisto_fromTree("tree_passedEvents","minv_bgg","eventWeight*(category>=0)*((mgg>100 && mgg<180)||mgg>0)",50,0,1000,"minv_bgg","bjet-DiPhot M_{T}","GeV");
 
   return 0;
 
