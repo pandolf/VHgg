@@ -68,30 +68,30 @@ int main( int argc, char* argv[] ) {
   float effS_UL_min = 0.;
   float effmax = 0.;
 
-//  TFile* signalFile = TFile::Open("../VHgg_HToGG_M-125_8TeV-pythia6_presel_JP.root");
-  //TFile* signalFile = TFile::Open("../VHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_presel_JP.root");
+//  TFile* signalFile = TFile::Open("../VHgg_HToGG_M-125_8TeV-pythia6_presel_CSV.root");
+  //TFile* signalFile = TFile::Open("../VHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_presel_CSV.root");
   //TTree* signalTree = (TTree*)signalFile->Get("tree_passedEvents");
 
   // optimized working point chosen when looking only at VH (and ttH) signal:
   TChain* signalTree = new TChain("tree_passedEvents");
   if( category>1 ) // VH
-    signalTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_JP.root");
+    signalTree->Add("../finalizedTrees_micheli_20121112/TTVHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_CSV.root");
   else // ttH
-    signalTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_JP.root");
+    signalTree->Add("../finalizedTrees_micheli_20121112/TTVHgg_TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_CSV.root");
 
 
   TChain* backgroundTree = new TChain("tree_passedEvents");
-  backgroundTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_DiPhoton_8TeV-pythia6_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_VV_8TeV_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_VGG_8TeV_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_TT_8TeV_presel_JP.root/tree_passedEvents");
-  backgroundTree->Add("../finalizedTrees_micheli_noPUID/TTVHgg_QCD_doubleEMEnriched_TuneZ2star_8TeV-pythia6_presel_JP.root/tree_passedEvents");
+  backgroundTree->Add("../finalizedTrees_micheli_20121112/TTVHgg_DiPhoton_8TeV-pythia6_presel_CSV.root/tree_passedEvents");
+  backgroundTree->Add("../finalizedTrees_micheli_20121112/TTVHgg_GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6_presel_CSV.root/tree_passedEvents");
+  backgroundTree->Add("../finalizedTrees_micheli_20121112/TTVHgg_VV_8TeV_presel_CSV.root/tree_passedEvents");
+  backgroundTree->Add("../finalizedTrees_micheli_20121112/TTVHgg_VGG_8TeV_presel_CSV.root/tree_passedEvents");
+  backgroundTree->Add("../finalizedTrees_micheli_20121112/TTVHgg_TT_8TeV_presel_CSV.root/tree_passedEvents");
+  backgroundTree->Add("../finalizedTrees_micheli_20121112/TTVHgg_QCD_doubleEMEnriched_TuneZ2star_8TeV-pythia6_presel_CSV.root/tree_passedEvents");
 
 
   TChain* backgroundTree_data = new TChain("tree_passedEvents");
-  backgroundTree_data->Add("../finalizedTrees_micheli_noPUID/TTVHgg_DATA_Run2012ABC_presel_JP.root");
-  //backgroundTree_data->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_noPUID/TTVHgg_DATA_Run2012ABC_presel_invertedPhotID_JP.root");
+  backgroundTree_data->Add("../finalizedTrees_micheli_20121112/TTVHgg_DATA_Run2012ABC_presel_CSV.root");
+  //backgroundTree_data->Add("/cmsrm/pc23/micheli/finalizedTrees_micheli_20121112/TTVHgg_DATA_Run2012ABC_presel_invertedPhotID_CSV.root");
 
 
   std::string categoryText;
@@ -162,10 +162,7 @@ int main( int argc, char* argv[] ) {
     if( category<4 ) {
       selection += categoryCut_str;
     } else { //tried also these other btag combinations:
-      if( category==6 ) selection += " && nbjets_medium>=1 && nbjets_loose>=2 ";
-      if( category==7 ) selection += " && nbjets_medium>=2 ";
-      if( category==8 ) selection += " && nbjets_medium>=1 ";
-      if( category==9 ) selection += " && nbjets_loose>=1 ";
+      if( category==5 ) selection += " && category==2 && nbjets_medium>=1";
     }
 
     // just to be sure, add mgg cut by hand:
