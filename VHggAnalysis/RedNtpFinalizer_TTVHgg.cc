@@ -1202,12 +1202,14 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
        } else { // cs selection inverted photon ID and no btag
 
-	 if(hasPassedDoublePhot==1)continue;
-
-	 if(hasPassedSinglePhot==1){
-	   if(!(hasPassedSinglePhot==1 && hasPassedDoublePhot==0))continue; 
+	 if(dataset_ == "DATA_Run2012SinglePhoton"){
+	  
+	   if(hasPassedDoublePhot==1)continue;
+	   
+	   if(hasPassedSinglePhot==1){
+	     if(!(hasPassedSinglePhot==1 && hasPassedDoublePhot==0))continue; 
+	   }
 	 }
-
 
        // *****   ttH leptonic category: 
        // *****   (3 jets, 1 btag medium, 1 lepton)
@@ -2001,6 +2003,10 @@ void RedNtpFinalizer_TTVHgg::Init()
 
 }
 
+
+void RedNtpFinalizer_TTVHgg::setDatasetName( const std::string& dataset ) {
+  dataset_=dataset;
+}
 
 
 

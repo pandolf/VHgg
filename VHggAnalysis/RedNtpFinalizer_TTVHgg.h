@@ -829,12 +829,14 @@ public :
    void setSelectionType( const std::string& selectionType );
    void setPreselectionType( const std::string& preselectionType );
    void invertPhotID() { invert_photonCuts_ = true; };
+   void setDatasetName(const std::string&  datasetname);
    virtual void     finalize();
 
 
    std::string selectionType_;
    std::string bTaggerType_;
    std::string preselectionType_;
+   std::string dataset_;
 
 
    bool dopureeventWeight_;

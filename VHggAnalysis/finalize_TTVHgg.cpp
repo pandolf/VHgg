@@ -178,6 +178,7 @@ void finalize_oneDataset( const std::string& redntpProdVersion, const std::strin
   if( isData ) redNtpDir = redNtpDir + "/" + dirs.datadir;
   else         redNtpDir = redNtpDir + "/" + dirs.mcdir;
 
+  rf->setDatasetName(dataset);
   rf->set_redNtpDir(redNtpDir);
   rf->set_outputDir("finalizedTrees_"+redntpProdVersion);
   rf->addFile(dataset);
