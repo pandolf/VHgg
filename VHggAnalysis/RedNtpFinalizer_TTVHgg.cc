@@ -761,7 +761,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
          }
 
          //// then modify btags with Scale Factors:
-         //btsfutil->modifyBTagsWithSF_fast(btagged_loose, btagged_medium, ptcorrjet[ijet], etajet[ijet], partPdgIDjet[ijet], "mean" );
+         if( isMC )
+           btsfutil->modifyBTagsWithSF_fast(btagged_loose, btagged_medium, ptcorrjet[ijet], etajet[ijet], partPdgIDjet[ijet], "mean" );
 
 
          if( btagged_loose ) {
