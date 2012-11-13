@@ -752,11 +752,11 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	     index_selected_btagmedium.push_back(ijet);
 	   }
 	 }else if(bTaggerType_=="CSV") {
-	   if( btagvtxjet[ijet]>0.244){
+	   if( btagcsvjet[ijet]>0.244){
 	     njets_selected_btagloose++;
 	     index_selected_btagloose.push_back(ijet);
 	   }
-	   if( btagvtxjet[ijet]>0.679){
+	   if( btagcsvjet[ijet]>0.679){
 	     njets_selected_btagmedium++;
 	     index_selected_btagmedium.push_back(ijet);
 	   }	   
@@ -775,8 +775,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	     btaggedLooseJet_t[njets_selected] = btagjprobjet[ijet]>0.275;
 	     btaggedMediumJet_t[njets_selected] = btagjprobjet[ijet]>0.545;
 	   }else if(bTaggerType_=="CSV") {
-	     btaggedLooseJet_t[njets_selected] = btagvtxjet[ijet]>0.244;
-	     btaggedMediumJet_t[njets_selected] = btagvtxjet[ijet]>0.679;
+	     btaggedLooseJet_t[njets_selected] = btagcsvjet[ijet]>0.244;
+	     btaggedMediumJet_t[njets_selected] = btagcsvjet[ijet]>0.679;
 	   }
 
          }
@@ -1703,6 +1703,7 @@ void RedNtpFinalizer_TTVHgg::Init()
    tree_->SetBranchAddress("betajet", betajet, &b_betajet);
    tree_->SetBranchAddress("betastarjet", betastarjet, &b_betastarjet);
    tree_->SetBranchAddress("btagvtxjet", btagvtxjet, &b_btagvtxjet);
+   tree_->SetBranchAddress("btagcsvjet", btagcsvjet, &b_btagcsvjet);
    tree_->SetBranchAddress("btagtrkjet", btagtrkjet, &b_btagtrkjet);
    tree_->SetBranchAddress("btagjprobjet", btagjprobjet, &b_btagjprobjet);
    tree_->SetBranchAddress("ptDjet", ptDjet, &b_ptDjet);

@@ -126,6 +126,7 @@ public :
    Float_t         betajet[10];
    Float_t         betastarjet[10];
    Float_t         btagvtxjet[10];
+   Float_t         btagcsvjet[10];
    Float_t         btagtrkjet[10];
    Float_t         btagjprobjet[10];
    Float_t         ptDjet[10];
@@ -524,6 +525,7 @@ public :
    TBranch        *b_betajet;   //!
    TBranch        *b_betastarjet;   //!
    TBranch        *b_btagvtxjet;   //!
+   TBranch        *b_btagcsvjet;   //!
    TBranch        *b_btagtrkjet;   //!
    TBranch        *b_btagjprobjet;   //!
    TBranch        *b_ptDjet;   //!
