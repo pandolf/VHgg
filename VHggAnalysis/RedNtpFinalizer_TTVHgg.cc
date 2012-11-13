@@ -577,8 +577,6 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
       }
 
-      h1_nvertex_PUW->Fill( nvtx, eventWeight );
-
 
       TLorentzVector diphot;
       diphot.SetPtEtaPhiM( ptggnewvtx, etagg, phigg, massggnewvtx);
@@ -667,13 +665,16 @@ void RedNtpFinalizer_TTVHgg::finalize()
        }
 
 
+       if(diphot.M()<100 || diphot.M()>180) continue;
+
        //       if( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130. ) continue;
+       h1_nvertex_PUW->Fill( nvtx, eventWeight );
+
 
        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_prepresel->Fill( massggnewvtx, eventWeight );
 
 
        if(selectionType_=="onlyPhotonCuts" ){
-	 if(diphot.M()<100 || diphot.M()>180) continue;
 
 	 double ptweight2D=h2_ptweight->GetBinContent(h2_ptweight->GetXaxis()->FindBin(ptphot2),h2_ptweight->GetYaxis()->FindBin(ptphot1));
 	 double etaweight2D=h2_etaweight->GetBinContent(h2_etaweight->GetXaxis()->FindBin(etaphot2),h2_etaweight->GetYaxis()->FindBin(etaphot1));
