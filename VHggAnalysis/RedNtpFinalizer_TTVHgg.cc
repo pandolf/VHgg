@@ -6,6 +6,7 @@
 
 #include "HelicityLikelihoodDiscriminant/HelicityLikelihoodDiscriminant.h"
 
+#include "BTagSFUtil/interface/BTagSFUtil.h"
 
 
 
@@ -443,8 +444,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "cosThetaStar", &cosThetaStar_t, "cosThetaStar_t/F" );
    tree_passedEvents->Branch( "cosTheta2", &cosTheta2_t, "cosTheta2_t/F" );
    tree_passedEvents->Branch( "etaVstar", &etaVstar_t, "etaVstar_t/F" );
-   tree_passedEvents->Branch( "WH_event", &WH_event, "WH_event_t/O" );
-   tree_passedEvents->Branch( "ZH_event", &ZH_event, "ZH_event_t/O" );
+   tree_passedEvents->Branch( "WH_event", &WH_event, "WH_event/O" );
+   tree_passedEvents->Branch( "ZH_event", &ZH_event, "ZH_event/O" );
 
 
    TTree* tree_weights=new TTree();
@@ -514,6 +515,9 @@ void RedNtpFinalizer_TTVHgg::finalize()
    DiJetKinFitter* fitter_jetsZ = new DiJetKinFitter( "fitter_jetsZ", "fitter_jets", Zmass );
 
    HelicityLikelihoodDiscriminant *helicityDiscriminator = new HelicityLikelihoodDiscriminant();
+
+   BTagSFUtil* btsfutil = new BTagSFUtil(bTaggerType_, 13);
+
 
    int seed = 110;
    TRandom3* coin = new TRandom3(seed);
@@ -718,19 +722,19 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
          //jet PU ID:
          bool passedPUID = true;
-	 if(use_PUID_){
-	   if((ijet+1)>=njets_PUID_thresh_){
-	     if(TMath::Abs(etajet[ijet]) < 2.5) {
-	       if(betastarjet[ijet] > 0.2 * log( nvtx - 0.67 ) ) passedPUID = false;
-	       if(rmsjet[ijet] > 0.06) passedPUID = false;
-	     } else if(TMath::Abs(etajet[ijet]) < 3.){
-	       if(rmsjet[ijet] > 0.05) passedPUID = false;
-	     } else {
-	       if(rmsjet[ijet] > 0.055) passedPUID = false;
-	     }
-	   }
-	   if( !passedPUID )continue;
-	 }
+         if(use_PUID_){
+           if((ijet+1)>=njets_PUID_thresh_){
+             if(TMath::Abs(etajet[ijet]) < 2.5) {
+               if(betastarjet[ijet] > 0.2 * log( nvtx - 0.67 ) ) passedPUID = false;
+               if(rmsjet[ijet] > 0.06) passedPUID = false;
+             } else if(TMath::Abs(etajet[ijet]) < 3.){
+               if(rmsjet[ijet] > 0.05) passedPUID = false;
+             } else {
+               if(rmsjet[ijet] > 0.055) passedPUID = false;
+             }
+           }
+           if( !passedPUID )continue;
+         }
 
          if( isMC ) {
            if( partMomPdgIDjet[ijet] == 23 || abs( partMomPdgIDjet[ijet] ) == 24 ) {
@@ -742,43 +746,41 @@ void RedNtpFinalizer_TTVHgg::finalize()
            }
          }
 
-	 if(bTaggerType_=="JP"){
-	   if( btagjprobjet[ijet]>0.275 ) {
-	     njets_selected_btagloose++;
-	     index_selected_btagloose.push_back(ijet);
-	   }
-	   if( btagjprobjet[ijet]>0.545 ) {
-	     njets_selected_btagmedium++;
-	     index_selected_btagmedium.push_back(ijet);
-	   }
-	 }else if(bTaggerType_=="CSV") {
-	   if( btagcsvjet[ijet]>0.244){
-	     njets_selected_btagloose++;
-	     index_selected_btagloose.push_back(ijet);
-	   }
-	   if( btagcsvjet[ijet]>0.679){
-	     njets_selected_btagmedium++;
-	     index_selected_btagmedium.push_back(ijet);
-	   }	   
 
-	 }else{
+         bool btagged_loose = false;
+         bool btagged_medium = false;
 
-	   std::cout<<"WARNING: btag type "<<bTaggerType_<<"not found"<<std::endl;
-	 }
+         if(bTaggerType_=="JP") {
+           btagged_loose = btagjprobjet[ijet]>0.275;
+           btagged_medium = btagjprobjet[ijet]>0.545;
+         } else if(bTaggerType_=="CSV") {
+           btagged_loose = btagcsvjet[ijet]>0.244;
+           btagged_medium = btagcsvjet[ijet]>0.679;
+         } else {
+           std::cout<<"WARNING: btag type "<<bTaggerType_<<"not found"<<std::endl;
+         }
+
+         //// then modify btags with Scale Factors:
+         //btsfutil->modifyBTagsWithSF_fast(btagged_loose, btagged_medium, ptcorrjet[ijet], etajet[ijet], partPdgIDjet[ijet], "mean" );
+
+
+         if( btagged_loose ) {
+           njets_selected_btagloose++;
+           index_selected_btagloose.push_back(ijet);
+         }
+         if( btagged_medium ) {
+           njets_selected_btagmedium++;
+           index_selected_btagmedium.push_back(ijet);
+         }
+
 
          index_selected.push_back(ijet);
 
          if( njets_selected<20 ) {
            ptJet_t[njets_selected] = ptcorrjet[ijet];
            etaJet_t[njets_selected] = etajet[ijet];
-	   if(bTaggerType_=="JP"){
-	     btaggedLooseJet_t[njets_selected] = btagjprobjet[ijet]>0.275;
-	     btaggedMediumJet_t[njets_selected] = btagjprobjet[ijet]>0.545;
-	   }else if(bTaggerType_=="CSV") {
-	     btaggedLooseJet_t[njets_selected] = btagcsvjet[ijet]>0.244;
-	     btaggedMediumJet_t[njets_selected] = btagcsvjet[ijet]>0.679;
-	   }
-
+	     btaggedLooseJet_t[njets_selected] = btagged_loose;
+	     btaggedMediumJet_t[njets_selected] = btagged_medium;
          }
 
          njets_selected++;
