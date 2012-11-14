@@ -1097,7 +1097,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
        // try to be as model independent as possible (no mass or angular cuts)
        // just cut hard on jet pt's
        isBSMEvent_t = false;
-       if( njets_selected_btagmedium==2 && jet0.Pt()>50. && jet1.Pt()>50. && diphot.Pt()>100. ) { 
+       if( njets_selected_btagmedium>=1 && njets_selected_btagloose>=2 && jet0.Pt()>50. && jet1.Pt()>50. && diphot.Pt()>100. ) { 
 
          isBSMEvent_t = true;
 
