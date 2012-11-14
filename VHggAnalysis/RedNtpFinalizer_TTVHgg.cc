@@ -11,6 +11,11 @@
 
 
 
+int DEBUG_EVENT_NUMBER_ = 428092871;
+
+
+
+
 RedNtpFinalizer_TTVHgg::RedNtpFinalizer_TTVHgg( const std::string& dataset, const std::string& selectionType, const std::string& bTaggerType ) : RedNtpFinalizer( "TTVHgg", dataset ) 
 {
 
@@ -578,8 +583,20 @@ void RedNtpFinalizer_TTVHgg::finalize()
       }
 
 
+
       TLorentzVector diphot;
       diphot.SetPtEtaPhiM( ptggnewvtx, etagg, phigg, massggnewvtx);
+
+
+
+      if( event == DEBUG_EVENT_NUMBER_ ) {
+        std::cout << std::endl << std::endl << "#### DEBUG LOG FOR EVENT " << DEBUG_EVENT_NUMBER_ << std::endl << std::endl;
+        std::cout << std::endl << "Here are the photons: " << std::endl;
+        std::cout << "   Phot1:  pt: " << ptphot1 << " eta: " << etascphot1 << std::endl;
+        std::cout << "   Phot2:  pt: " << ptphot2 << " eta: " << etascphot2 << std::endl;
+        std::cout << std::endl << "Diphoton pt: " << diphot.Pt() << " mass: " << diphot.M() << std::endl;
+      }
+
 
 
       // analysis cuts:
@@ -592,6 +609,9 @@ void RedNtpFinalizer_TTVHgg::finalize()
       if((TMath::Abs(etascphot1)>1.4442&&TMath::Abs(etascphot1)<1.566)||(TMath::Abs(etascphot2)>1.4442&&TMath::Abs(etascphot2)<1.566)
          || TMath::Abs(etascphot1)>2.5 || TMath::Abs(etascphot2)>2.5) continue;  // acceptance
 
+      if( event == DEBUG_EVENT_NUMBER_ ) {
+        std::cout << "-> Passed photon eta acceptance." << std::endl;
+      }
       //     if(ptphot1<ptphot1cut) continue; //pt first photon
 
       bool ebeb = TMath::Abs(etascphot1)<1.4442 && TMath::Abs(etascphot2)<1.4442;
@@ -602,8 +622,20 @@ void RedNtpFinalizer_TTVHgg::finalize()
       if(ptphot1 < triggerThreshPhot1) continue; //pt first photon
       if(ptphot2 < triggerThreshPhot2) continue; //pt second photon
 
+      if( event == DEBUG_EVENT_NUMBER_ ) {
+        std::cout << "-> Passed photon trigger pt thresholds." << std::endl;
+        std::cout << std::endl << "Checking analysis thresholds: " << std::endl;
+        std::cout << ptphot1 << " > " << ptphot1cut_ << "*" << massggnewvtx << "/120. = " << ptphot1cut_*massggnewvtx/120. << " ? " << std::endl;
+        std::cout << ptphot2 << " > " << ptphot2cut_ << "*" << massggnewvtx << "/120. = " << ptphot2cut_*massggnewvtx/120. << " ? " << std::endl;
+
+      }
+
       if(ptphot1 < ptphot1cut_*massggnewvtx/120.) continue; //pt first photon
       if(ptphot2 < ptphot2cut_* massggnewvtx/120.) continue; //pt second photon
+
+      if( event == DEBUG_EVENT_NUMBER_ ) {
+        std::cout << "-> Passed photon analysis pt thresholds." << std::endl;
+      }
 
       //if(ptgg_thresh_>0 && diphot.Pt()< pthiggsmincut_) continue; //pt higgs min
 
@@ -644,770 +676,816 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	idphot2 = (idcicpfphot2 < photonID_thresh_);
       }
 
-       if(!cs_){ // photon id no control sample
+      if(!cs_){ // photon id no control sample
  
-       if(photonID_thresh_>0) {
-         if(!(idphot1)) continue;
-         if(!(idphot2)) continue;
-       }else{
-         if(!(idphot1 && pxlphot1)) continue;
-         if(!(idphot2 && pxlphot2)) continue;
-       }
+      if(photonID_thresh_>0) {
+        if(!(idphot1)) continue;
+        if(!(idphot2)) continue;
+      }else{
+        if(!(idphot1 && pxlphot1)) continue;
+        if(!(idphot2 && pxlphot2)) continue;
+      }
+      
+      }else{ // photon id for control sample
        
-       }else{ // photon id for control sample
-        
-         looseidphot1 = (idcicpfphot1 > 0 );
-         looseidphot2 = (idcicpfphot2 > 0 );
-         //	  if( !( (idphot1 && looseidphot2 && !idphot2) || (idphot2 && looseidphot1 && !idphot1) ) ) continue; 
-         // Not perfect should be using the same electronVeto wrt CiC selection (now using matchedPromptEle veto)
-         if( !( (idphot1 && !idphot2 && !pid_hasMatchedPromptElephot2) || (idphot2 && !idphot1 && !pid_hasMatchedPromptElephot1) ) ) continue; 
+        looseidphot1 = (idcicpfphot1 > 0 );
+        looseidphot2 = (idcicpfphot2 > 0 );
+        //	  if( !( (idphot1 && looseidphot2 && !idphot2) || (idphot2 && looseidphot1 && !idphot1) ) ) continue; 
+        // Not perfect should be using the same electronVeto wrt CiC selection (now using matchedPromptEle veto)
+        if( !( (idphot1 && !idphot2 && !pid_hasMatchedPromptElephot2) || (idphot2 && !idphot1 && !pid_hasMatchedPromptElephot1) ) ) continue; 
  
-       }
+      }
 
+      if( event == DEBUG_EVENT_NUMBER_ ) {
+        std::cout << "-> Passed photon ID." << std::endl;
+      }
 
-       if(diphot.M()<100 || diphot.M()>180) continue;
+      if(diphot.M()<100 || diphot.M()>180) continue;
 
-       //       if( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130. ) continue;
-       h1_nvertex_PUW->Fill( nvtx, eventWeight );
-
-
-       if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_prepresel->Fill( massggnewvtx, eventWeight );
-
-
-       if(selectionType_=="onlyPhotonCuts" ){
-
-	 double ptweight2D=h2_ptweight->GetBinContent(h2_ptweight->GetXaxis()->FindBin(ptphot2),h2_ptweight->GetYaxis()->FindBin(ptphot1));
-	 double etaweight2D=h2_etaweight->GetBinContent(h2_etaweight->GetXaxis()->FindBin(etaphot2),h2_etaweight->GetYaxis()->FindBin(etaphot1));
-	 double ptweight2D_data=h2_ptweight_data->GetBinContent(h2_ptweight_data->GetXaxis()->FindBin(ptphot2),h2_ptweight_data->GetYaxis()->FindBin(ptphot1));
-	 double etaweight2D_data=h2_etaweight_data->GetBinContent(h2_etaweight_data->GetXaxis()->FindBin(etaphot2),h2_etaweight_data->GetYaxis()->FindBin(etaphot1));
-	 if(!invert_photonCuts_){
-	   pt_scaled_2D_weight_t=eventWeight;
-	   eta_scaled_2D_weight_t=eventWeight;
-	   pt_scaled_2D_weight_data_t=eventWeight;
-	   eta_scaled_2D_weight_data_t=eventWeight;
-	   
-	 }else{
-	   pt_scaled_2D_weight_t=eventWeight*ptweight2D;
-	   eta_scaled_2D_weight_t=eventWeight*etaweight2D;
-	   
-	   if(ptweight2D_data!=0){
-	     pt_scaled_2D_weight_data_t=eventWeight*ptweight2D_data;
-	     eta_scaled_2D_weight_data_t=eventWeight*etaweight2D_data;
-	   }else{
-	     pt_scaled_2D_weight_data_t=eventWeight;
-	     eta_scaled_2D_weight_data_t=eventWeight;
-	   }
-
-
-	 }
-	 tree_weights->Fill();
-	 continue;
-       }
-
-
-       // jets
-       int njets_selected = 0;
-       int njets_selected_btagloose = 0;
-       int njets_selected_btagmedium = 0;
-       std::vector<int> index_MatchedJet;
-       std::vector<int> index_selected;
-       std::vector<int> index_selected_btagloose;
-       std::vector<int> index_selected_btagmedium;
-       Ht_t = 0.;
-
-       for( unsigned ijet=0; ijet<njets; ++ijet ) {
-
-	 //std::cout << ijet << "/" << njets << " pt: " << ptcorrjet[ijet] << " eta: " << etajet[ijet] << std::endl;
-         if( ptcorrjet[ijet] < ptjetthresh_count_ ) continue;
-         if( fabs(etajet[ijet]) > etajetthresh_count_ ) continue;
-
-         //jet PU ID:
-         bool passedPUID = true;
-         if(use_PUID_){
-           if((ijet+1)>=njets_PUID_thresh_){
-             if(TMath::Abs(etajet[ijet]) < 2.5) {
-               if(betastarjet[ijet] > 0.2 * log( nvtx - 0.67 ) ) passedPUID = false;
-               if(rmsjet[ijet] > 0.06) passedPUID = false;
-             } else if(TMath::Abs(etajet[ijet]) < 3.){
-               if(rmsjet[ijet] > 0.05) passedPUID = false;
-             } else {
-               if(rmsjet[ijet] > 0.055) passedPUID = false;
-             }
-           }
-           if( !passedPUID )continue;
-         }
-
-         if( isMC ) {
-           if( partMomPdgIDjet[ijet] == 23 || abs( partMomPdgIDjet[ijet] ) == 24 ) {
-             h1_posMatchedJet->Fill( ijet, eventWeight );
-             h1_ptMatchedJet->Fill( ptcorrjet[ijet], eventWeight );
-             h1_etaMatchedJet->Fill( etajet[ijet], eventWeight );
-             h1_phiMatchedJet->Fill( phijet[ijet], eventWeight );
-             index_MatchedJet.push_back(ijet);
-           }
-         }
-
-
-         bool btagged_loose = false;
-         bool btagged_medium = false;
-
-         if(bTaggerType_=="JP") {
-           btagged_loose = btagjprobjet[ijet]>0.275;
-           btagged_medium = btagjprobjet[ijet]>0.545;
-         } else if(bTaggerType_=="CSV") {
-           btagged_loose = btagcsvjet[ijet]>0.244;
-           btagged_medium = btagcsvjet[ijet]>0.679;
-         } else {
-           std::cout<<"WARNING: btag type "<<bTaggerType_<<"not found"<<std::endl;
-         }
-
-         //// then modify btags with Scale Factors:
-         if( isMC )
-           btsfutil->modifyBTagsWithSF_fast(btagged_loose, btagged_medium, ptcorrjet[ijet], etajet[ijet], partPdgIDjet[ijet], "mean" );
-
-
-         if( btagged_loose ) {
-           njets_selected_btagloose++;
-           index_selected_btagloose.push_back(ijet);
-         }
-         if( btagged_medium ) {
-           njets_selected_btagmedium++;
-           index_selected_btagmedium.push_back(ijet);
-         }
-
-
-         index_selected.push_back(ijet);
-
-         if( njets_selected<20 ) {
-           ptJet_t[njets_selected] = ptcorrjet[ijet];
-           etaJet_t[njets_selected] = etajet[ijet];
-	     btaggedLooseJet_t[njets_selected] = btagged_loose;
-	     btaggedMediumJet_t[njets_selected] = btagged_medium;
-         }
-
-         njets_selected++;
-
-
-         Ht_t += ptcorrjet[ijet];
-
-
-         //AnalysisJet thisJet;
-         //thisJet.set
-         //selectedJets.push_back( thisJet );
-
-       } //for jets
-
-
-
-       // define m3:
-       float triJetPtMax=0.;
-       float m3=0.;
-       for( unsigned i=0; i<index_selected.size(); ++i ) {
-	 for( unsigned j=i+1; j<index_selected.size(); ++j ) {
-	   for( unsigned k=j+1; k<index_selected.size(); ++k ) {
-	     TLorentzVector jet1,jet2,jet3;
-	     jet1.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
-	     jet2.SetPtEtaPhiE(ptcorrjet[j],etajet[j],phijet[j],ecorrjet[j]);
-	     jet3.SetPtEtaPhiE(ptcorrjet[k],etajet[k],phijet[k],ecorrjet[k]);
-	     TLorentzVector triJet = jet1 + jet2 + jet3;
-	     if( triJet.Pt() > triJetPtMax ) {
-	       triJetPtMax=triJet.Pt();
-	       m3 = triJet.M();
-	     }
-	   }
-	 }
-       }
-
-       m3_t=m3;
-
-
-       int isLeptonic= (ptele1>0 || ptmu1>0);
-       int isMu=ptmu1>0;
-
-
-       //invariant mass
-       TLorentzVector l,nu,lnu,b,blnu,bgg;
-
-       if(isLeptonic){
-       float ptlep=ptmu1;
-       float etalep=etamu1;
-       float philep=phimu1;
-       float energylep=enemu1;
-       if(!isMu){
-	 ptlep=ptele1;
-	 etalep=etaele1;
-	 philep=phiele1;
-	 energylep=eneele1;
-       }
-
-       l.SetPtEtaPhiE(ptlep,etalep,philep,energylep);
-       nu.SetPtEtaPhiE(epfMet,0,phipfMet,epfMet);
-       lnu=l+nu;
-
-
-       minv_lnu_t=lnu.Mt();
-
-       h1_minv_lnu->Fill(minv_lnu_t,eventWeight);
-       }
-
-
-
-
-       //       cout<<njets_selected<<"------"<<endl;
-       if(njets_selected<njets_thresh_) continue;
-       if(njets_selected>njets_upper_thresh_)continue;
-       if(njets_selected_btagloose<nbtagloose_thresh_) continue;
-       if(njets_selected_btagmedium<nbtagmedium_thresh_) continue;
-
-       if(Ht_t<Ht_thresh_)continue;
-
-
-
-
-
-
-       h1_ptphot0->Fill(ptphot1, eventWeight);
-       h1_ptphot1->Fill(ptphot2, eventWeight);
-
-       h1_ptrunphot0->Fill(ptphot1*120/massggnewvtx, eventWeight);
-       h1_ptrunphot1->Fill(ptphot2*120/massggnewvtx, eventWeight);
-
-       h1_etaphot0->Fill(etaphot1, eventWeight);
-       h1_etaphot1->Fill(etaphot2, eventWeight);
-
-
-       h1_njets->Fill( njets_selected, eventWeight );
-       h1_nbjets_loose->Fill( njets_selected_btagloose, eventWeight );
-       h1_nbjets_medium->Fill( njets_selected_btagmedium, eventWeight );
-
-       if( njets_selected>=2 ) {
-         h1_nbjets_loose_2jets->Fill( njets_selected_btagloose, eventWeight );
-         h1_nbjets_medium_2jets->Fill( njets_selected_btagmedium, eventWeight );
-       }
-
-       if( H_event && V_event && Zbb_event ) {
-         h1_njets_ZbbHgg->Fill( njets_selected, eventWeight );
-         h1_nbjets_loose_ZbbHgg->Fill( njets_selected_btagloose, eventWeight );
-         h1_nbjets_medium_ZbbHgg->Fill( njets_selected_btagmedium, eventWeight );
-         if( njets_selected>1 ) {
-           h1_nbjets_loose_nj2_ZbbHgg->Fill( njets_selected_btagloose, eventWeight );
-           h1_nbjets_medium_nj2_ZbbHgg->Fill( njets_selected_btagmedium, eventWeight );
-         }
-       }
+      if( event == DEBUG_EVENT_NUMBER_ ) {
+        std::cout << "-> Passed mgg 100-180 cut." << std::endl;
+      }
 
       
-
-       if( index_selected.size()<2 ) continue;
-       if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_presel->Fill( massggnewvtx, eventWeight );
-
-
-       // try with simply the two leading ones:
-       allPairs += eventWeight;
-       if( (partMomPdgIDjet[index_selected[0]] == 23 || abs( partMomPdgIDjet[index_selected[0]] ) == 24)
-       && ( partMomPdgIDjet[index_selected[1]] == 23 || abs( partMomPdgIDjet[index_selected[1]] ) == 24) ) correctPairs_lead += eventWeight;
-       
-
-
-       // choose jets as two btagged jets, OR leading ones
-       int indexjet0 = index_selected[0];
-       int indexjet1 = index_selected[1];
-       bool chooseBtaggedJets=true;//be careful with this
-       bool firstjet_isbtaggedloose = false;
-       bool secondjet_isbtaggedloose = false;
-
-
-       if(chooseBtaggedJets){
-       if( index_selected_btagloose.size()==1 ) {
-         if( index_selected_btagloose[0]!=index_selected[0] ) { 
-           indexjet1 = index_selected_btagloose[0];
-           secondjet_isbtaggedloose = true;
-         } else {
-           firstjet_isbtaggedloose = true;
-         }
-       }
-       if( index_selected_btagloose.size()>1 ) {
-         indexjet0 = index_selected_btagloose[0];
-         indexjet1 = index_selected_btagloose[1];
-         firstjet_isbtaggedloose = true;
-         secondjet_isbtaggedloose = true;
-       }
-       }
-       AnalysisJet jet0;
-       jet0.SetPtEtaPhiE( ptcorrjet[indexjet0], etajet[indexjet0], phijet[indexjet0], ecorrjet[indexjet0] );
-       AnalysisJet jet1;
-       jet1.SetPtEtaPhiE( ptcorrjet[indexjet1], etajet[indexjet1], phijet[indexjet1], ecorrjet[indexjet1] );
-       AnalysisJet dijet = jet0 + jet1;
-
-       if(firstjet_isbtaggedloose){
-	 b.SetPtEtaPhiE( ptcorrjet[indexjet0], etajet[indexjet0], phijet[indexjet0], ecorrjet[indexjet0] );
-	 if(isLeptonic){
-	   blnu=b+lnu;
-	   minv_blnu_t=blnu.Mt();
-	   h1_minv_blnu->Fill(minv_blnu_t,eventWeight);
-	 }
-	 bgg=b+diphot;
-	 minv_bgg_t=bgg.M();
-	 h1_minv_bgg->Fill(minv_bgg_t,eventWeight);
-       }
-
-
-
-
-
-       h1_ptjet0->Fill( jet0.Pt(), eventWeight );
-       h1_ptjet1->Fill( jet1.Pt(), eventWeight );
-
-       h1_etajet0->Fill( jet0.Eta(), eventWeight );
-       h1_etajet1->Fill( jet1.Eta(), eventWeight );
-
-
-       h1_Ht->Fill(Ht_t,eventWeight);
-
-
-       bool chose_correctPair = (partMomPdgIDjet[indexjet0] == 23 || abs( partMomPdgIDjet[indexjet0] ) == 24)
-                             && (partMomPdgIDjet[indexjet1] == 23 || abs( partMomPdgIDjet[indexjet1] ) == 24);
-
-
-       h1_mjj->Fill( dijet.M(), eventWeight );
-
-       if( chose_correctPair ) {
-
-         correctPairs_fancy += eventWeight;
-         h1_mjj_correct->Fill( dijet.M(), eventWeight );
-
-       } else {
-
-         h1_mjj_incorrect->Fill( dijet.M(), eventWeight );
-
-       }
-
-
-
-       float zeppen = diphot.Eta() - 0.5*( jet0.Eta() + jet1.Eta() );
-       h1_zeppen->Fill( zeppen, eventWeight);
-
-
-
-       // perform two kinfits:
-       std::pair<TLorentzVector,TLorentzVector> jets_kinfitW = fitter_jetsW->fit(jet0, jet1);
-       std::pair<TLorentzVector,TLorentzVector> jets_kinfitZ = fitter_jetsZ->fit(jet0, jet1);
-       float chiSquareProbW = TMath::Prob(fitter_jetsW->getS(), fitter_jetsW->getNDF());
-       float chiSquareProbZ = TMath::Prob(fitter_jetsZ->getS(), fitter_jetsZ->getNDF());
-
-
-       TLorentzVector phot0, phot1;
-       phot0.SetPtEtaPhiM( ptphot1, etaphot1, phiphot1, 0.);
-       phot1.SetPtEtaPhiM( ptphot2, etaphot2, phiphot2, 0.);
-
-       HelicityLikelihoodDiscriminant::HelicityAngles hangles;
-       if( coin->Uniform(1.)<0.5 ) hangles = helicityDiscriminator->computeHelicityAngles(phot0, phot1, jet0, jet1);
-       else                        hangles = helicityDiscriminator->computeHelicityAngles(phot1, phot0, jet0, jet1);
-
-       
-       float cosThetaStar = hangles.helCosThetaStar;
-       cosThetaStar_t=cosThetaStar;
-       cosTheta2_t=hangles.helCosTheta2;
-       h1_cosThetaStar->Fill( hangles.helCosThetaStar, eventWeight );
-       h1_cosTheta1->Fill( hangles.helCosTheta1, eventWeight );
-       h1_cosTheta2->Fill( hangles.helCosTheta2, eventWeight );
-       h1_helphi->Fill( hangles.helPhi, eventWeight );
-       h1_helphi1->Fill( hangles.helPhi1, eventWeight );
-
-       TLorentzVector Vstar = dijet + diphot;
-
-
-       // boost stuff in Vstar frame
-       TLorentzVector Vstar_Vstar(Vstar);
-       Vstar_Vstar.Boost(-Vstar.BoostVector());
-       TLorentzVector V_Vstar(dijet);
-       V_Vstar.Boost(-Vstar.BoostVector());
-
-       // boost stuff in the V_Vstar frame:
-       TLorentzVector Vstar_V(Vstar_Vstar);
-       Vstar_V.Boost(-V_Vstar.BoostVector());
-       TLorentzVector jet0_V, jet1_V;
-       // randomize:
-       if( coin->Uniform(1.)<0.5) {
-         jet0_V = jet0;
-         jet1_V = jet1;
-       } else {
-         jet0_V = jet1;
-         jet1_V = jet0;
-       }
-       jet0_V.Boost(-dijet.BoostVector());
-       jet1_V.Boost(-dijet.BoostVector());
+      //       if( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130. ) continue;
+      h1_nvertex_PUW->Fill( nvtx, eventWeight );
       
-       TVector3 v3_jet0_V  = jet0_V.Vect();
-       TVector3 v3_jet1_V  = jet1_V.Vect();
-       TVector3 v3_Vstar_V = Vstar_V.Vect();
-       TVector3 v3_V_Vstar = V_Vstar.Vect();
-
-       float cosThetaStar_jets = cos( v3_jet0_V.Angle(v3_V_Vstar) );
-       float helicityAngle_V = sin( v3_jet0_V.Angle(v3_Vstar_V) );
-
-       h1_cosThetaStar_jets->Fill( cosThetaStar_jets, eventWeight );
-       h1_helicityAngle_V->Fill( helicityAngle_V, eventWeight );
-
-
-       TLorentzVector jet0_kinfit, jet1_kinfit;
-       float chiSquareProbMax=0.;
-
-       if( chiSquareProbW>chiSquareProbZ ) {
-
-         chiSquareProbMax = chiSquareProbW;
-         jet0_kinfit = jets_kinfitW.first;
-         jet1_kinfit = jets_kinfitW.second;
-
-       } else {
-
-         chiSquareProbMax = chiSquareProbZ;
-         jet0_kinfit = jets_kinfitZ.first;
-         jet1_kinfit = jets_kinfitZ.second;
-
-       }
-
-       TLorentzVector dijet_kinfit = jet0_kinfit + jet1_kinfit;
-
-       h1_kinfit_chiSquareProbMax->Fill( chiSquareProbMax, eventWeight );
-       if( dijet.M()>60. && dijet.M()<120. ) 
-         h1_kinfit_chiSquareProbMax_mjjWindow->Fill( chiSquareProbMax, eventWeight );
-
-       
-       float zeppen_kinfit = diphot.Eta() - 0.5*( jet0_kinfit.Eta() + jet1_kinfit.Eta() );
-       h1_zeppen_kinfit->Fill( zeppen_kinfit, eventWeight );
-
       
-
-
-
-       float qgljet0 = qglikeli->computeQGLikelihoodPU( jet0.Pt(), rhoPF, ntrkjet[indexjet0], nneutjet[indexjet0], ptDjet[indexjet0] );
-       float qgljet1 = qglikeli->computeQGLikelihoodPU( jet1.Pt(), rhoPF, ntrkjet[indexjet1], nneutjet[indexjet1], ptDjet[indexjet1] );
-
-
-
-
-       // -------------------------------------------------
-       // 
-       //              DEFINE EVENT CATEGORY
-       // 
-       // -------------------------------------------------
-
-       
-       // uncorrelated  med-med category for double higgs/BSM searches
-       // try to be as model independent as possible (no mass or angular cuts)
-       // just cut hard on jet pt's
-       isBSMEvent_t = false;
-       if( njets_selected_btagmedium>=1 && njets_selected_btagloose>=2 && jet0.Pt()>50. && jet1.Pt()>50. && diphot.Pt()>100. ) { 
-
-         isBSMEvent_t = true;
-
-         if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_bsm->Fill( massggnewvtx, eventWeight );
-
-       }
-
-
-
-
-       if( !invert_photonCuts_ ) {
-
-
-       // SM Higgs CATEGORIES:
-
-       // *****   ttH leptonic category: 
-       // *****   (3 jets, 1 btag medium, 1 lepton)
-
-       if(  isLeptonic && njets_selected>=3 && njets_selected_btagmedium>0 ) {
-
-         category_t = 0;
-         if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_ttH_leptonic->Fill( massggnewvtx, eventWeight );
-
-
-
-       // *****   ttH hadronic category: 
-       // *****   (5 jets, 1 btag medium, no lepton)
-       } else if(  !isLeptonic && njets_selected>=njets_ttH_hadronic_thresh_ && njets_selected_btagmedium>0 ) {
-
-         category_t = 1;
-         if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_ttH_hadronic->Fill( massggnewvtx, eventWeight );
-
-
-
-
-       // *****   VH btagged category: 
-       // *****   (2 jets, >=1 btag loose)
-       } else if(  njets_selected>=2 && njets_selected_btagloose>=1 ) {
-
-         category_t = 2;
-
-
-         if( diphot.Pt() < ptgg_VHbtag_thresh_ ) continue;
-
-         // fill before mjj cut:
-         h1_mjj_VHbtag->Fill( dijet.M(), eventWeight );
-
-         if( fabs(zeppen)>zeppenfeld_thresh_ ) continue;
-         if( dijet.M()<mjj_min_VHbtag_thresh_ || dijet.M()>mjj_max_VHbtag_thresh_ ) continue;
-
-         if( jet1.Pt() < ptjet_VHbtag_thresh_ ) continue;
-         if( fabs(cosThetaStar) > costhetastar_VHbtag_thresh_ ) continue;
-
-
-         if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_VHbtag->Fill( massggnewvtx, eventWeight );
-
-         // qg only for non-btagged jet:
-         if( firstjet_isbtaggedloose ) {
-           h1_qgljet_VHbtag->Fill( qgljet1, eventWeight );
-         } else {
-           h1_qgljet_VHbtag->Fill( qgljet0, eventWeight );
-         }
-
-
-       // *****   VH no-btag category: 
-       // *****   (2 jets, 0 btag loose)
-       } else if(  njets_selected>=2 && njets_selected_btagloose==0 ) {
-
-         category_t = 3;
-
-
-         if( diphot.Pt() < ptgg_VHnotag_thresh_ ) continue;
-         if( (ebeb_VHnotag_thresh_ && !ebeb) ) continue;
-
-         // fill before mjj cut:
-         h1_mjj_VHnotag->Fill( dijet.M(), eventWeight );
-
-         if( fabs(zeppen)>zeppenfeld_thresh_ ) continue;
-         if( dijet.M()<mjj_min_VHnotag_thresh_ || dijet.M()>mjj_max_VHnotag_thresh_ ) continue;
-
-         if( jet1.Pt() < ptjet_VHnotag_thresh_ ) continue;
-         if( fabs(cosThetaStar) > costhetastar_VHnotag_thresh_ ) continue;
-
-         if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )          h1_mgg_VHnotag->Fill( massggnewvtx, eventWeight );
-
-         h1_qgljet0_VHnotag->Fill( qgljet0, eventWeight );
-         h1_qgljet1_VHnotag->Fill( qgljet1, eventWeight );
-
-
-       } else {
-
-         if( isBSMEvent_t ) { //keep only if BSM cat is ok
-
-           category_t = -1; //these are BSMEvents which are not part of other categories
-
-         } else {
-
-           continue; // not my category, not my problem
-       
-         }
-
-       }
-
-       } else { // cs selection inverted photon ID and no btag
-
-	 if(dataset_ == "DATA_Run2012SinglePhoton"){
-	  
-	   if(hasPassedDoublePhot==1)continue;
-	   
-	   if(hasPassedSinglePhot==1){
-	     if(!(hasPassedSinglePhot==1 && hasPassedDoublePhot==0))continue; 
-	   }
-	 }
-
-       // *****   ttH leptonic category: 
-       // *****   (3 jets, 1 btag medium, 1 lepton)
-	   if(  isLeptonic && njets_selected>=3  ) {
-	     
-	     category_t = 0;
-	     if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )	     h1_mgg_ttH_leptonic->Fill( massggnewvtx, eventWeight );
-	     
-	     
-	     
-       // *****   ttH hadronic category: 
-       // *****   (5 jets, 1 btag medium, no lepton)
-	   } else if(  !isLeptonic && njets_selected>=5  ) {
-	     
-	     category_t = 1;
-	     if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )	     h1_mgg_ttH_hadronic->Fill( massggnewvtx, eventWeight );
-	
-
-       // *****   VH b-tag category: 
-       // *****   (2 jets, >=1 btag loose)
-       } else if(  njets_selected>=2 &&  diphot.Pt() > ptgg_VHbtag_thresh_ &&  fabs(zeppen)<zeppenfeld_thresh_ 
-		   &&  dijet.M()>mjj_min_VHbtag_thresh_ && dijet.M()<mjj_max_VHbtag_thresh_ &&  jet1.Pt() > ptjet_VHbtag_thresh_ &&
-		   fabs(cosThetaStar) < costhetastar_VHbtag_thresh_ ) {
-
-         category_t = 2;
-
-       // *****   VH no tag category: 
-       // *****   (2 jets, 0 btag loose)
-       } else if(  njets_selected>=2 && diphot.Pt() > ptgg_VHnotag_thresh_ && (ebeb==ebeb_VHnotag_thresh_) && fabs(zeppen)<zeppenfeld_thresh_
-		   && dijet.M()>mjj_min_VHnotag_thresh_ && dijet.M()<mjj_max_VHnotag_thresh_ && jet1.Pt() > ptjet_VHnotag_thresh_ 
-		   && fabs(cosThetaStar) < costhetastar_VHnotag_thresh_ ) {
-         category_t = 3;
-
-       } else {
-
-         if( isBSMEvent_t ) { //keep only if BSM cat is ok
-
-           category_t = -1; //these are BSMEvents which are not part of other categories
-
-         } else {
-
-           continue; // not my category, not my problem
-       
-         }
-
-
-       }
-       }
-
-       // inclusive plots:
-
-       h1_ptDiphot->Fill( diphot.Pt(), eventWeight );
-       h1_ptRunDiphot->Fill( diphot.Pt()*120./massggnewvtx, eventWeight );
-
-
-       float deltaphi = fabs(dijet.DeltaPhi(diphot));
-
-       h1_deltaPhi->Fill( deltaphi, eventWeight );
-       h1_ptDijet->Fill( dijet.Pt(), eventWeight );
-       h1_ptRatio->Fill( dijet.Pt()/diphot.Pt(), eventWeight );
-       h1_ptDifference->Fill( dijet.Pt()-diphot.Pt(), eventWeight );
-
-       h1_deltaEtaJets->Fill( jet0.Eta()-jet1.Eta(), eventWeight );
-       h1_deltaFabsEtaJets->Fill( fabs(jet0.Eta())-fabs(jet1.Eta()), eventWeight );
-
-
-       float deltaphi_kinfit = fabs(dijet_kinfit.DeltaPhi(diphot));
-
-       h1_deltaPhi_kinfit->Fill( deltaphi_kinfit, eventWeight );
-       h1_ptDijet_kinfit->Fill( dijet_kinfit.Pt(), eventWeight );
-       h1_ptRatio_kinfit->Fill( dijet_kinfit.Pt()/diphot.Pt(), eventWeight );
-       h1_ptDifference_kinfit->Fill( dijet_kinfit.Pt()-diphot.Pt(), eventWeight );
-
-       h1_deltaEtaJets_kinfit->Fill( jet0_kinfit.Eta()-jet1_kinfit.Eta(), eventWeight );
-       h1_deltaFabsEtaJets_kinfit->Fill( fabs(jet0_kinfit.Eta())-fabs(jet1_kinfit.Eta()), eventWeight );
-
-
-       if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg->Fill( massggnewvtx, eventWeight );
-       double ptweightPhot1=h1_ptweight_phot1->GetBinContent(h1_ptweight_phot1->GetXaxis()->FindBin(ptphot1));
-       double ptweightPhot2=h1_ptweight_phot2->GetBinContent(h1_ptweight_phot2->GetXaxis()->FindBin(ptphot2));
-       double ptweight2D=h2_ptweight->GetBinContent(h2_ptweight->GetXaxis()->FindBin(ptphot2),h2_ptweight->GetYaxis()->FindBin(ptphot1));
-
-       double etaweightPhot1=h1_etaweight_phot1->GetBinContent(h1_etaweight_phot1->GetXaxis()->FindBin(etaphot1));
-       double etaweightPhot2=h1_etaweight_phot2->GetBinContent(h1_etaweight_phot2->GetXaxis()->FindBin(etaphot2));
-       double etaweight2D=h2_etaweight->GetBinContent(h2_etaweight->GetXaxis()->FindBin(etaphot2),h2_etaweight->GetYaxis()->FindBin(etaphot1));
-
-       double ptweight2D_data=h2_ptweight_data->GetBinContent(h2_ptweight_data->GetXaxis()->FindBin(ptphot2),h2_ptweight_data->GetYaxis()->FindBin(ptphot1));
-       double etaweight2D_data=h2_etaweight_data->GetBinContent(h2_etaweight_data->GetXaxis()->FindBin(etaphot2),h2_etaweight_data->GetYaxis()->FindBin(etaphot1));
-
-
-       //       if(selectionType_.find("inverted")!=string::npos){//if not inverted do not apply corrections. useful for plots
-       if(invert_photonCuts_){
-	 if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_scaled->Fill( massggnewvtx, eventWeight*ptweightPhot1*ptweightPhot2 );
-	 
-         pt_scaled_weight_t=eventWeight*ptweightPhot1*ptweightPhot2;
-         ptPhot1_scaled_weight_t=eventWeight*ptweightPhot1;
-         ptPhot2_scaled_weight_t=eventWeight*ptweightPhot2;
-         pt_scaled_2D_weight_t=eventWeight*ptweight2D;
+      if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_prepresel->Fill( massggnewvtx, eventWeight );
+      
+      
+      if(selectionType_=="onlyPhotonCuts" ){
+      
+      double ptweight2D=h2_ptweight->GetBinContent(h2_ptweight->GetXaxis()->FindBin(ptphot2),h2_ptweight->GetYaxis()->FindBin(ptphot1));
+      double etaweight2D=h2_etaweight->GetBinContent(h2_etaweight->GetXaxis()->FindBin(etaphot2),h2_etaweight->GetYaxis()->FindBin(etaphot1));
+      double ptweight2D_data=h2_ptweight_data->GetBinContent(h2_ptweight_data->GetXaxis()->FindBin(ptphot2),h2_ptweight_data->GetYaxis()->FindBin(ptphot1));
+      double etaweight2D_data=h2_etaweight_data->GetBinContent(h2_etaweight_data->GetXaxis()->FindBin(etaphot2),h2_etaweight_data->GetYaxis()->FindBin(etaphot1));
+      if(!invert_photonCuts_){
+        pt_scaled_2D_weight_t=eventWeight;
+        eta_scaled_2D_weight_t=eventWeight;
+        pt_scaled_2D_weight_data_t=eventWeight;
+        eta_scaled_2D_weight_data_t=eventWeight;
         
-         eta_scaled_weight_t=eventWeight*etaweightPhot1*etaweightPhot2;
-         etaPhot1_scaled_weight_t=eventWeight*etaweightPhot1;
-         etaPhot2_scaled_weight_t=eventWeight*etaweightPhot2;
-         eta_scaled_2D_weight_t=eventWeight*etaweight2D;
-
-	 if(ptweight2D_data!=0){
-	   pt_scaled_2D_weight_data_t=eventWeight*ptweight2D_data;
-	   eta_scaled_2D_weight_data_t=eventWeight*etaweight2D_data;
-	 }else{
-	   pt_scaled_2D_weight_data_t=eventWeight;
-	   eta_scaled_2D_weight_data_t=eventWeight;
-	 }
-	 
-
-
-       } else {
-
-	 if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_scaled->Fill(massggnewvtx, eventWeight );
-         pt_scaled_weight_t=eventWeight;
-         ptPhot1_scaled_weight_t=eventWeight;
-         ptPhot2_scaled_weight_t=eventWeight;
-         pt_scaled_2D_weight_t=eventWeight;
+      }else{
+        pt_scaled_2D_weight_t=eventWeight*ptweight2D;
+        eta_scaled_2D_weight_t=eventWeight*etaweight2D;
         
-         eta_scaled_weight_t=eventWeight;
-         etaPhot1_scaled_weight_t=eventWeight;
-         etaPhot2_scaled_weight_t=eventWeight;
-         eta_scaled_2D_weight_t=eventWeight;
+        if(ptweight2D_data!=0){
+          pt_scaled_2D_weight_data_t=eventWeight*ptweight2D_data;
+          eta_scaled_2D_weight_data_t=eventWeight*etaweight2D_data;
+        }else{
+          pt_scaled_2D_weight_data_t=eventWeight;
+          eta_scaled_2D_weight_data_t=eventWeight;
+        }
+      
+      
+      }
+      tree_weights->Fill();
+      continue;
+      }
+      
+      
+      // jets
+      int njets_selected = 0;
+      int njets_selected_btagloose = 0;
+      int njets_selected_btagmedium = 0;
+      std::vector<int> index_MatchedJet;
+      std::vector<int> index_selected;
+      std::vector<int> index_selected_btagloose;
+      std::vector<int> index_selected_btagmedium;
+      Ht_t = 0.;
+      
+      for( unsigned ijet=0; ijet<njets; ++ijet ) {
+      
+      //std::cout << ijet << "/" << njets << " pt: " << ptcorrjet[ijet] << " eta: " << etajet[ijet] << std::endl;
+        if( ptcorrjet[ijet] < ptjetthresh_count_ ) continue;
+        if( fabs(etajet[ijet]) > etajetthresh_count_ ) continue;
+      
+        //jet PU ID:
+        bool passedPUID = true;
+        if(use_PUID_){
+          if((ijet+1)>=njets_PUID_thresh_){
+            if(TMath::Abs(etajet[ijet]) < 2.5) {
+              if(betastarjet[ijet] > 0.2 * log( nvtx - 0.67 ) ) passedPUID = false;
+              if(rmsjet[ijet] > 0.06) passedPUID = false;
+            } else if(TMath::Abs(etajet[ijet]) < 3.){
+              if(rmsjet[ijet] > 0.05) passedPUID = false;
+            } else {
+              if(rmsjet[ijet] > 0.055) passedPUID = false;
+            }
+          }
+          if( !passedPUID )continue;
+        }
+      
+        if( isMC ) {
+          if( partMomPdgIDjet[ijet] == 23 || abs( partMomPdgIDjet[ijet] ) == 24 ) {
+            h1_posMatchedJet->Fill( ijet, eventWeight );
+            h1_ptMatchedJet->Fill( ptcorrjet[ijet], eventWeight );
+            h1_etaMatchedJet->Fill( etajet[ijet], eventWeight );
+            h1_phiMatchedJet->Fill( phijet[ijet], eventWeight );
+            index_MatchedJet.push_back(ijet);
+          }
+        }
+      
+      
+        bool btagged_loose = false;
+        bool btagged_medium = false;
+      
+        if(bTaggerType_=="JP") {
+          btagged_loose = btagjprobjet[ijet]>0.275;
+          btagged_medium = btagjprobjet[ijet]>0.545;
+        } else if(bTaggerType_=="CSV") {
+          btagged_loose = btagcsvjet[ijet]>0.244;
+          btagged_medium = btagcsvjet[ijet]>0.679;
+        } else {
+          std::cout<<"WARNING: btag type "<<bTaggerType_<<"not found"<<std::endl;
+        }
+      
+        //// then modify btags with Scale Factors:
+        if( isMC )
+          btsfutil->modifyBTagsWithSF_fast(btagged_loose, btagged_medium, ptcorrjet[ijet], etajet[ijet], partPdgIDjet[ijet], "mean" );
+      
+      
+        if( btagged_loose ) {
+          njets_selected_btagloose++;
+          index_selected_btagloose.push_back(ijet);
+        }
+        if( btagged_medium ) {
+          njets_selected_btagmedium++;
+          index_selected_btagmedium.push_back(ijet);
+        }
+      
+      
+        index_selected.push_back(ijet);
+      
+        if( njets_selected<20 ) {
+          ptJet_t[njets_selected] = ptcorrjet[ijet];
+          etaJet_t[njets_selected] = etajet[ijet];
+          btaggedLooseJet_t[njets_selected] = btagged_loose;
+          btaggedMediumJet_t[njets_selected] = btagged_medium;
+        }
+      
+        njets_selected++;
+      
+      
+        Ht_t += ptcorrjet[ijet];
+      
+      
+        //AnalysisJet thisJet;
+        //thisJet.set
+        //selectedJets.push_back( thisJet );
+      
+      } //for jets
+      
+      
+      
+      // define m3:
+      float triJetPtMax=0.;
+      float m3=0.;
+      for( unsigned i=0; i<index_selected.size(); ++i ) {
+      for( unsigned j=i+1; j<index_selected.size(); ++j ) {
+        for( unsigned k=j+1; k<index_selected.size(); ++k ) {
+          TLorentzVector jet1,jet2,jet3;
+          jet1.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
+          jet2.SetPtEtaPhiE(ptcorrjet[j],etajet[j],phijet[j],ecorrjet[j]);
+          jet3.SetPtEtaPhiE(ptcorrjet[k],etajet[k],phijet[k],ecorrjet[k]);
+          TLorentzVector triJet = jet1 + jet2 + jet3;
+          if( triJet.Pt() > triJetPtMax ) {
+            triJetPtMax=triJet.Pt();
+            m3 = triJet.M();
+          }
+        }
+      }
+      }
+      
+      m3_t=m3;
+      
+      
+      int isLeptonic= (ptele1>0 || ptmu1>0);
+      int isMu=ptmu1>0;
+      
+      
+      //invariant mass
+      TLorentzVector l,nu,lnu,b,blnu,bgg;
+      
+      if(isLeptonic){
+      float ptlep=ptmu1;
+      float etalep=etamu1;
+      float philep=phimu1;
+      float energylep=enemu1;
+      if(!isMu){
+      ptlep=ptele1;
+      etalep=etaele1;
+      philep=phiele1;
+      energylep=eneele1;
+      }
+      
+      l.SetPtEtaPhiE(ptlep,etalep,philep,energylep);
+      nu.SetPtEtaPhiE(epfMet,0,phipfMet,epfMet);
+      lnu=l+nu;
+      
+      
+      minv_lnu_t=lnu.Mt();
+      
+      h1_minv_lnu->Fill(minv_lnu_t,eventWeight);
+      }
+      
+      
+      
+      
+      //       cout<<njets_selected<<"------"<<endl;
+      if(njets_selected<njets_thresh_) continue;
+      if( event == DEBUG_EVENT_NUMBER_ ) {
+        std::cout << "-> Passed njets cut." << std::endl;
+      }
 
-	 pt_scaled_2D_weight_data_t=eventWeight;
-	 eta_scaled_2D_weight_data_t=eventWeight;
-	   
+      if(njets_selected>njets_upper_thresh_)continue;
+      if( event == DEBUG_EVENT_NUMBER_ ) {
+        std::cout << "-> Passed njets upper cut." << std::endl;
+      }
 
-       }
+      if(njets_selected_btagloose<nbtagloose_thresh_) continue;
+      if( event == DEBUG_EVENT_NUMBER_ ) {
+        std::cout << "-> Passed nbjets loose cut." << std::endl;
+      }
+
+      if(njets_selected_btagmedium<nbtagmedium_thresh_) continue;
+      if( event == DEBUG_EVENT_NUMBER_ ) {
+        std::cout << "-> Passed nbjets medium cut." << std::endl;
+      }
+
+      
+      if(Ht_t<Ht_thresh_)continue;
+      if( event == DEBUG_EVENT_NUMBER_ ) {
+        std::cout << "-> Passed HT  cut." << std::endl;
+      }
+
+      
+      
+      
+      
+      
+      
+      h1_ptphot0->Fill(ptphot1, eventWeight);
+      h1_ptphot1->Fill(ptphot2, eventWeight);
+      
+      h1_ptrunphot0->Fill(ptphot1*120/massggnewvtx, eventWeight);
+      h1_ptrunphot1->Fill(ptphot2*120/massggnewvtx, eventWeight);
+      
+      h1_etaphot0->Fill(etaphot1, eventWeight);
+      h1_etaphot1->Fill(etaphot2, eventWeight);
+      
+      
+      h1_njets->Fill( njets_selected, eventWeight );
+      h1_nbjets_loose->Fill( njets_selected_btagloose, eventWeight );
+      h1_nbjets_medium->Fill( njets_selected_btagmedium, eventWeight );
+      
+      if( njets_selected>=2 ) {
+        h1_nbjets_loose_2jets->Fill( njets_selected_btagloose, eventWeight );
+        h1_nbjets_medium_2jets->Fill( njets_selected_btagmedium, eventWeight );
+      }
+      
+      if( H_event && V_event && Zbb_event ) {
+        h1_njets_ZbbHgg->Fill( njets_selected, eventWeight );
+        h1_nbjets_loose_ZbbHgg->Fill( njets_selected_btagloose, eventWeight );
+        h1_nbjets_medium_ZbbHgg->Fill( njets_selected_btagmedium, eventWeight );
+        if( njets_selected>1 ) {
+          h1_nbjets_loose_nj2_ZbbHgg->Fill( njets_selected_btagloose, eventWeight );
+          h1_nbjets_medium_nj2_ZbbHgg->Fill( njets_selected_btagmedium, eventWeight );
+        }
+      }
+      
+      
+      
+      if( index_selected.size()<2 ) continue;
+      if( event == DEBUG_EVENT_NUMBER_ ) {
+        std::cout << "-> Passed at least 2 selected jets." << std::endl;
+      }
+
+      if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_presel->Fill( massggnewvtx, eventWeight );
+      
+      
+      // try with simply the two leading ones:
+      allPairs += eventWeight;
+      if( (partMomPdgIDjet[index_selected[0]] == 23 || abs( partMomPdgIDjet[index_selected[0]] ) == 24)
+      && ( partMomPdgIDjet[index_selected[1]] == 23 || abs( partMomPdgIDjet[index_selected[1]] ) == 24) ) correctPairs_lead += eventWeight;
+      
+      
+      
+      // choose jets as two btagged jets, OR leading ones
+      int indexjet0 = index_selected[0];
+      int indexjet1 = index_selected[1];
+      bool chooseBtaggedJets=true;//be careful with this
+      bool firstjet_isbtaggedloose = false;
+      bool secondjet_isbtaggedloose = false;
+      
+      
+      if(chooseBtaggedJets){
+      if( index_selected_btagloose.size()==1 ) {
+        if( index_selected_btagloose[0]!=index_selected[0] ) { 
+          indexjet1 = index_selected_btagloose[0];
+          secondjet_isbtaggedloose = true;
+        } else {
+          firstjet_isbtaggedloose = true;
+        }
+      }
+      if( index_selected_btagloose.size()>1 ) {
+        indexjet0 = index_selected_btagloose[0];
+        indexjet1 = index_selected_btagloose[1];
+        firstjet_isbtaggedloose = true;
+        secondjet_isbtaggedloose = true;
+      }
+      }
+      AnalysisJet jet0;
+      jet0.SetPtEtaPhiE( ptcorrjet[indexjet0], etajet[indexjet0], phijet[indexjet0], ecorrjet[indexjet0] );
+      AnalysisJet jet1;
+      jet1.SetPtEtaPhiE( ptcorrjet[indexjet1], etajet[indexjet1], phijet[indexjet1], ecorrjet[indexjet1] );
+      AnalysisJet dijet = jet0 + jet1;
+      
+      if(firstjet_isbtaggedloose){
+      b.SetPtEtaPhiE( ptcorrjet[indexjet0], etajet[indexjet0], phijet[indexjet0], ecorrjet[indexjet0] );
+      if(isLeptonic){
+        blnu=b+lnu;
+        minv_blnu_t=blnu.Mt();
+        h1_minv_blnu->Fill(minv_blnu_t,eventWeight);
+      }
+      bgg=b+diphot;
+      minv_bgg_t=bgg.M();
+      h1_minv_bgg->Fill(minv_bgg_t,eventWeight);
+      }
+      
+      
+      
+      
+      
+      h1_ptjet0->Fill( jet0.Pt(), eventWeight );
+      h1_ptjet1->Fill( jet1.Pt(), eventWeight );
+      
+      h1_etajet0->Fill( jet0.Eta(), eventWeight );
+      h1_etajet1->Fill( jet1.Eta(), eventWeight );
+      
+      
+      h1_Ht->Fill(Ht_t,eventWeight);
+      
+      
+      bool chose_correctPair = (partMomPdgIDjet[indexjet0] == 23 || abs( partMomPdgIDjet[indexjet0] ) == 24)
+                            && (partMomPdgIDjet[indexjet1] == 23 || abs( partMomPdgIDjet[indexjet1] ) == 24);
+      
+      
+      h1_mjj->Fill( dijet.M(), eventWeight );
+      
+      if( chose_correctPair ) {
+      
+        correctPairs_fancy += eventWeight;
+        h1_mjj_correct->Fill( dijet.M(), eventWeight );
+      
+      } else {
+      
+        h1_mjj_incorrect->Fill( dijet.M(), eventWeight );
+      
+      }
+      
+      
+      
+      float zeppen = diphot.Eta() - 0.5*( jet0.Eta() + jet1.Eta() );
+      h1_zeppen->Fill( zeppen, eventWeight);
+      
+      
+      
+      // perform two kinfits:
+      std::pair<TLorentzVector,TLorentzVector> jets_kinfitW = fitter_jetsW->fit(jet0, jet1);
+      std::pair<TLorentzVector,TLorentzVector> jets_kinfitZ = fitter_jetsZ->fit(jet0, jet1);
+      float chiSquareProbW = TMath::Prob(fitter_jetsW->getS(), fitter_jetsW->getNDF());
+      float chiSquareProbZ = TMath::Prob(fitter_jetsZ->getS(), fitter_jetsZ->getNDF());
+      
+      
+      TLorentzVector phot0, phot1;
+      phot0.SetPtEtaPhiM( ptphot1, etaphot1, phiphot1, 0.);
+      phot1.SetPtEtaPhiM( ptphot2, etaphot2, phiphot2, 0.);
+      
+      HelicityLikelihoodDiscriminant::HelicityAngles hangles;
+      if( coin->Uniform(1.)<0.5 ) hangles = helicityDiscriminator->computeHelicityAngles(phot0, phot1, jet0, jet1);
+      else                        hangles = helicityDiscriminator->computeHelicityAngles(phot1, phot0, jet0, jet1);
+      
+      
+      float cosThetaStar = hangles.helCosThetaStar;
+      cosThetaStar_t=cosThetaStar;
+      cosTheta2_t=hangles.helCosTheta2;
+      h1_cosThetaStar->Fill( hangles.helCosThetaStar, eventWeight );
+      h1_cosTheta1->Fill( hangles.helCosTheta1, eventWeight );
+      h1_cosTheta2->Fill( hangles.helCosTheta2, eventWeight );
+      h1_helphi->Fill( hangles.helPhi, eventWeight );
+      h1_helphi1->Fill( hangles.helPhi1, eventWeight );
+      
+      TLorentzVector Vstar = dijet + diphot;
+      
+      
+      // boost stuff in Vstar frame
+      TLorentzVector Vstar_Vstar(Vstar);
+      Vstar_Vstar.Boost(-Vstar.BoostVector());
+      TLorentzVector V_Vstar(dijet);
+      V_Vstar.Boost(-Vstar.BoostVector());
+      
+      // boost stuff in the V_Vstar frame:
+      TLorentzVector Vstar_V(Vstar_Vstar);
+      Vstar_V.Boost(-V_Vstar.BoostVector());
+      TLorentzVector jet0_V, jet1_V;
+      // randomize:
+      if( coin->Uniform(1.)<0.5) {
+        jet0_V = jet0;
+        jet1_V = jet1;
+      } else {
+        jet0_V = jet1;
+        jet1_V = jet0;
+      }
+      jet0_V.Boost(-dijet.BoostVector());
+      jet1_V.Boost(-dijet.BoostVector());
+      
+      TVector3 v3_jet0_V  = jet0_V.Vect();
+      TVector3 v3_jet1_V  = jet1_V.Vect();
+      TVector3 v3_Vstar_V = Vstar_V.Vect();
+      TVector3 v3_V_Vstar = V_Vstar.Vect();
+      
+      float cosThetaStar_jets = cos( v3_jet0_V.Angle(v3_V_Vstar) );
+      float helicityAngle_V = sin( v3_jet0_V.Angle(v3_Vstar_V) );
+      
+      h1_cosThetaStar_jets->Fill( cosThetaStar_jets, eventWeight );
+      h1_helicityAngle_V->Fill( helicityAngle_V, eventWeight );
+      
+      
+      TLorentzVector jet0_kinfit, jet1_kinfit;
+      float chiSquareProbMax=0.;
+      
+      if( chiSquareProbW>chiSquareProbZ ) {
+      
+        chiSquareProbMax = chiSquareProbW;
+        jet0_kinfit = jets_kinfitW.first;
+        jet1_kinfit = jets_kinfitW.second;
+      
+      } else {
+      
+        chiSquareProbMax = chiSquareProbZ;
+        jet0_kinfit = jets_kinfitZ.first;
+        jet1_kinfit = jets_kinfitZ.second;
+      
+      }
+      
+      TLorentzVector dijet_kinfit = jet0_kinfit + jet1_kinfit;
+      
+      h1_kinfit_chiSquareProbMax->Fill( chiSquareProbMax, eventWeight );
+      if( dijet.M()>60. && dijet.M()<120. ) 
+        h1_kinfit_chiSquareProbMax_mjjWindow->Fill( chiSquareProbMax, eventWeight );
+      
+      
+      float zeppen_kinfit = diphot.Eta() - 0.5*( jet0_kinfit.Eta() + jet1_kinfit.Eta() );
+      h1_zeppen_kinfit->Fill( zeppen_kinfit, eventWeight );
+      
+      
+      
+      
+      
+      float qgljet0 = qglikeli->computeQGLikelihoodPU( jet0.Pt(), rhoPF, ntrkjet[indexjet0], nneutjet[indexjet0], ptDjet[indexjet0] );
+      float qgljet1 = qglikeli->computeQGLikelihoodPU( jet1.Pt(), rhoPF, ntrkjet[indexjet1], nneutjet[indexjet1], ptDjet[indexjet1] );
+      
+      
+      
+      
+      // -------------------------------------------------
+      // 
+      //              DEFINE EVENT CATEGORY
+      // 
+      // -------------------------------------------------
+      
+      
+      // uncorrelated  med-med category for double higgs/BSM searches
+      // try to be as model independent as possible (no mass or angular cuts)
+      // just cut hard on jet pt's
+      isBSMEvent_t = false;
+      if( ((njets_selected_btagmedium>=1 && njets_selected_btagloose>=2) || invert_photonCuts_)  && jet0.Pt()>50. && jet1.Pt()>50. && diphot.Pt()>100. ) { 
+
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Passes BSM criteria." << std::endl;
+        }
+
+      
+        isBSMEvent_t = true;
+      
+        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_bsm->Fill( massggnewvtx, eventWeight );
+      
+      }
+      
+      
+      
+      
+      // SM Higgs CATEGORIES:
+      
+      // *****   ttH leptonic category: 
+      // *****   (3 jets, 1 btag medium, 1 lepton)
+      
+      if(  isLeptonic && njets_selected>=3 && (njets_selected_btagmedium>0 || invert_photonCuts_) ) {
+
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Goes in ttH leptonic category." << std::endl;
+        }
+
+      
+        category_t = 0;
+        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_ttH_leptonic->Fill( massggnewvtx, eventWeight );
+      
+      
+      
+      // *****   ttH hadronic category: 
+      // *****   (5 jets, 1 btag medium, no lepton)
+      } else if(  !isLeptonic && njets_selected>=njets_ttH_hadronic_thresh_ && (njets_selected_btagmedium>0 || invert_photonCuts_) ) {
+      
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Goes in ttH hadronic category." << std::endl;
+        }
+
+        category_t = 1;
+        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_ttH_hadronic->Fill( massggnewvtx, eventWeight );
+      
+      
+      
+      
+      // *****   VH btagged category: 
+      // *****   (2 jets, >=1 btag loose)
+      } else if(  njets_selected>=2 && njets_selected_btagloose>=1 && !invert_photonCuts_ ) {
+
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Goes in VH btagged category." << std::endl;
+        }
+
+      
+        category_t = 2;
+      
+      
+        if( diphot.Pt() < ptgg_VHbtag_thresh_*massggnewvtx/120. ) continue;
+
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Passed running ptgg thresh." << std::endl;
+        }
+
+      
+        // fill before mjj cut:
+        h1_mjj_VHbtag->Fill( dijet.M(), eventWeight );
+      
+        if( fabs(zeppen)>zeppenfeld_thresh_ ) continue;
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Passed zeppen thresh." << std::endl;
+        }
+
+        if( dijet.M()<mjj_min_VHbtag_thresh_ || dijet.M()>mjj_max_VHbtag_thresh_ ) continue;
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Passed dijet thresh." << std::endl;
+        }
+
+      
+        if( jet1.Pt() < ptjet_VHbtag_thresh_ ) continue;
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Passed jet1 pt thresh." << std::endl;
+        }
+
+        if( fabs(cosThetaStar) > costhetastar_VHbtag_thresh_ ) continue;
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Passed costhetastar thresh." << std::endl;
+        }
+
+      
+      
+        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_VHbtag->Fill( massggnewvtx, eventWeight );
+      
+        // qg only for non-btagged jet:
+        if( firstjet_isbtaggedloose ) {
+          h1_qgljet_VHbtag->Fill( qgljet1, eventWeight );
+        } else {
+          h1_qgljet_VHbtag->Fill( qgljet0, eventWeight );
+        }
+      
+      
+      // *****   VH no-btag category: 
+      // *****   (2 jets, 0 btag loose)
+      } else if(  njets_selected>=2 && (njets_selected_btagloose==0 || invert_photonCuts_) ) {
+
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Goes in VH no tag category." << std::endl;
+        }
+
+      
+        category_t = 3;
+      
+      
+        if( diphot.Pt() < ptgg_VHnotag_thresh_*massggnewvtx/120. ) continue;
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Passed running ptgg thresh." << std::endl;
+        }
 
 
-       //       std::cout<<massggnewvtx<<" "<<mgg_scaled<<std::endl;
-       //std::cout<<"ptweightPhot0 "<<ptweightPhot0<<"ptweightPhot1 "<<ptweightPhot1<<std::endl;
+        if( (ebeb_VHnotag_thresh_ && !ebeb) ) continue;
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Passed EBEB condition." << std::endl;
+        }
 
-       TLorentzVector Vstar_kinfit = dijet_kinfit + diphot;
+      
+        // fill before mjj cut:
+        h1_mjj_VHnotag->Fill( dijet.M(), eventWeight );
+      
+        if( fabs(zeppen)>zeppenfeld_thresh_ ) continue;
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Passed zeppen thresh." << std::endl;
+        }
+
+        if( dijet.M()<mjj_min_VHnotag_thresh_ || dijet.M()>mjj_max_VHnotag_thresh_ ) continue;
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Passed dijet mass thresh." << std::endl;
+        }
+      
+        if( jet1.Pt() < ptjet_VHnotag_thresh_ ) continue;
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Passed jet1 pt thresh." << std::endl;
+        }
+      
+        if( fabs(cosThetaStar) > costhetastar_VHnotag_thresh_ ) continue;
+        if( event == DEBUG_EVENT_NUMBER_ ) {
+          std::cout << "-> Passed costhetastar thresh." << std::endl;
+        }
+      
+      
+        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )          h1_mgg_VHnotag->Fill( massggnewvtx, eventWeight );
+      
+        h1_qgljet0_VHnotag->Fill( qgljet0, eventWeight );
+        h1_qgljet1_VHnotag->Fill( qgljet1, eventWeight );
+      
+      
+      } else {
+      
+        if( isBSMEvent_t ) { //keep only if BSM cat is ok
+      
+          category_t = -1; //these are BSMEvents which are not part of other categories
+      
+        } else {
+      
+          continue; // not my category, not my problem
+      
+        }
+      
+      }
+
+
+      if( event == DEBUG_EVENT_NUMBER_ ) {
+        std::cout << "-> Passed ALL SELECTIONS." << std::endl;
+      }
+      
+      
+      
+      // inclusive plots:
+      
+      h1_ptDiphot->Fill( diphot.Pt(), eventWeight );
+      h1_ptRunDiphot->Fill( diphot.Pt()*120./massggnewvtx, eventWeight );
+      
+      
+      float deltaphi = fabs(dijet.DeltaPhi(diphot));
+      
+      h1_deltaPhi->Fill( deltaphi, eventWeight );
+      h1_ptDijet->Fill( dijet.Pt(), eventWeight );
+      h1_ptRatio->Fill( dijet.Pt()/diphot.Pt(), eventWeight );
+      h1_ptDifference->Fill( dijet.Pt()-diphot.Pt(), eventWeight );
+      
+      h1_deltaEtaJets->Fill( jet0.Eta()-jet1.Eta(), eventWeight );
+      h1_deltaFabsEtaJets->Fill( fabs(jet0.Eta())-fabs(jet1.Eta()), eventWeight );
+      
+      
+      float deltaphi_kinfit = fabs(dijet_kinfit.DeltaPhi(diphot));
+      
+      h1_deltaPhi_kinfit->Fill( deltaphi_kinfit, eventWeight );
+      h1_ptDijet_kinfit->Fill( dijet_kinfit.Pt(), eventWeight );
+      h1_ptRatio_kinfit->Fill( dijet_kinfit.Pt()/diphot.Pt(), eventWeight );
+      h1_ptDifference_kinfit->Fill( dijet_kinfit.Pt()-diphot.Pt(), eventWeight );
+      
+      h1_deltaEtaJets_kinfit->Fill( jet0_kinfit.Eta()-jet1_kinfit.Eta(), eventWeight );
+      h1_deltaFabsEtaJets_kinfit->Fill( fabs(jet0_kinfit.Eta())-fabs(jet1_kinfit.Eta()), eventWeight );
+      
+      
+      if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg->Fill( massggnewvtx, eventWeight );
+      double ptweightPhot1=h1_ptweight_phot1->GetBinContent(h1_ptweight_phot1->GetXaxis()->FindBin(ptphot1));
+      double ptweightPhot2=h1_ptweight_phot2->GetBinContent(h1_ptweight_phot2->GetXaxis()->FindBin(ptphot2));
+      double ptweight2D=h2_ptweight->GetBinContent(h2_ptweight->GetXaxis()->FindBin(ptphot2),h2_ptweight->GetYaxis()->FindBin(ptphot1));
+      
+      double etaweightPhot1=h1_etaweight_phot1->GetBinContent(h1_etaweight_phot1->GetXaxis()->FindBin(etaphot1));
+      double etaweightPhot2=h1_etaweight_phot2->GetBinContent(h1_etaweight_phot2->GetXaxis()->FindBin(etaphot2));
+      double etaweight2D=h2_etaweight->GetBinContent(h2_etaweight->GetXaxis()->FindBin(etaphot2),h2_etaweight->GetYaxis()->FindBin(etaphot1));
+      
+      double ptweight2D_data=h2_ptweight_data->GetBinContent(h2_ptweight_data->GetXaxis()->FindBin(ptphot2),h2_ptweight_data->GetYaxis()->FindBin(ptphot1));
+      double etaweight2D_data=h2_etaweight_data->GetBinContent(h2_etaweight_data->GetXaxis()->FindBin(etaphot2),h2_etaweight_data->GetYaxis()->FindBin(etaphot1));
+      
+      
+      //       if(selectionType_.find("inverted")!=string::npos){//if not inverted do not apply corrections. useful for plots
+      if(invert_photonCuts_){
+      if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_scaled->Fill( massggnewvtx, eventWeight*ptweightPhot1*ptweightPhot2 );
+      
+        pt_scaled_weight_t=eventWeight*ptweightPhot1*ptweightPhot2;
+        ptPhot1_scaled_weight_t=eventWeight*ptweightPhot1;
+        ptPhot2_scaled_weight_t=eventWeight*ptweightPhot2;
+        pt_scaled_2D_weight_t=eventWeight*ptweight2D;
        
-       h1_mVstar->Fill( Vstar.M(), eventWeight );
-       h1_ptVstar->Fill( Vstar.Pt(), eventWeight );
-       h1_etaVstar->Fill( Vstar.Eta(), eventWeight );
-       etaVstar_t=Vstar.Eta();
-       h1_phiVstar->Fill( Vstar.Phi(), eventWeight );
-
-       h1_mVstar_kinfit->Fill( Vstar_kinfit.M(), eventWeight );
-       h1_ptVstar_kinfit->Fill( Vstar_kinfit.Pt(), eventWeight );
-       h1_etaVstar_kinfit->Fill( Vstar_kinfit.Eta(), eventWeight );
-       h1_phiVstar_kinfit->Fill( Vstar_kinfit.Phi(), eventWeight );
-   
-       //leptons
-       h1_ptele1->Fill(ptele1,eventWeight);
-       h1_ptele2->Fill(ptele2,eventWeight);
-       h1_ptmu1->Fill(ptmu1,eventWeight);
-       h1_ptmu2->Fill(ptmu2,eventWeight);
-
-       //MET
-       h1_pfMet->Fill(epfMet,eventWeight);
-
-
-
-       // set tree vars:
-       njets_t  = njets_selected;
-       nbjets_loose_t = njets_selected_btagloose;
-       nbjets_medium_t = njets_selected_btagmedium;
-       ptPhot1_t = ptphot1;
-       ptPhot2_t = ptphot2;
-       ptRunPhot1_t = ptphot1*120./massggnewvtx;
-       ptRunPhot2_t = ptphot2*120./massggnewvtx;
-       etaPhot1_t = etaphot1;
-       etaPhot2_t = etaphot2;
-       if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) ){
-	 mgg_t = diphot.M();
-       }else{
-	 mgg_t = -1;
-       }
-       ptgg_t = diphot.Pt();
-       ptRungg_t = diphot.Pt()*120./massggnewvtx;
-
-       ptJet1_t = jet0.Pt();
-       ptJet2_t = jet1.Pt();
-       etaJet1_t = jet0.Eta();
-       etaJet2_t = jet1.Eta();
-       qglJet1_t = qgljet0;
-       qglJet2_t = qgljet1;
-       btagJet1_t = firstjet_isbtaggedloose;
-       btagJet2_t = secondjet_isbtaggedloose;
-       mjj_t = dijet.M();
-       ptjj_t = dijet.Pt();
-       zeppen_t = zeppen;
-       chiSquareProbMax_t = chiSquareProbMax;
-       absCosThetaStar_t = fabs(cosThetaStar);
-       hasPassedSinglePhot_t=hasPassedSinglePhot;
-       hasPassedDoublePhot_t=hasPassedDoublePhot;
-
-
-       tree_passedEvents->Fill();
+        eta_scaled_weight_t=eventWeight*etaweightPhot1*etaweightPhot2;
+        etaPhot1_scaled_weight_t=eventWeight*etaweightPhot1;
+        etaPhot2_scaled_weight_t=eventWeight*etaweightPhot2;
+        eta_scaled_2D_weight_t=eventWeight*etaweight2D;
+      
+      if(ptweight2D_data!=0){
+        pt_scaled_2D_weight_data_t=eventWeight*ptweight2D_data;
+        eta_scaled_2D_weight_data_t=eventWeight*etaweight2D_data;
+      }else{
+        pt_scaled_2D_weight_data_t=eventWeight;
+        eta_scaled_2D_weight_data_t=eventWeight;
+      }
+      
+      
+      
+      } else {
+      
+      if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_scaled->Fill(massggnewvtx, eventWeight );
+        pt_scaled_weight_t=eventWeight;
+        ptPhot1_scaled_weight_t=eventWeight;
+        ptPhot2_scaled_weight_t=eventWeight;
+        pt_scaled_2D_weight_t=eventWeight;
+       
+        eta_scaled_weight_t=eventWeight;
+        etaPhot1_scaled_weight_t=eventWeight;
+        etaPhot2_scaled_weight_t=eventWeight;
+        eta_scaled_2D_weight_t=eventWeight;
+      
+      pt_scaled_2D_weight_data_t=eventWeight;
+      eta_scaled_2D_weight_data_t=eventWeight;
+        
+      
+      }
+      
+      
+      //       std::cout<<massggnewvtx<<" "<<mgg_scaled<<std::endl;
+      //std::cout<<"ptweightPhot0 "<<ptweightPhot0<<"ptweightPhot1 "<<ptweightPhot1<<std::endl;
+      
+      TLorentzVector Vstar_kinfit = dijet_kinfit + diphot;
+      
+      h1_mVstar->Fill( Vstar.M(), eventWeight );
+      h1_ptVstar->Fill( Vstar.Pt(), eventWeight );
+      h1_etaVstar->Fill( Vstar.Eta(), eventWeight );
+      etaVstar_t=Vstar.Eta();
+      h1_phiVstar->Fill( Vstar.Phi(), eventWeight );
+      
+      h1_mVstar_kinfit->Fill( Vstar_kinfit.M(), eventWeight );
+      h1_ptVstar_kinfit->Fill( Vstar_kinfit.Pt(), eventWeight );
+      h1_etaVstar_kinfit->Fill( Vstar_kinfit.Eta(), eventWeight );
+      h1_phiVstar_kinfit->Fill( Vstar_kinfit.Phi(), eventWeight );
+      
+      //leptons
+      h1_ptele1->Fill(ptele1,eventWeight);
+      h1_ptele2->Fill(ptele2,eventWeight);
+      h1_ptmu1->Fill(ptmu1,eventWeight);
+      h1_ptmu2->Fill(ptmu2,eventWeight);
+      
+      //MET
+      h1_pfMet->Fill(epfMet,eventWeight);
+      
+      
+      
+      // set tree vars:
+      njets_t  = njets_selected;
+      nbjets_loose_t = njets_selected_btagloose;
+      nbjets_medium_t = njets_selected_btagmedium;
+      ptPhot1_t = ptphot1;
+      ptPhot2_t = ptphot2;
+      ptRunPhot1_t = ptphot1*120./massggnewvtx;
+      ptRunPhot2_t = ptphot2*120./massggnewvtx;
+      etaPhot1_t = etaphot1;
+      etaPhot2_t = etaphot2;
+      if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) ){
+        mgg_t = diphot.M();
+      }else{
+        mgg_t = -1;
+      }
+      ptgg_t = diphot.Pt();
+      ptRungg_t = diphot.Pt()*120./massggnewvtx;
+      
+      ptJet1_t = jet0.Pt();
+      ptJet2_t = jet1.Pt();
+      etaJet1_t = jet0.Eta();
+      etaJet2_t = jet1.Eta();
+      qglJet1_t = qgljet0;
+      qglJet2_t = qgljet1;
+      btagJet1_t = firstjet_isbtaggedloose;
+      btagJet2_t = secondjet_isbtaggedloose;
+      mjj_t = dijet.M();
+      ptjj_t = dijet.Pt();
+      zeppen_t = zeppen;
+      chiSquareProbMax_t = chiSquareProbMax;
+      absCosThetaStar_t = fabs(cosThetaStar);
+      hasPassedSinglePhot_t=hasPassedSinglePhot;
+      hasPassedDoublePhot_t=hasPassedDoublePhot;
+      
+      
+      tree_passedEvents->Fill();
 
 
    } //for entries
@@ -2208,13 +2286,13 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
     ebeb_VHnotag_thresh_ = true;
     
     ptgg_VHnotag_thresh_ = 105.;
-    ptgg_VHbtag_thresh_ = 78.;
+    ptgg_VHbtag_thresh_ = 70.;
 
     ptjet_VHnotag_thresh_ = 35.;
     ptjet_VHbtag_thresh_ = 20.;
 
     costhetastar_VHnotag_thresh_ = 0.9;
-    costhetastar_VHbtag_thresh_ = 0.66;
+    costhetastar_VHbtag_thresh_ = 0.84;
 
     mjj_min_VHbtag_thresh_ = 60.;
     mjj_max_VHbtag_thresh_ = 120.;
