@@ -9,7 +9,7 @@
 bool separate_signals = false;
 
 
-void printYields( DrawBase* db, const std::string& suffix, bool doUL=false );
+void printYields( DrawBase* db, const std::string& suffix, bool doUL=false, DrawBase*db_separateSignals=0 );
 
 
 int main(int argc, char* argv[]) {
@@ -39,6 +39,7 @@ int main(int argc, char* argv[]) {
 
 
   DrawBase* db_stack = new DrawBase("TTVHgg_stack");
+  DrawBase* db_separateSignals = new DrawBase("TTVHgg_separateSignals");
 
   db_stack->set_lumiOnRightSide();
 
@@ -46,6 +47,8 @@ int main(int argc, char* argv[]) {
 
   std::string outputdir_str = "TTVHggPlots_DATA_" + dataDataset + "_" + redntpVersion + "_" + selType + "_" + bTaggerType;
   db_stack->set_outputdir(outputdir_str);
+
+
 
   int signalFillColor = 46;
 
@@ -67,6 +70,38 @@ int main(int argc, char* argv[]) {
   TFile* HToGGFile = TFile::Open(HToGGFileName.c_str());
   db_stack->add_mcFile( HToGGFile, "HToGG", "H (125)", signalFillColor, 0);
 
+  // separate signals needed later, put them in db_separateSignals:
+  std::string GluGluHFileName = filedir + "finalizedTrees_" + redntpVersion + "/TTVHgg_GluGluToHToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1";
+  GluGluHFileName += "_" + selType;
+  GluGluHFileName += "_" + bTaggerType;
+  GluGluHFileName += ".root";
+  TFile* GluGluHFile = TFile::Open(GluGluHFileName.c_str());
+  db_separateSignals->add_mcFile( GluGluHFile, "GluGluH", "ggF H (125)", signalFillColor, 0);
+
+  std::string VBFHFileName = filedir + "finalizedTrees_" + redntpVersion + "/TTVHgg_VBF_HToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1";
+  VBFHFileName += "_" + selType;
+  VBFHFileName += "_" + bTaggerType;
+  VBFHFileName += ".root";
+  TFile* VBFHFile = TFile::Open(VBFHFileName.c_str());
+  db_separateSignals->add_mcFile( VBFHFile, "VBFH", "VBF H (125)", signalFillColor, 0);
+
+  std::string VHFileName = filedir + "finalizedTrees_" + redntpVersion + "/TTVHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2";
+  VHFileName += "_" + selType;
+  VHFileName += "_" + bTaggerType;
+  VHFileName += ".root";
+  TFile* VHFile = TFile::Open(VHFileName.c_str());
+  db_separateSignals->add_mcFile( VHFile, "VH", "VH (125)", signalFillColor, 0);
+
+  std::string TTHFileName = filedir + "finalizedTrees_" + redntpVersion + "/TTVHgg_TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2";
+  TTHFileName += "_" + selType;
+  TTHFileName += "_" + bTaggerType;
+  TTHFileName += ".root";
+  TFile* TTHFile = TFile::Open(TTHFileName.c_str());
+  db_separateSignals->add_mcFile( TTHFile, "TTH", "ttH (125)", signalFillColor, 0);
+
+
+
+  // and now BG's:
 
   std::string DiPhotonFileName = filedir + "finalizedTrees_" + redntpVersion + "/TTVHgg_DiPhoton_8TeV-pythia6";
   DiPhotonFileName += "_" + selType;
@@ -114,14 +149,17 @@ int main(int argc, char* argv[]) {
 
 
 
+  //db_stack->set_displayEmptyDatasets(false);
 
 
 
   bool log = true;
 
 
+  db_stack->set_yAxisMaxScale(1.1);
   db_stack->drawHisto("nvertex", "Number of Reconstructed Vertexes");
   db_stack->drawHisto("nvertex_PUW", "Number of Reconstructed Vertexes");
+  db_stack->reset();
 
   db_stack->drawHisto("njets", "Number of Jets", "", "Events", log);
   db_stack->drawHisto("nbjets_loose", "Number of b-Jets (Loose)", "", "Events", log);
@@ -130,17 +168,14 @@ int main(int argc, char* argv[]) {
 
   db_stack->set_rebin(8);
   db_stack->drawHisto("mjj", "Dijet Mass", "GeV");
-  db_stack->set_legendTitle( "0 b-tag Category" );
-  db_stack->drawHisto("mjj_VH0btag", "Dijet Mass", "GeV");
-  //db_stack->drawHisto("mjj_cutMgg_VH0btag", "Dijet Mass (122 < m_{#gamma#gamma} < 128 GeV)", "GeV");
+  db_stack->set_legendTitle( "VH, no tag");
+  db_stack->drawHisto("mjj_VHnotag", "Dijet Mass", "GeV");
+  //db_stack->drawHisto("mjj_cutMgg_VHnotag", "Dijet Mass (122 < m_{#gamma#gamma} < 128 GeV)", "GeV");
 
-  db_stack->set_legendTitle( "1 b-tag Category" );
-  db_stack->drawHisto("mjj_VH1btag", "Dijet Mass", "GeV");
-  //db_stack->drawHisto("mjj_cutMgg_VH1btag", "Dijet Mass (122 < m_{#gamma#gamma} < 128 GeV)", "GeV");
+  db_stack->set_legendTitle( "VH, b-tagged");
+  db_stack->drawHisto("mjj_VHbtag", "Dijet Mass", "GeV");
+  //db_stack->drawHisto("mjj_cutMgg_VHbtag", "Dijet Mass (122 < m_{#gamma#gamma} < 128 GeV)", "GeV");
 
-  db_stack->set_legendTitle( "2 b-tag Category" );
-  db_stack->drawHisto("mjj_VH2btag", "Dijet Mass", "GeV");
-  //db_stack->drawHisto("mjj_cutMgg_VH2btag", "Dijet Mass (122 < m_{#gamma#gamma} < 128 GeV)", "GeV");
 
   //db_stack->set_legendTitle( "2 b-tag Med Category" );
   //db_stack->drawHisto("mjj_VH2btagmed", "Dijet Mass", "GeV");
@@ -151,10 +186,10 @@ int main(int argc, char* argv[]) {
   db_stack->drawHisto("qgljet0", "Lead Jet Q-G LD");
   db_stack->drawHisto("qgljet1", "Sublead Jet Q-G LD");
   //db_stack->set_legendTitle( "0 b-tag Category" );
-  //db_stack->drawHisto("qgljet0_VH0btag", "Lead Jet Q-G LD");
-  //db_stack->drawHisto("qgljet1_VH0btag", "Sublead Jet Q-G LD");
+  //db_stack->drawHisto("qgljet0_VHnotag", "Lead Jet Q-G LD");
+  //db_stack->drawHisto("qgljet1_VHnotag", "Sublead Jet Q-G LD");
   //db_stack->set_legendTitle( "1 b-tag Category" );
-  //db_stack->drawHisto("qgljet_VH1btag", "Non b-Tagged Jet Q-G LD");
+  //db_stack->drawHisto("qgljet_VHbtag", "Non b-Tagged Jet Q-G LD");
   //db_stack->set_legendTitle( "" );
   //db_stack->set_rebin();
 
@@ -235,23 +270,20 @@ int main(int argc, char* argv[]) {
   bool doUL = (selType != "presel" );
 
   db_stack->drawHisto("mgg", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack, "incl", doUL );
+  printYields( db_stack, "incl", doUL, db_separateSignals );
 
   db_stack->set_legendTitle( "ttH Leptonic Category");
   db_stack->drawHisto("mgg_ttH_leptonic", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack, "ttH_leptonic", doUL );
+  printYields( db_stack, "ttH_leptonic", doUL, db_separateSignals );
   db_stack->set_legendTitle( "VH Hadronic");
   db_stack->drawHisto("mgg_ttH_hadronic", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack, "ttH_hadronic", doUL );
-  db_stack->set_legendTitle( "VH 0 b-tag Category" );
-  db_stack->drawHisto("mgg_VH0btag", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack, "0tag", doUL );
-  db_stack->set_legendTitle( "VH 1 b-tag Category" );
-  db_stack->drawHisto("mgg_VH1btag", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack, "1tag", doUL );
-  db_stack->set_legendTitle( "VH 2 b-tag Category" );
-  db_stack->drawHisto("mgg_VH2btag", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack, "2tag", doUL );
+  printYields( db_stack, "ttH_hadronic", doUL, db_separateSignals );
+  db_stack->set_legendTitle( "VH, no tag");
+  db_stack->drawHisto("mgg_VHnotag", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "VHnotag", doUL, db_separateSignals );
+  db_stack->set_legendTitle( "VH, b-tagged");
+  db_stack->drawHisto("mgg_VHbtag", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "VHbtag", doUL, db_separateSignals );
   //db_stack->set_legendTitle( "2 b-tag Med Category" );
   //db_stack->drawHisto("mgg_VH2btagmed", "DiPhoton Invariant Mass", "GeV");
   //printYields( db_stack, "2tagmed", doUL );
@@ -265,7 +297,10 @@ int main(int argc, char* argv[]) {
 
 
 
-void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
+void printYields( DrawBase* db, const std::string& suffix, bool doUL, DrawBase* db_separateSignals ) {
+
+  float lumi_ul = 30000.;
+
 
   std::string yieldsFileName = db->get_outputdir() + "/yields_" + suffix + ".txt";
   ofstream yieldsFile(yieldsFileName.c_str());
@@ -277,6 +312,9 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
   float xMax = 130.;
 
   std::vector<TH1D*> histos = db->get_lastHistos_mc();
+
+  std::string histoName = histos[0]->GetName();
+
 
   int binXmin = histos[0]->FindBin(xMin);
   int binXmax = histos[0]->FindBin(xMax) -1;
@@ -290,14 +328,25 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
 
   yieldsFile << std::endl << "Yields (@ 30 fb-1): " << std::endl;
   for( unsigned int ii=0; ii<histos.size(); ++ii ) {
-    yieldsFile << db->get_mcFile(ii).datasetName << " " << histos[ii]->Integral(binXmin, binXmax) << std::endl;
+    yieldsFile << db->get_mcFile(ii).datasetName << " " << histos[ii]->Integral(binXmin, binXmax)*lumi_ul/db->get_lumi() << std::endl;
     if( db->get_mcFile(ii).datasetName != "HToGG" ) {
-      totalBG += histos[ii]->Integral(binXmin, binXmax);
-      totalBG_ave += histos[ii]->Integral(1, histos[ii]->GetNbinsX());
+      totalBG += histos[ii]->Integral(binXmin, binXmax)*lumi_ul/db->get_lumi();
+      totalBG_ave += histos[ii]->Integral(1, histos[ii]->GetNbinsX())*lumi_ul/db->get_lumi();
     } else {
       foundSignal = true;
-      signal = histos[ii]->Integral(binXmin, binXmax);
-    }
+      signal = histos[ii]->Integral(binXmin, binXmax)*lumi_ul/db->get_lumi();
+      // print different signal contributions:
+      if( db_separateSignals!=0 ) {
+        for( unsigned int jj=0; jj<db_separateSignals->get_mcFiles().size(); ++jj ) {
+          TFile* thisFile = db_separateSignals->get_mcFile(jj).file;
+          TH1D* thisHisto = (TH1D*)thisFile->Get(histoName.c_str());
+          int this_binXmin = thisHisto->FindBin(xMin);
+          int this_binXmax = thisHisto->FindBin(xMax);
+          float thisYield = thisHisto->Integral(this_binXmin, this_binXmax)*lumi_ul;
+          yieldsFile << "     " << db_separateSignals->get_mcFile(jj).datasetName << " " << thisYield << " (" << 100.*thisYield/signal << "%%)" <<std::endl;
+        } //for separate signals
+      } //if db_separatesignals
+    } //if is signal
   }
 
   totalBG_ave *= (10.)/(histos[0]->GetXaxis()->GetXmax()-histos[0]->GetXaxis()->GetXmin());
@@ -305,7 +354,7 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
   yieldsFile << "Total BG: " << totalBG << " (averaged: " << totalBG_ave << ")" << std::endl;
 
   float signal_xsec = 2.28E-03*(19.37 + 1.573 + 0.6966 + 0.3943 + 0.1302); 
-  float total_signal = signal_xsec*db->get_lumi();
+  float total_signal = signal_xsec*lumi_ul;
   float effS = signal/total_signal;
   yieldsFile << "Signal efficiency: " << effS << std::endl;
 
@@ -314,20 +363,20 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
   
   if( doUL && foundSignal ) {
 
-    float ul = CLA( db->get_lumi(), 0., effS, 0., totalBG, 0. );
-    float ul_bgave = CLA( db->get_lumi(), 0., effS, 0., totalBG_ave, 0. );
+    float ul = CLA( lumi_ul, 0., effS, 0., totalBG, 0. );
+    float ul_bgave = CLA( lumi_ul, 0., effS, 0., totalBG_ave, 0. );
     yieldsFile << std::endl << "No error on BG:" << std::endl;
     yieldsFile << "UL: " << ul << "    (average BG): " << ul_bgave << std::endl;
     yieldsFile << "UL/SM: " << ul/signal_xsec << "    (average BG): " << ul_bgave/signal_xsec << std::endl;
-    float ul_bgerr = CLA( db->get_lumi(), 0., effS, 0., totalBG, 0.05*totalBG );
-    float ul_bgerr_bgave = CLA( db->get_lumi(), 0., effS, 0., totalBG_ave, 0.05*totalBG_ave );
+    float ul_bgerr = CLA( lumi_ul, 0., effS, 0., totalBG, 0.05*totalBG );
+    float ul_bgerr_bgave = CLA( lumi_ul, 0., effS, 0., totalBG_ave, 0.05*totalBG_ave );
     yieldsFile << std::endl << "5\% error on BG:" << std::endl;
     yieldsFile << "UL: " << ul_bgerr << "    (average BG): " << ul_bgerr_bgave << std::endl;
     yieldsFile << "UL/SM: " << ul_bgerr/signal_xsec << "    (average BG): " << ul_bgerr_bgave/signal_xsec << std::endl;
 
   }
 
-
+  std::cout << "-> Saved yields in " << yieldsFileName << std::endl;
 
 }
 
