@@ -70,6 +70,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
    TH1D*  h1_nvertex_PUW = new TH1D("nvertex_PUW", "", 51, -0.5, 50.5);
    h1_nvertex_PUW->Sumw2();
 
+   TH1D*  h1_njets_presel = new TH1D("njets_presel", "", 11, -0.5, 10.5);
+   h1_njets_presel->Sumw2();
    TH1D*  h1_njets = new TH1D("njets", "", 11, -0.5, 10.5);
    h1_njets->Sumw2();
    TH1D*  h1_nbjets_loose = new TH1D("nbjets_loose", "", 11, -0.5, 10.5);
@@ -963,7 +965,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       }
 
       if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_presel->Fill( massggnewvtx, eventWeight );
-      
+      h1_njets_presel->Fill( njets_selected, eventWeight ); 
       
       // try with simply the two leading ones:
       allPairs += eventWeight;
@@ -1085,6 +1087,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       Vstar_Vstar.Boost(-Vstar.BoostVector());
       TLorentzVector V_Vstar(dijet);
       V_Vstar.Boost(-Vstar.BoostVector());
+
       
       // boost stuff in the V_Vstar frame:
       TLorentzVector Vstar_V(Vstar_Vstar);
@@ -1182,7 +1185,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       // *****   ttH leptonic category: 
       // *****   (3 jets, 1 btag medium, 1 lepton)
       
-      if(  isLeptonic && njets_selected>=3 && (njets_selected_btagmedium>0 || invert_photonCuts_) ) {
+      if(  isLeptonic && njets_selected>=njets_ttH_leptonic_thresh_ && (njets_selected_btagmedium>0 || invert_photonCuts_) ) {
 
         if( event == DEBUG_EVENT_NUMBER_ ) {
           std::cout << "-> Goes in ttH leptonic category." << std::endl;
@@ -1196,11 +1199,15 @@ void RedNtpFinalizer_TTVHgg::finalize()
       
       // *****   ttH hadronic category: 
       // *****   (5 jets, 1 btag medium, no lepton)
-      } else if(  !isLeptonic && njets_selected>=njets_ttH_hadronic_thresh_ && (njets_selected_btagmedium>0 || invert_photonCuts_) ) {
+      } else if(  !isLeptonic && njets_selected>=njets_ttH_hadronic_thresh_ && ( (njets_selected_btagmedium>0) || invert_photonCuts_) ) {
       
         if( event == DEBUG_EVENT_NUMBER_ ) {
           std::cout << "-> Goes in ttH hadronic category." << std::endl;
         }
+
+        const int lastJetIndex(njets_ttH_hadronic_thresh_-1);
+        if( ptJet_t[lastJetIndex]<ptjet_ttH_hadronic_thresh_) continue;
+
 
         category_t = 1;
         if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_ttH_hadronic->Fill( massggnewvtx, eventWeight );
@@ -1509,6 +1516,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    h1_nvertex->Write();
    h1_nvertex_PUW->Write();
 
+   h1_njets_presel->Write();
    h1_njets->Write();
    h1_nbjets_loose->Write();
    h1_nbjets_medium->Write();
@@ -2133,6 +2141,7 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   nbtagmedium_thresh_=0;
 
   njets_ttH_hadronic_thresh_ = 4;
+  njets_ttH_leptonic_thresh_ = 3;
 
   Ht_thresh_=0;
   invert_photonCuts_=false;
@@ -2231,7 +2240,7 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   } else if( selectionType=="optsel1_noPUID_3rdJet" ) {
 
     njets_ttH_hadronic_thresh_ = 5;
-     //opt sel 1 without pu id from 3rd jet
+     
     njets_PUID_thresh_=3;
     ptphot1cut_ = 60.;
     ptphot2cut_ = 25.;
@@ -2279,6 +2288,7 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   } else if ( selectionType=="optsel2" ){
 
     njets_ttH_hadronic_thresh_ = 5;
+    njets_ttH_leptonic_thresh_ = 3;
 
     ptphot1cut_ = 60.;
     ptphot2cut_ = 25.;
@@ -2292,6 +2302,84 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
     ptjet_VHbtag_thresh_ = 20.;
 
     costhetastar_VHnotag_thresh_ = 0.9;
+    costhetastar_VHbtag_thresh_ = 0.84;
+
+    mjj_min_VHbtag_thresh_ = 60.;
+    mjj_max_VHbtag_thresh_ = 120.;
+
+    mjj_min_VHnotag_thresh_ = 60.;
+    mjj_max_VHnotag_thresh_ = 120.;
+
+  } else if ( selectionType=="optsel2_noPUID" ){
+
+    njets_PUID_thresh_=3;
+
+    njets_ttH_hadronic_thresh_ = 5;
+    njets_ttH_leptonic_thresh_ = 3;
+
+    ptphot1cut_ = 60.;
+    ptphot2cut_ = 25.;
+    
+    ebeb_VHnotag_thresh_ = true;
+    
+    ptgg_VHnotag_thresh_ = 105.;
+    ptgg_VHbtag_thresh_ = 70.;
+
+    ptjet_VHnotag_thresh_ = 35.;
+    ptjet_VHbtag_thresh_ = 20.;
+
+    costhetastar_VHnotag_thresh_ = 0.9;
+    costhetastar_VHbtag_thresh_ = 0.84;
+
+    mjj_min_VHbtag_thresh_ = 60.;
+    mjj_max_VHbtag_thresh_ = 120.;
+
+    mjj_min_VHnotag_thresh_ = 60.;
+    mjj_max_VHnotag_thresh_ = 120.;
+
+
+  } else if ( selectionType=="optsel2_wip" ){
+
+    njets_ttH_hadronic_thresh_ = 5;
+    njets_ttH_leptonic_thresh_ = 3;
+
+    ptphot1cut_ = 60.;
+    ptphot2cut_ = 25.;
+    
+    ebeb_VHnotag_thresh_ = true;
+    
+    ptgg_VHnotag_thresh_ = 105.;
+    ptgg_VHbtag_thresh_ = 70.;
+
+    ptjet_VHnotag_thresh_ = 35.;
+    ptjet_VHbtag_thresh_ = 20.;
+
+    costhetastar_VHnotag_thresh_ = 0.9;
+    costhetastar_VHbtag_thresh_ = 0.84;
+
+    mjj_min_VHbtag_thresh_ = 60.;
+    mjj_max_VHbtag_thresh_ = 120.;
+
+    mjj_min_VHnotag_thresh_ = 60.;
+    mjj_max_VHnotag_thresh_ = 120.;
+
+  } else if ( selectionType=="optsel3" ){
+
+    njets_ttH_hadronic_thresh_ = 5;
+    njets_ttH_leptonic_thresh_ = 3;
+
+    ptphot1cut_ = 60.;
+    ptphot2cut_ = 25.;
+    
+    ebeb_VHnotag_thresh_ = false;
+    
+    ptgg_VHnotag_thresh_ = 90.;
+    ptgg_VHbtag_thresh_ = 70.;
+
+    ptjet_VHnotag_thresh_ = 30.;
+    ptjet_VHbtag_thresh_ = 20.;
+
+    costhetastar_VHnotag_thresh_ = 0.57;
     costhetastar_VHbtag_thresh_ = 0.84;
 
     mjj_min_VHbtag_thresh_ = 60.;
