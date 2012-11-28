@@ -11,7 +11,7 @@
 
 
 
-int DEBUG_EVENT_NUMBER_ = 428092871;
+int DEBUG_EVENT_NUMBER_ = -1;
 
 
 
@@ -175,6 +175,9 @@ void RedNtpFinalizer_TTVHgg::finalize()
    h1_kinfit_chiSquareProbMax->Sumw2();
    TH1D* h1_kinfit_chiSquareProbMax_mjjWindow = new TH1D("kinfit_chiSquareProbMax_mjjWindow", "", 1000, 0., 1.0001);
    h1_kinfit_chiSquareProbMax_mjjWindow->Sumw2();
+
+   TH1D* h1_deltaRjj_ttH_hadronic = new TH1D("deltaRjj_ttH_hadronic", "", 100, 0., 5.);
+   h1_deltaRjj_ttH_hadronic->Sumw2();
 
    TH1D* h1_mjj = new TH1D("mjj", "", 200, 0., 500.);
    h1_mjj->Sumw2();
@@ -470,7 +473,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_weights->Branch( "eta_scaled_2D_weight_data", &eta_scaled_2D_weight_data_t, "eta_scaled_2D_weight_data_t/F" );
  
 //   std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
-   std::string qglFileName="/afs/cern.ch/user/m/micheli/public/ttH/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
+   //std::string qglFileName="/afs/cern.ch/user/m/micheli/public/ttH/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
+   std::string qglFileName="/afs/cern.ch/work/p/pandolf/CMSSW_5_3_6/src/QG/QGLikelihood/test/Histos_2012.root";
 
    //pt reweight for photons
    std::string ptweightPhot1FileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_ptphot1_4GeVbinning.root";
@@ -591,7 +595,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
 
 
-      if( event == DEBUG_EVENT_NUMBER_ ) {
+      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << std::endl << std::endl << "#### DEBUG LOG FOR EVENT " << DEBUG_EVENT_NUMBER_ << std::endl << std::endl;
         std::cout << std::endl << "Here are the photons: " << std::endl;
         std::cout << "   Phot1:  pt: " << ptphot1 << " eta: " << etascphot1 << std::endl;
@@ -611,7 +615,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       if((TMath::Abs(etascphot1)>1.4442&&TMath::Abs(etascphot1)<1.566)||(TMath::Abs(etascphot2)>1.4442&&TMath::Abs(etascphot2)<1.566)
          || TMath::Abs(etascphot1)>2.5 || TMath::Abs(etascphot2)>2.5) continue;  // acceptance
 
-      if( event == DEBUG_EVENT_NUMBER_ ) {
+      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed photon eta acceptance." << std::endl;
       }
       //     if(ptphot1<ptphot1cut) continue; //pt first photon
@@ -624,7 +628,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       if(ptphot1 < triggerThreshPhot1) continue; //pt first photon
       if(ptphot2 < triggerThreshPhot2) continue; //pt second photon
 
-      if( event == DEBUG_EVENT_NUMBER_ ) {
+      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed photon trigger pt thresholds." << std::endl;
         std::cout << std::endl << "Checking analysis thresholds: " << std::endl;
         std::cout << ptphot1 << " > " << ptphot1cut_ << "*" << massggnewvtx << "/120. = " << ptphot1cut_*massggnewvtx/120. << " ? " << std::endl;
@@ -635,7 +639,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       if(ptphot1 < ptphot1cut_*massggnewvtx/120.) continue; //pt first photon
       if(ptphot2 < ptphot2cut_* massggnewvtx/120.) continue; //pt second photon
 
-      if( event == DEBUG_EVENT_NUMBER_ ) {
+      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed photon analysis pt thresholds." << std::endl;
       }
 
@@ -698,13 +702,13 @@ void RedNtpFinalizer_TTVHgg::finalize()
  
       }
 
-      if( event == DEBUG_EVENT_NUMBER_ ) {
+      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed photon ID." << std::endl;
       }
 
       if(diphot.M()<100 || diphot.M()>180) continue;
 
-      if( event == DEBUG_EVENT_NUMBER_ ) {
+      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed mgg 100-180 cut." << std::endl;
       }
 
@@ -897,28 +901,28 @@ void RedNtpFinalizer_TTVHgg::finalize()
       
       //       cout<<njets_selected<<"------"<<endl;
       if(njets_selected<njets_thresh_) continue;
-      if( event == DEBUG_EVENT_NUMBER_ ) {
+      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed njets cut." << std::endl;
       }
 
       if(njets_selected>njets_upper_thresh_)continue;
-      if( event == DEBUG_EVENT_NUMBER_ ) {
+      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed njets upper cut." << std::endl;
       }
 
       if(njets_selected_btagloose<nbtagloose_thresh_) continue;
-      if( event == DEBUG_EVENT_NUMBER_ ) {
+      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed nbjets loose cut." << std::endl;
       }
 
       if(njets_selected_btagmedium<nbtagmedium_thresh_) continue;
-      if( event == DEBUG_EVENT_NUMBER_ ) {
+      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed nbjets medium cut." << std::endl;
       }
 
       
       if(Ht_t<Ht_thresh_)continue;
-      if( event == DEBUG_EVENT_NUMBER_ ) {
+      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed HT  cut." << std::endl;
       }
 
@@ -960,7 +964,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       
       
       if( index_selected.size()<2 ) continue;
-      if( event == DEBUG_EVENT_NUMBER_ ) {
+      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed at least 2 selected jets." << std::endl;
       }
 
@@ -1166,7 +1170,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       isBSMEvent_t = false;
       if( ((njets_selected_btagmedium>=1 && njets_selected_btagloose>=2) || invert_photonCuts_)  && jet0.Pt()>50. && jet1.Pt()>50. && diphot.Pt()>100. ) { 
 
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Passes BSM criteria." << std::endl;
         }
 
@@ -1187,7 +1191,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       
       if(  isLeptonic && njets_selected>=njets_ttH_leptonic_thresh_ && (njets_selected_btagmedium>0 || invert_photonCuts_) ) {
 
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Goes in ttH leptonic category." << std::endl;
         }
 
@@ -1201,13 +1205,19 @@ void RedNtpFinalizer_TTVHgg::finalize()
       // *****   (5 jets, 1 btag medium, no lepton)
       } else if(  !isLeptonic && njets_selected>=njets_ttH_hadronic_thresh_ && ( (njets_selected_btagmedium>0) || invert_photonCuts_) ) {
       
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Goes in ttH hadronic category." << std::endl;
         }
 
         const int lastJetIndex(njets_ttH_hadronic_thresh_-1);
         if( ptJet_t[lastJetIndex]<ptjet_ttH_hadronic_thresh_) continue;
 
+//std::cout << &jet0 << std::endl;
+//std::cout << &jet1 << std::endl;
+//std::cout << "pt: " << jet0.Pt() << std::endl;
+//std::cout << "pt: " << jet1.Pt() << std::endl;
+        
+        h1_deltaRjj_ttH_hadronic->Fill( jet0.DeltaR(jet1), eventWeight );
 
         category_t = 1;
         if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_ttH_hadronic->Fill( massggnewvtx, eventWeight );
@@ -1219,7 +1229,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       // *****   (2 jets, >=1 btag loose)
       } else if(  njets_selected>=2 && njets_selected_btagloose>=1 && !invert_photonCuts_ ) {
 
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Goes in VH btagged category." << std::endl;
         }
 
@@ -1229,7 +1239,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       
         if( diphot.Pt() < ptgg_VHbtag_thresh_*massggnewvtx/120. ) continue;
 
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Passed running ptgg thresh." << std::endl;
         }
 
@@ -1238,23 +1248,23 @@ void RedNtpFinalizer_TTVHgg::finalize()
         h1_mjj_VHbtag->Fill( dijet.M(), eventWeight );
       
         if( fabs(zeppen)>zeppenfeld_thresh_ ) continue;
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Passed zeppen thresh." << std::endl;
         }
 
         if( dijet.M()<mjj_min_VHbtag_thresh_ || dijet.M()>mjj_max_VHbtag_thresh_ ) continue;
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Passed dijet thresh." << std::endl;
         }
 
       
         if( jet1.Pt() < ptjet_VHbtag_thresh_ ) continue;
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Passed jet1 pt thresh." << std::endl;
         }
 
         if( fabs(cosThetaStar) > costhetastar_VHbtag_thresh_ ) continue;
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Passed costhetastar thresh." << std::endl;
         }
 
@@ -1274,7 +1284,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       // *****   (2 jets, 0 btag loose)
       } else if(  njets_selected>=2 && (njets_selected_btagloose==0 || invert_photonCuts_) ) {
 
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Goes in VH no tag category." << std::endl;
         }
 
@@ -1283,13 +1293,13 @@ void RedNtpFinalizer_TTVHgg::finalize()
       
       
         if( diphot.Pt() < ptgg_VHnotag_thresh_*massggnewvtx/120. ) continue;
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Passed running ptgg thresh." << std::endl;
         }
 
 
         if( (ebeb_VHnotag_thresh_ && !ebeb) ) continue;
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Passed EBEB condition." << std::endl;
         }
 
@@ -1298,22 +1308,22 @@ void RedNtpFinalizer_TTVHgg::finalize()
         h1_mjj_VHnotag->Fill( dijet.M(), eventWeight );
       
         if( fabs(zeppen)>zeppenfeld_thresh_ ) continue;
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Passed zeppen thresh." << std::endl;
         }
 
         if( dijet.M()<mjj_min_VHnotag_thresh_ || dijet.M()>mjj_max_VHnotag_thresh_ ) continue;
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Passed dijet mass thresh." << std::endl;
         }
       
         if( jet1.Pt() < ptjet_VHnotag_thresh_ ) continue;
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Passed jet1 pt thresh." << std::endl;
         }
       
         if( fabs(cosThetaStar) > costhetastar_VHnotag_thresh_ ) continue;
-        if( event == DEBUG_EVENT_NUMBER_ ) {
+        if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Passed costhetastar thresh." << std::endl;
         }
       
@@ -1339,7 +1349,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       }
 
 
-      if( event == DEBUG_EVENT_NUMBER_ ) {
+      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed ALL SELECTIONS." << std::endl;
       }
       
@@ -1605,6 +1615,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
    h1_mgg_ttH_leptonic->Write();
    h1_mgg_ttH_hadronic->Write();
+
+   h1_deltaRjj_ttH_hadronic->Write();
 
    h1_qgljet0->Write();
    h1_qgljet1->Write();
