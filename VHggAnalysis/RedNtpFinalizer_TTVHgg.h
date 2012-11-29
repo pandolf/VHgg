@@ -856,6 +856,7 @@ public :
    float ptjetthresh_count_;
    float etajetthresh_count_;
 
+   float ptjet_ttH_hadronic_thresh_;
    float ptjet_VHnotag_thresh_;
    float ptjet_VHbtag_thresh_;
 
@@ -864,6 +865,7 @@ public :
    int nbtagloose_thresh_;
    int nbtagmedium_thresh_;
    int njets_ttH_hadronic_thresh_;
+   int njets_ttH_leptonic_thresh_;
 
 
    float zeppenfeld_thresh_;
