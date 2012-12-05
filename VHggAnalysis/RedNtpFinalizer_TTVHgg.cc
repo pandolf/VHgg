@@ -472,9 +472,9 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_weights->Branch( "eta_scaled_2D_weight", &eta_scaled_2D_weight_t, "eta_scaled_2D_weight_t/F" );
    tree_weights->Branch( "eta_scaled_2D_weight_data", &eta_scaled_2D_weight_data_t, "eta_scaled_2D_weight_data_t/F" );
  
-//   std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
-   //std::string qglFileName="/afs/cern.ch/user/m/micheli/public/ttH/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
-   std::string qglFileName="/afs/cern.ch/work/p/pandolf/CMSSW_5_3_6/src/QG/QGLikelihood/test/Histos_2012.root";
+   //  std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
+  //   std::string qglFileName="/afs/cern.ch/user/m/micheli/public/ttH/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
+      std::string qglFileName="/afs/cern.ch/work/p/pandolf/CMSSW_5_3_6/src/QG/QGLikelihood/test/Histos_2012.root";
 
    //pt reweight for photons
    std::string ptweightPhot1FileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_ptphot1_4GeVbinning.root";
@@ -1189,6 +1189,16 @@ void RedNtpFinalizer_TTVHgg::finalize()
       // *****   ttH leptonic category: 
       // *****   (3 jets, 1 btag medium, 1 lepton)
       
+
+      if(dataset_ == "DATA_Run2012SinglePhoton" && invert_photonCuts_){
+	  
+	if(hasPassedDoublePhot==1)continue;
+	   
+	if(hasPassedSinglePhot==1){
+	  if(!(hasPassedSinglePhot==1 && hasPassedDoublePhot==0))continue; 
+	}
+      }
+
       if(  isLeptonic && njets_selected>=njets_ttH_leptonic_thresh_ && (njets_selected_btagmedium>0 || invert_photonCuts_) ) {
 
         if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
