@@ -472,9 +472,10 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_weights->Branch( "eta_scaled_2D_weight", &eta_scaled_2D_weight_t, "eta_scaled_2D_weight_t/F" );
    tree_weights->Branch( "eta_scaled_2D_weight_data", &eta_scaled_2D_weight_data_t, "eta_scaled_2D_weight_data_t/F" );
  
-    std::string qglFileName = "/afs/cern.ch/work/p/pandolf/public/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
-    //  std::string qglFileName="/afs/cern.ch/user/m/micheli/public/ttH/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
-   //      std::string qglFileName="/afs/cern.ch/work/p/pandolf/CMSSW_5_3_6/src/QG/QGLikelihood/test/Histos_2012.root";
+//   std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
+   //std::string qglFileName="/afs/cern.ch/user/m/micheli/public/ttH/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
+   //std::string qglFileName="/afs/cern.ch/work/p/pandolf/CMSSW_5_3_6/src/QG/QGLikelihood/test/Histos_2012.root";
+   std::string qglFileName="/afs/cern.ch/work/p/pandolf/public/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1.root";
 
    //pt reweight for photons
    std::string ptweightPhot1FileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_ptphot1_4GeVbinning.root";
@@ -1151,8 +1152,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
       
       
       
-      float qgljet0 = qglikeli->computeQGLikelihoodPU( jet0.Pt(), rhoPF, ntrkjet[indexjet0], nneutjet[indexjet0], ptDjet[indexjet0] );
-      float qgljet1 = qglikeli->computeQGLikelihoodPU( jet1.Pt(), rhoPF, ntrkjet[indexjet1], nneutjet[indexjet1], ptDjet[indexjet1] );
+      float qgljet0 = qglikeli->computeQGLikelihood2012( jet0.Pt(), jet0.Eta(), rhoPF, nChg_QCjet[indexjet0]+nNeutral_ptCutjet[indexjet0], ptD_QCjet[indexjet0], axis2_QCjet[indexjet0] );
+      float qgljet1 = qglikeli->computeQGLikelihood2012( jet1.Pt(), jet1.Eta(), rhoPF, nChg_QCjet[indexjet1]+nNeutral_ptCutjet[indexjet1], ptD_QCjet[indexjet1], axis2_QCjet[indexjet1] );
       
       
       
@@ -1821,9 +1822,13 @@ void RedNtpFinalizer_TTVHgg::Init()
    tree_->SetBranchAddress("btagtrkjet", btagtrkjet, &b_btagtrkjet);
    tree_->SetBranchAddress("btagjprobjet", btagjprobjet, &b_btagjprobjet);
    tree_->SetBranchAddress("ptDjet", ptDjet, &b_ptDjet);
+   tree_->SetBranchAddress("ptD_QCjet", ptD_QCjet, &b_ptD_QCjet);
+   tree_->SetBranchAddress("axis2_QCjet", axis2_QCjet, &b_axis2_QCjet);
    tree_->SetBranchAddress("rmsjet", rmsjet, &b_rmsjet);
    tree_->SetBranchAddress("ntrkjet", ntrkjet, &b_ntrkjet);
    tree_->SetBranchAddress("nneutjet", nneutjet, &b_nneutjet);
+   tree_->SetBranchAddress("nChg_QCjet", nChg_QCjet, &b_nChg_QCjet);
+   tree_->SetBranchAddress("nNeutral_ptCutjet", nNeutral_ptCutjet, &b_nNeutral_ptCutjet);
    tree_->SetBranchAddress("jetIdSimple_mvajet", jetIdSimple_mvajet, &b_jetIdSimple_mvajet);
    tree_->SetBranchAddress("jetIdFull_mvajet", jetIdFull_mvajet, &b_jetIdFull_mvajet);
    tree_->SetBranchAddress("jetId_dR2Meanjet", jetId_dR2Meanjet, &b_jetId_dR2Meanjet);

@@ -130,9 +130,13 @@ public :
    Float_t         btagtrkjet[10];
    Float_t         btagjprobjet[10];
    Float_t         ptDjet[10];
+   Float_t         ptD_QCjet[10];
+   Float_t         axis2_QCjet[10];
    Float_t         rmsjet[10];
    Int_t           ntrkjet[10];
    Int_t           nneutjet[10];
+   Int_t           nChg_QCjet[10];
+   Int_t           nNeutral_ptCutjet[10];
    Float_t         jetIdSimple_mvajet[10];
    Float_t         jetIdFull_mvajet[10];
    Float_t         jetId_dR2Meanjet[10];
@@ -529,9 +533,13 @@ public :
    TBranch        *b_btagtrkjet;   //!
    TBranch        *b_btagjprobjet;   //!
    TBranch        *b_ptDjet;   //!
+   TBranch        *b_ptD_QCjet;   //!
+   TBranch        *b_axis2_QCjet;   //!
    TBranch        *b_rmsjet;   //!
    TBranch        *b_ntrkjet;   //!
    TBranch        *b_nneutjet;   //!
+   TBranch        *b_nChg_QCjet;   //!
+   TBranch        *b_nNeutral_ptCutjet;   //!
    TBranch        *b_jetIdSimple_mvajet;   //!
    TBranch        *b_jetIdFull_mvajet;   //!
    TBranch        *b_jetId_dR2Meanjet;   //!
