@@ -875,6 +875,7 @@ public :
    int njets_ttH_hadronic_thresh_;
    int njets_ttH_leptonic_thresh_;
 
+   float ptlep_ttH_leptonic_thresh_;
 
    float zeppenfeld_thresh_;
 
@@ -892,6 +893,9 @@ public :
    bool use_PUID_;
 
    int njets_PUID_thresh_;
+   float PUID_betastar_thresh_;
+
+   bool chooseBtaggedJets_;
 
    bool BLIND_;
 

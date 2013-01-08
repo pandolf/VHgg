@@ -763,17 +763,19 @@ void RedNtpFinalizer_TTVHgg::finalize()
       Ht_t = 0.;
       
       for( unsigned ijet=0; ijet<njets; ++ijet ) {
-      
-      //std::cout << ijet << "/" << njets << " pt: " << ptcorrjet[ijet] << " eta: " << etajet[ijet] << std::endl;
-        if( ptcorrjet[ijet] < ptjetthresh_count_ ) continue;
-        if( fabs(etajet[ijet]) > etajetthresh_count_ ) continue;
-      
+      	if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
+	  std::cout << ijet << "/" << njets << " pt: " << ptcorrjet[ijet] << " eta: " << etajet[ijet] << std::endl;
+	}
+	if( ptcorrjet[ijet] < ptjetthresh_count_ ) continue;
+	if( fabs(etajet[ijet]) > etajetthresh_count_ ) continue;
+	
         //jet PU ID:
         bool passedPUID = true;
         if(use_PUID_){
           if((ijet+1)>=njets_PUID_thresh_){
             if(TMath::Abs(etajet[ijet]) < 2.5) {
-              if(betastarjet[ijet] > 0.2 * log( nvtx - 0.67 ) ) passedPUID = false;
+	      if(betastarjet[ijet]<0)passedPUID=false;
+	      if(betastarjet[ijet] > 0.2 * log( nvtx - PUID_betastar_thresh_ ) ) passedPUID = false;
               if(rmsjet[ijet] > 0.06) passedPUID = false;
             } else if(TMath::Abs(etajet[ijet]) < 3.){
               if(rmsjet[ijet] > 0.05) passedPUID = false;
@@ -868,7 +870,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       m3_t=m3;
       
       
-      int isLeptonic= (ptele1>20. || ptmu1>20.);//cut on pt lepton
+      int isLeptonic= (ptele1>0. || ptmu1>0.);//cut on pt lepton
       int isMu=ptmu1>0;
       
       
@@ -982,12 +984,12 @@ void RedNtpFinalizer_TTVHgg::finalize()
       // choose jets as two btagged jets, OR leading ones
       int indexjet0 = index_selected[0];
       int indexjet1 = index_selected[1];
-      bool chooseBtaggedJets=true;//be careful with this
+      //      bool chooseBtaggedJets=true;//be careful with this
       bool firstjet_isbtaggedloose = false;
       bool secondjet_isbtaggedloose = false;
       
       
-      if(chooseBtaggedJets){
+      if(chooseBtaggedJets_){
       if( index_selected_btagloose.size()==1 ) {
         if( index_selected_btagloose[0]!=index_selected[0] ) { 
           indexjet1 = index_selected_btagloose[0];
@@ -1200,8 +1202,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	}
       }
 
-      if(  isLeptonic && njets_selected>=njets_ttH_leptonic_thresh_ && (njets_selected_btagmedium>0 || invert_photonCuts_) ) {
 
+      if(  isLeptonic && (ptele1>ptlep_ttH_leptonic_thresh_||ptmu1>ptlep_ttH_leptonic_thresh_) && njets_selected>=njets_ttH_leptonic_thresh_ && (njets_selected_btagmedium>0 || invert_photonCuts_) ) {
         if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Goes in ttH leptonic category." << std::endl;
         }
@@ -2151,6 +2153,8 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   ptjet_VHnotag_thresh_ = 20.;
   ptjet_VHbtag_thresh_ = 20.;
 
+  ptjet_ttH_hadronic_thresh_=20.;
+
   zeppenfeld_thresh_ = 1000.;
 
   costhetastar_VHnotag_thresh_ = 2.;
@@ -2175,6 +2179,11 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   use_PUID_=true;
 
   njets_PUID_thresh_=0;
+  ptlep_ttH_leptonic_thresh_=20;
+
+  PUID_betastar_thresh_=0.67;
+  chooseBtaggedJets_=true;//be careful with this
+
 
   if( selectionType=="presel" ) {
 
@@ -2414,6 +2423,35 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
 
     mjj_min_VHnotag_thresh_ = 60.;
     mjj_max_VHnotag_thresh_ = 120.;
+
+  } else if ( selectionType=="optsel4" ){
+    //optsel3 with different  puid thresh
+    njets_ttH_hadronic_thresh_ = 5;
+    njets_ttH_leptonic_thresh_ = 3;
+
+    ptphot1cut_ = 60.;
+    ptphot2cut_ = 25.;
+    
+    ebeb_VHnotag_thresh_ = false;
+    
+    ptgg_VHnotag_thresh_ = 90.;
+    ptgg_VHbtag_thresh_ = 70.;
+
+    ptjet_VHnotag_thresh_ = 30.;
+    ptjet_VHbtag_thresh_ = 20.;
+
+    costhetastar_VHnotag_thresh_ = 0.57;
+    costhetastar_VHbtag_thresh_ = 0.84;
+
+    mjj_min_VHbtag_thresh_ = 60.;
+    mjj_max_VHbtag_thresh_ = 120.;
+
+    mjj_min_VHnotag_thresh_ = 60.;
+    mjj_max_VHnotag_thresh_ = 120.;
+
+    PUID_betastar_thresh_=0.64;
+    chooseBtaggedJets_=true;//be careful with this
+
 
 
   } else if ( selectionType=="ttHsel" ){
