@@ -75,6 +75,7 @@ int main( int argc, char* argv[] ) {
   // optimized working point chosen when looking only at VH (and ttH) signal:
   TChain* signalTree = new TChain("tree_passedEvents");
   if( category>1 ) // VH
+    //signalTree->Add("../finalizedTrees_micheli_20121112/TTVHgg_HToGG_M-125_8TeV-pythia6_presel_CSV.root");
     signalTree->Add("../finalizedTrees_micheli_20121112/TTVHgg_WH_ZH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_CSV.root");
   else // ttH
     signalTree->Add("../finalizedTrees_micheli_20121112/TTVHgg_TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_CSV.root");
@@ -119,20 +120,20 @@ int main( int argc, char* argv[] ) {
   
     std::vector<std::string> varNames;
     std::vector<float> cutsMin;
-    std::vector<float> cutsmin;
+    std::vector<float> cutsMax;
 
     while( ifs.good() && !ifs.eof() ) {
 
       std::string varName;
-      float cutMin, cutmin;
+      float cutMin, cutMax;
 
-      ifs >> varName >> cutMin >> cutmin;
+      ifs >> varName >> cutMin >> cutMax;
     
       if( varName=="category" ) continue;
 
       varNames.push_back( varName );
       cutsMin.push_back( cutMin );
-      cutsmin.push_back( cutmin );
+      cutsMax.push_back( cutMax );
 
     } //while file is good
   
@@ -141,7 +142,7 @@ int main( int argc, char* argv[] ) {
     // eliminate last element (last line is read and is empty):
     varNames.pop_back();
     cutsMin.pop_back();
-    cutsmin.pop_back();
+    cutsMax.pop_back();
 
 
 
@@ -149,7 +150,7 @@ int main( int argc, char* argv[] ) {
     for( unsigned ivar=0; ivar<varNames.size(); ++ivar ) {
       if( ivar!=0 ) selection += " && ";
       char thisCut[200];
-      sprintf( thisCut, "%s >= %f && %s < %f", varNames[ivar].c_str(), cutsMin[ivar], varNames[ivar].c_str(), cutsmin[ivar] );
+      sprintf( thisCut, "%s >= %f && %s < %f", varNames[ivar].c_str(), cutsMin[ivar], varNames[ivar].c_str(), cutsMax[ivar] );
       std::string thisCut_str(thisCut);
       selection += thisCut_str;
     }
