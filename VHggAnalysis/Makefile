@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.6 2012/09/06 17:04:35 pandolf Exp $
+# $Id: Makefile,v 1.7 2012/09/26 10:54:12 pandolf Exp $
 ROOTLIBS      = $(shell $(ROOTSYS)/bin/root-config --libs)
 ROOTGLIBS     = $(shell $(ROOTSYS)/bin/root-config --glibs)
 
@@ -33,7 +33,7 @@ EXTRALIBS  :=  -L$(ROOTSYS)/lib -L$(ROOFIT_LIBDIR)/ -lHtml -lMathCore -lGenVecto
 CCFILES=$(filter-out $(BINFILES),$(wildcard *.cc))
 
 # List of all object files to build
-OLIST = $(OBJDIR)/RedNtpFinalizer.o $(OBJDIR)/AnalysisJet.o $(OBJDIR)/BTagSFUtil.o $(OBJDIR)/SFlightFuncs.o $(OBJDIR)/MistagFuncs.o $(OBJDIR)/QGLikelihoodCalculator.o
+OLIST = $(OBJDIR)/RedNtpFinalizer.o $(OBJDIR)/AnalysisJet.o $(OBJDIR)/BTagSFUtil.o $(OBJDIR)/SFlightFuncs.o $(OBJDIR)/MistagFuncs.o $(OBJDIR)/Bins.o $(OBJDIR)/QGLikelihoodCalculator.o 
 OLIST += $(OBJDIR)/DrawBase.o $(OBJDIR)/fitTools.o
 OLIST += $(OBJDIR)/TAbsFitParticle.o $(OBJDIR)/TAbsFitConstraint.o $(OBJDIR)/TFitConstraintM.o $(OBJDIR)/TFitParticleEtEtaPhi.o $(OBJDIR)/TKinFitter.o $(OBJDIR)/DiJetKinFitter.o
 OLIST += $(OBJDIR)/HelicityLikelihoodDiscriminant.o $(OBJDIR)/RooPentaSpinTwo.o $(OBJDIR)/RooBphione.o $(OBJDIR)/RooBtheta.o $(OBJDIR)/RooBkg2l2jHL.o $(OBJDIR)/RooSpinZero5DV2.o $(OBJDIR)/RooBkgd2L2JV2.o 
@@ -64,10 +64,19 @@ $(OBJDIR)/MistagFuncs.o: $(CMSSW_BASE)/src/UserCode/pandolf/BTagSFUtil/src/Mista
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
+$(OBJDIR)/Bins.o: $(CMSSW_BASE)/src/UserCode/pandolf/QGLikelihood/src/Bins.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+
+
 $(OBJDIR)/QGLikelihoodCalculator.o: $(CMSSW_BASE)/src/UserCode/pandolf/QGLikelihood/src/QGLikelihoodCalculator.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+
 
 $(OBJDIR)/DrawBase.o: $(CMSSW_BASE)/src/UserCode/pandolf/CommonTools/DrawBase.C
 	@echo "Compiling $<"
