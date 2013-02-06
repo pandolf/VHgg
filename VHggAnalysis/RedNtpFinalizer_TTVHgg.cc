@@ -870,8 +870,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
       m3_t=m3;
       
       
-      int isLeptonic= (ptele1>0. || ptmu1>0.);//cut on pt lepton
-      int isMu=ptmu1>0;
+      int isLeptonic= (ptele1>ptlep_ttH_leptonic_thresh_ || ptmu1>ptlep_ttH_leptonic_thresh_);//cut on pt lepton
+      int isMu=ptmu1>ptlep_ttH_leptonic_thresh_;
       
       
       //invariant mass
@@ -1203,7 +1203,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       }
 
 
-      if(  isLeptonic && (ptele1>ptlep_ttH_leptonic_thresh_||ptmu1>ptlep_ttH_leptonic_thresh_) && njets_selected>=njets_ttH_leptonic_thresh_ && (njets_selected_btagmedium>0 || invert_photonCuts_) ) {
+      if(  isLeptonic  && njets_selected>=njets_ttH_leptonic_thresh_ && (njets_selected_btagmedium>0 || invert_photonCuts_) ) {
         if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Goes in ttH leptonic category." << std::endl;
         }
