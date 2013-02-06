@@ -70,6 +70,11 @@ int main( int argc, char* argv[] ) {
     finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-13Jul2012-v1_b", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-13Jul2012-v2", selectionType, bTaggerType, datasets);
 
+  } else if( dataset=="DATA_Run2012AB" ) {
+   
+    finalize_oneDataset(redntpVersion, "Photon-Run2012A-13Jul2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
+
   } else if( dataset=="DATA_Run2012SinglePhoton" ) {
    
     finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
@@ -257,6 +262,12 @@ RedntpDirStruct get_dirs( const std::string& prodVersion ) {
     returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
     returnStruct.datadir = "redntp.53xv1_data.cicpfloose.scales-Lisbon-Hgg.micheli_20121112/merged";
     returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.micheli_20121112/merged";
+
+  } else if(prodVersion=="qg_version_2") {
+
+    returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
+    returnStruct.datadir = "redntp.53xv1_data.cicpfloose.scales-Lisbon-Hgg.qg_version_2/merged";
+    returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.qg_version_2/merged";
 
   }else if(prodVersion=="micheli_SinglePhoton_preselectionCS"){
     
