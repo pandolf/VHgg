@@ -1200,6 +1200,14 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	if(hasPassedSinglePhot==1){
 	  if(!(hasPassedSinglePhot==1 && hasPassedDoublePhot==0))continue; 
 	}
+      }else if (dataset_ == "DATA_Run2012SinglePhoton_2" && invert_photonCuts_){
+
+
+	//        if(hasPassedDoublePhot==1)continue;
+
+        if(hasPassedSinglePhot==1){
+          if(!(hasPassedSinglePhot==1 && hasPassedDoublePhot==0))continue;
+        }
       }
 
 

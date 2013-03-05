@@ -79,6 +79,10 @@ int main( int argc, char* argv[] ) {
    
     finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-PromptReco-v1", selectionType, bTaggerType, datasets);
+   
+
+  } else if ( dataset== "DATA_Run2012SinglePhoton_2"){
+
     finalize_oneDataset(redntpVersion, "Photon-Run2012A-13Jul2012-v1", selectionType, bTaggerType, datasets);
 
   }   else if(dataset == "DATA_Run2012DoublePhoton"){
