@@ -844,7 +844,6 @@ public :
    std::string selectionType_;
    std::string bTaggerType_;
    std::string preselectionType_;
-   std::string dataset_;
 
 
    bool dopureeventWeight_;
