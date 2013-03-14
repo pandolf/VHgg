@@ -2,10 +2,6 @@
 
 #include "QGLikelihood/interface/QGLikelihoodCalculator.h"
 
-#include "KinematicFit/DiJetKinFitter.h"
-
-#include "HelicityLikelihoodDiscriminant/HelicityLikelihoodDiscriminant.h"
-
 #include "BTagSFUtil/interface/BTagSFUtil.h"
 
 
@@ -44,8 +40,10 @@ RedNtpFinalizer_THq::~RedNtpFinalizer_THq()
 void RedNtpFinalizer_THq::finalize()
 {
 
-
    this->Init();
+
+   TString dataset_tstr(dataset_);
+   bool isSignalMC =  dataset_tstr.BeginsWith("tHq");
 
 
    std::string fullFlags = selectionType_ + "_";
@@ -192,46 +190,16 @@ void RedNtpFinalizer_THq::finalize()
    float ptRunPhot2_t;
    float etaPhot1_t;
    float etaPhot2_t;
+
    float mgg_t;
-   float pt_scaled_weight_t;
-   float pt_scaled_2D_weight_t;
-   float pt_scaled_2D_weight_data_t;
-   float ptPhot1_scaled_weight_t;
-   float ptPhot2_scaled_weight_t;
-   float eta_scaled_weight_t;
-   float eta_scaled_2D_weight_t;
-   float eta_scaled_2D_weight_data_t;
-   float etaPhot1_scaled_weight_t;
-   float etaPhot2_scaled_weight_t;
    float ptgg_t;
    float ptRungg_t;
-   // these are just leading 20 jets in event:
-   float ptJet_t[20];
-   float etaJet_t[20];
-   bool  btaggedLooseJet_t[20];
-   bool  btaggedMediumJet_t[20];
+
    float Ht_t;
-   // jet1 and jet2 are chosen with criterium
-   // leding, or btagged
-   float ptJet1_t;
-   float ptJet2_t;
-   float etaJet1_t;
-   float etaJet2_t;
-   float qglJet1_t;
-   float qglJet2_t;
-   bool  btagJet1_t;
-   bool  btagJet2_t;
-   float mjj_t;
-   float ptjj_t;
-   float zeppen_t;
-   float chiSquareProbMax_t;
-   float absCosThetaStar_t;
 
    int hasPassedSinglePhot_t;
    int hasPassedDoublePhot_t;
 
-   float cosThetaStar_t, cosTheta2_t;
-   float etaVstar_t;
    float m3_t;
    float minv_lnu_t;
    float minv_blnu_t;
@@ -257,16 +225,6 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch( "mgg", &mgg_t, "mgg_t/F" );
    tree_passedEvents->Branch( "ptgg", &ptgg_t, "ptgg_t/F" );
    tree_passedEvents->Branch( "ptRungg", &ptRungg_t, "ptRungg_t/F" );
-   tree_passedEvents->Branch( "ptPhot1_scaled_weight", &ptPhot1_scaled_weight_t, "ptPhot1_scaled_weight_t/F" );
-   tree_passedEvents->Branch( "ptPhot2_scaled_weight", &ptPhot2_scaled_weight_t, "ptPhot2_scaled_weight_t/F" );
-   tree_passedEvents->Branch( "pt_scaled_weight", &pt_scaled_weight_t, "pt_scaled_weight_t/F" );
-   tree_passedEvents->Branch( "pt_scaled_2D_weight", &pt_scaled_2D_weight_t, "pt_scaled_2D_weight_t/F" );
-   tree_passedEvents->Branch( "pt_scaled_2D_weight_data", &pt_scaled_2D_weight_data_t, "pt_scaled_2D_weight_data_t/F" );
-   tree_passedEvents->Branch( "etaPhot1_scaled_weight", &etaPhot1_scaled_weight_t, "etaPhot1_scaled_weight_t/F" );
-   tree_passedEvents->Branch( "etaPhot2_scaled_weight", &etaPhot2_scaled_weight_t, "etaPhot2_scaled_weight_t/F" );
-   tree_passedEvents->Branch( "eta_scaled_weight", &eta_scaled_weight_t, "eta_scaled_weight_t/F" );
-   tree_passedEvents->Branch( "eta_scaled_2D_weight", &eta_scaled_2D_weight_t, "eta_scaled_2D_weight_t/F" );
-   tree_passedEvents->Branch( "eta_scaled_2D_weight_data", &eta_scaled_2D_weight_data_t, "eta_scaled_2D_weight_data_t/F" );
    tree_passedEvents->Branch("epfMet", &epfMet, "epfMet");
    tree_passedEvents->Branch( "hasPassedSinglePhot", &hasPassedSinglePhot_t, "hasPassedSinglePhot_t/I" );
    tree_passedEvents->Branch( "hasPassedDoublePhot", &hasPassedDoublePhot_t, "hasPassedDoublePhot_t/I" );
@@ -275,58 +233,10 @@ void RedNtpFinalizer_THq::finalize()
 //   std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
    //std::string qglFileName="/afs/cern.ch/user/m/micheli/public/ttH/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
    //std::string qglFileName="/afs/cern.ch/work/p/pandolf/CMSSW_5_3_6/src/QG/QGLikelihood/test/Histos_2012.root";
-   std::string qglFileName="/afs/cern.ch/work/p/pandolf/public/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1.root";
-
-   //pt reweight for photons
-   std::string ptweightPhot1FileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_ptphot1_4GeVbinning.root";
-   std::string ptweightPhot2FileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_ptphot2_4GeVbinning.root";
-
-   //2D weights 
-   std::string ptweight2DFileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_pt_preselectionCS_onlyPhotonCuts_4GeVbinning.root";
-   //2D data
-   std::string ptweight2DFileName_data="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_pt_data_4GeVbinning.root";
-
-
-   TFile* ptweightPhot1File=TFile::Open(ptweightPhot1FileName.c_str());
-   TFile* ptweightPhot2File=TFile::Open(ptweightPhot2FileName.c_str());
-   TFile* ptweight2DFile=TFile::Open(ptweight2DFileName.c_str());
-   TFile* ptweight2DFile_data=TFile::Open(ptweight2DFileName_data.c_str());
-
-
-   TH1F* h1_ptweight_phot1=(TH1F*)ptweightPhot1File->Get("h_phot1_straight");
-   TH1F* h1_ptweight_phot2=(TH1F*)ptweightPhot2File->Get("h_phot2_straight");
-   TH2F* h2_ptweight=(TH2F*)ptweight2DFile->Get("h2D_pt_straight");
-   TH2F* h2_ptweight_data=(TH2F*)ptweight2DFile_data->Get("h2D_pt_data");
-
-   //eta reweight for photons
-   std::string etaweightPhot1FileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_etaphot1_01binning.root";
-   std::string etaweightPhot2FileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_etaphot2_01binning.root";
-
-   //2D weights
-   std::string etaweight2DFileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_eta_preselectionCS_onlyPhotonCuts_01binning.root";
-   //2D data
-   std::string etaweight2DFileName_data="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_eta_data_01binning.root";
-
-
-   TFile* etaweightPhot1File=TFile::Open(etaweightPhot1FileName.c_str());
-   TFile* etaweightPhot2File=TFile::Open(etaweightPhot2FileName.c_str());
-   TFile* etaweight2DFile=TFile::Open(etaweight2DFileName.c_str());
-   TFile* etaweight2DFile_data=TFile::Open(etaweight2DFileName_data.c_str());
-
-   TH1F* h1_etaweight_phot1=(TH1F*)etaweightPhot1File->Get("h_phot1_eta_straight");
-   TH1F* h1_etaweight_phot2=(TH1F*)etaweightPhot2File->Get("h_phot2_eta_straight");
-   TH2F* h2_etaweight=(TH2F*)etaweight2DFile->Get("h2D_eta_straight");
-   TH2F* h2_etaweight_data=(TH2F*)etaweight2DFile_data->Get("h2D_eta_data");
+   std::string qglFileName="/afs/cern.ch/work/p/pandolf/public/ReducedHisto_2012.root";
 
    QGLikelihoodCalculator *qglikeli = new QGLikelihoodCalculator( qglFileName );
 
-   float Zmass = 91.19;
-   float Wmass = 80.4;
-
-   DiJetKinFitter* fitter_jetsW = new DiJetKinFitter( "fitter_jetsW", "fitter_jets", Wmass );
-   DiJetKinFitter* fitter_jetsZ = new DiJetKinFitter( "fitter_jetsZ", "fitter_jets", Zmass );
-
-   HelicityLikelihoodDiscriminant *helicityDiscriminator = new HelicityLikelihoodDiscriminant();
 
    BTagSFUtil* btsfutil = new BTagSFUtil(bTaggerType_, 13);
 
@@ -378,7 +288,6 @@ void RedNtpFinalizer_THq::finalize()
 
       nb = tree_->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
-
 
       bool isMC = ( run<5 );
 
@@ -602,12 +511,6 @@ void RedNtpFinalizer_THq::finalize()
       
         index_selected.push_back(ijet);
       
-        if( njets_selected<20 ) {
-          ptJet_t[njets_selected] = ptcorrjet[ijet];
-          etaJet_t[njets_selected] = etajet[ijet];
-          btaggedLooseJet_t[njets_selected] = btagged_loose;
-          btaggedMediumJet_t[njets_selected] = btagged_medium;
-        }
       
         njets_selected++;
       
@@ -693,6 +596,7 @@ void RedNtpFinalizer_THq::finalize()
       }      
       
       
+
       // now look for q-jet:
       int index_qJet=-1;
       TLorentzVector qJet;
@@ -703,6 +607,7 @@ void RedNtpFinalizer_THq::finalize()
         if( i==index_jetW2 ) continue;
 
         if( ptcorrjet[i]<20. ) continue;
+        if( fabs(etajet[i])<1. ) continue;
 
         index_qJet=i;
         qJet.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
@@ -714,8 +619,9 @@ void RedNtpFinalizer_THq::finalize()
       if( index_qJet<0 ) continue;
 
 
+
       
-      if( isMC ) {
+      if( isSignalMC ) {
 
         TLorentzVector h, t, q, b, Wq, Wqbar;
         h.SetPtEtaPhiE( pt_h, eta_h, phi_h, e_h );
@@ -724,6 +630,7 @@ void RedNtpFinalizer_THq::finalize()
         q.SetPtEtaPhiE( pt_q, eta_q, phi_q, e_q );
         Wq.SetPtEtaPhiE( pt_Wq, eta_Wq, phi_Wq, e_Wq );
         Wqbar.SetPtEtaPhiE( pt_Wqbar, eta_Wqbar, phi_Wqbar, e_Wqbar );
+
 
         N_all+=eventWeight;
  
@@ -883,7 +790,12 @@ void RedNtpFinalizer_THq::finalize()
    } //for entries
 
 
-   std::cout << "-> Chose correct qJet in " << (float)N_qMatched*100./N_all << "%% of the cases." << std::endl;
+   if( isSignalMC ) {
+     std::cout << "-> Matched Higgs in " << N_hMatched << "/" << N_all << " (" << (float)N_hMatched*100./N_all << "%%) of the cases." << std::endl;
+     std::cout << "-> Matched bJet  in " << N_bMatched << "/" << N_all << " (" << (float)N_bMatched*100./N_all << "%%) of the cases." << std::endl;
+     std::cout << "-> Matched top   in " << N_tMatched << "/" << N_all << " (" << (float)N_tMatched*100./N_all << "%%) of the cases." << std::endl;
+     std::cout << "-> Matched qJet  in " << N_qMatched << "/" << N_all << " (" << (float)N_qMatched*100./N_all << "%%) of the cases." << std::endl;
+   }
 
 
    outFile_->cd();
