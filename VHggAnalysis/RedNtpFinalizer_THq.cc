@@ -76,10 +76,6 @@ void RedNtpFinalizer_THq::finalize()
    h1_nbjets_loose->Sumw2();
    TH1D*  h1_nbjets_medium = new TH1D("nbjets_medium", "", 11, -0.5, 10.5);
    h1_nbjets_medium->Sumw2();
-   TH1D*  h1_nbjets_loose_2jets = new TH1D("nbjets_loose_2jets", "", 11, -0.5, 10.5);
-   h1_nbjets_loose_2jets->Sumw2();
-   TH1D*  h1_nbjets_medium_2jets = new TH1D("nbjets_medium_2jets", "", 11, -0.5, 10.5);
-   h1_nbjets_medium_2jets->Sumw2();
 
 
    TH1D* h1_ptphot0 = new TH1D("ptphot0", "",200, 0., 200.);
@@ -125,6 +121,12 @@ void RedNtpFinalizer_THq::finalize()
    TH1D* h1_eta_bJet = new TH1D("eta_bJet", "", 100, -5., 5.);
    h1_eta_bJet->Sumw2();
 
+   TH1D* h1_nCentralJets = new TH1D("nCentralJets", "", 7, -0.5, 6.5 );
+   h1_nCentralJets->Sumw2();
+   TH1D* h1_hardestCentralJetPt = new TH1D("hardestCentralJetPt", "", 100, 0., 200.);
+   h1_hardestCentralJetPt->Sumw2();
+
+
 
    // top
    TH1D* h1_pt_top = new TH1D("pt_top", "", 100, 0., 120.);
@@ -155,7 +157,7 @@ void RedNtpFinalizer_THq::finalize()
    TH1D*  h1_ptRunDiphot = new TH1D("ptRunDiphot", "", 100, 0., 500.);
    h1_ptRunDiphot->Sumw2();
 
-   TH1D*  h1_deltaPhi_top_higgs = new TH1D("deltaPhi_top_higgs", "", 100, 0., 10.);
+   TH1D*  h1_deltaPhi_top_higgs = new TH1D("deltaPhi_top_higgs", "", 100, 0., 3.15);
    h1_deltaPhi_top_higgs->Sumw2();
 
 
@@ -205,6 +207,19 @@ void RedNtpFinalizer_THq::finalize()
    float minv_blnu_t;
    float minv_bgg_t;
 
+   bool isLeptonic_t;
+   float pt_qJet_t;
+   float eta_qJet_t;
+   float qgl_qJet_t;
+   float pt_bJet_t;
+   float eta_bJet_t;
+   float pt_top_t;
+   float eta_top_t;
+   int   nCentralJets_t;
+   float hardestCentralJetPt_t;
+   float deltaPhi_top_higgs_t;
+
+
    float eventWeight = 1.;
 
    TTree* tree_passedEvents = new TTree();
@@ -228,6 +243,17 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("epfMet", &epfMet, "epfMet");
    tree_passedEvents->Branch( "hasPassedSinglePhot", &hasPassedSinglePhot_t, "hasPassedSinglePhot_t/I" );
    tree_passedEvents->Branch( "hasPassedDoublePhot", &hasPassedDoublePhot_t, "hasPassedDoublePhot_t/I" );
+   tree_passedEvents->Branch("isLeptonic",          &isLeptonic_t,         "isLeptonic_t/O");
+   tree_passedEvents->Branch("pt_qJet",             &pt_qJet_t,            "pt_qJet_t/F");
+   tree_passedEvents->Branch("eta_qJet",            &eta_qJet_t,           "eta_qJet_t/F");
+   tree_passedEvents->Branch("qgl_qJet",            &qgl_qJet_t,           "qgl_qJet_t/F");
+   tree_passedEvents->Branch("pt_bJet",             &pt_bJet_t,            "pt_bJet_t/F");
+   tree_passedEvents->Branch("eta_bJet",            &eta_bJet_t,           "eta_bJet_t/F");
+   tree_passedEvents->Branch("pt_top",              &pt_top_t,             "pt_top_t/F");
+   tree_passedEvents->Branch("eta_top",             &eta_top_t,            "eta_top_t/F");
+   tree_passedEvents->Branch("nCentralJets",        &nCentralJets_t,       "nCentralJets_t/I");
+   tree_passedEvents->Branch("hardestCentralJetPt", &hardestCentralJetPt_t,"hardestCentralJetPt_t/F");
+   tree_passedEvents->Branch("deltaPhi_top_higgs",  &deltaPhi_top_higgs_t, "deltaPhi_top_higgs_t/F");
 
  
 //   std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
@@ -603,6 +629,8 @@ void RedNtpFinalizer_THq::finalize()
       // now look for q-jet:
       int index_qJet=-1;
       TLorentzVector qJet;
+      int nCentralJets = 0;
+      float hardestCentralJetPt=0.;
       for( unsigned i=0; i<index_selected.size(); ++i ) {
 
         if( i==index_selected_btagmedium[0] ) continue;
@@ -610,14 +638,16 @@ void RedNtpFinalizer_THq::finalize()
         if( i==index_jetW2 ) continue;
 
         if( ptcorrjet[i]<20. ) continue;
-        if( fabs(etajet[i])<1. ) continue;
+        if( fabs(etajet[i])<1. ) {
+          if( nCentralJets==0 ) hardestCentralJetPt = ptcorrjet[i];
+          nCentralJets++;
+        } else if( index_qJet<0 ) {
+          index_qJet=i;
+          qJet.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
+        }
 
-        index_qJet=i;
-        qJet.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
-
-        break;
-    
       } 
+
       
       if( index_qJet<0 ) continue;
 
@@ -713,11 +743,6 @@ void RedNtpFinalizer_THq::finalize()
       h1_nbjets_loose->Fill( njets_selected_btagloose, eventWeight );
       h1_nbjets_medium->Fill( njets_selected_btagmedium, eventWeight );
       
-      if( njets_selected>=2 ) {
-        h1_nbjets_loose_2jets->Fill( njets_selected_btagloose, eventWeight );
-        h1_nbjets_medium_2jets->Fill( njets_selected_btagmedium, eventWeight );
-      }
-      
       
       
       if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_presel->Fill( massggnewvtx, eventWeight );
@@ -734,6 +759,8 @@ void RedNtpFinalizer_THq::finalize()
       h1_pt_bJet->Fill( bJet.Pt(), eventWeight ); 
       h1_eta_bJet->Fill( bJet.Eta(), eventWeight ); 
       
+      h1_nCentralJets->Fill( nCentralJets, eventWeight );
+      h1_hardestCentralJetPt->Fill( hardestCentralJetPt, eventWeight );
       
       
       h1_Ht->Fill(Ht_t,eventWeight);
@@ -763,11 +790,13 @@ void RedNtpFinalizer_THq::finalize()
 
       }
       
-
-      h1_deltaPhi_top_higgs->Fill(fabs(top.DeltaPhi(diphot)),eventWeight);
+      float deltaPhi_top_higgs = fabs(top.DeltaPhi(diphot));
+      h1_deltaPhi_top_higgs->Fill(deltaPhi_top_higgs,eventWeight);
       
       
       // set tree vars:
+      isLeptonic_t = isLeptonic;
+
       njets_t  = njets_selected;
       nbjets_loose_t = njets_selected_btagloose;
       nbjets_medium_t = njets_selected_btagmedium;
@@ -785,8 +814,23 @@ void RedNtpFinalizer_THq::finalize()
       ptgg_t = diphot.Pt();
       ptRungg_t = diphot.Pt()*120./massggnewvtx;
       
+      pt_qJet_t = qJet.Pt();
+      eta_qJet_t = qJet.Eta();
+      qgl_qJet_t = qgl_qJet;
       
+      pt_bJet_t = bJet.Pt();
+      eta_bJet_t = bJet.Eta();
       
+      pt_top_t = top.Pt();
+      eta_top_t = top.Eta();
+      
+      nCentralJets_t = nCentralJets;
+      hardestCentralJetPt_t = hardestCentralJetPt;
+
+      deltaPhi_top_higgs_t = deltaPhi_top_higgs;
+      
+
+
       tree_passedEvents->Fill();
 
 
@@ -819,8 +863,6 @@ void RedNtpFinalizer_THq::finalize()
    h1_njets->Write();
    h1_nbjets_loose->Write();
    h1_nbjets_medium->Write();
-   h1_nbjets_loose_2jets->Write();
-   h1_nbjets_medium_2jets->Write();
 
    h1_ptphot0->Write();
    h1_ptphot1->Write();
@@ -840,6 +882,11 @@ void RedNtpFinalizer_THq::finalize()
    h1_pt_bJet->Write();
    h1_eta_bJet->Write();
 
+   h1_pt_top->Write();
+   h1_eta_top->Write();
+
+   h1_nCentralJets->Write();
+   h1_hardestCentralJetPt->Write();
 
    h1_ptDiphot->Write();
    h1_ptRunDiphot->Write();
