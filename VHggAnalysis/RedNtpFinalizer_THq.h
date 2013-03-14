@@ -916,37 +916,15 @@ public :
    float ptphot1cut_;
    float ptphot2cut_;
 
-   bool ebeb_VHnotag_thresh_;
-
-   float ptgg_VHnotag_thresh_;
-   float ptgg_VHbtag_thresh_;
-
    float ptjetthresh_count_;
    float etajetthresh_count_;
-
-   float ptjet_ttH_hadronic_thresh_;
-   float ptjet_VHnotag_thresh_;
-   float ptjet_VHbtag_thresh_;
 
    int njets_thresh_;
    int njets_upper_thresh_;
    int nbtagloose_thresh_;
    int nbtagmedium_thresh_;
-   int njets_ttH_hadronic_thresh_;
-   int njets_ttH_leptonic_thresh_;
 
-   float ptlep_ttH_leptonic_thresh_;
-
-   float zeppenfeld_thresh_;
-
-   float costhetastar_VHnotag_thresh_;
-   float costhetastar_VHbtag_thresh_;
-
-   float mjj_min_VHbtag_thresh_;
-   float mjj_max_VHbtag_thresh_;
-
-   float mjj_min_VHnotag_thresh_;
-   float mjj_max_VHnotag_thresh_;
+   float ptLept_thresh_;
 
    float   Ht_thresh_;
    bool  invert_photonCuts_;

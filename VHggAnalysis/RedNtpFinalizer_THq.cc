@@ -532,8 +532,11 @@ void RedNtpFinalizer_THq::finalize()
       bJet.SetPtEtaPhiE(ptcorrjet[bJet_index],etajet[bJet_index],phijet[bJet_index],ecorrjet[bJet_index]);
 
 
-      isLeptonic = (ptele1>ptlep_ttH_leptonic_thresh_ || ptmu1>ptlep_ttH_leptonic_thresh_);//cut on pt lepton
-      int isMu=ptmu1>ptlep_ttH_leptonic_thresh_;
+      // veto events with 2 leptons:
+      if( (ptele1>ptLept_thresh_ && ptmu1>0.) || ptele2>ptLept_thresh_ || ptmu2>0. ) continue;
+
+      isLeptonic = (ptele1>ptLept_thresh_ || ptmu1>ptLept_thresh_);//cut on pt lepton
+      int isMu=ptmu1>ptLept_thresh_;
 
       int index_jetW1=-1;
       int index_jetW2=-1;
@@ -1359,7 +1362,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
 
   // default values 
   
-  dopureeventWeight_ = true;
+  dopureeventWeight_ = false;
   doptreeventWeight_ = true;
   r9cat_ = 1;
   photonID_thresh_ = 4;
@@ -1384,7 +1387,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
   use_PUID_=true;
 
   njets_PUID_thresh_=0;
-  ptlep_ttH_leptonic_thresh_=20;
+  ptLept_thresh_=10;
 
   PUID_betastar_thresh_=0.67;
   chooseBtaggedJets_=true;//be careful with this
