@@ -307,13 +307,22 @@ void RedNtpFinalizer_THq::finalize()
 
 
 
-   float N_all = 0.;
-   float N_qMatched = 0.;
-   float N_tMatched = 0.;
-   float N_hMatched = 0.;
-   float N_bMatched = 0.;
-   float N_WqMatched = 0.;
-   float N_WqbarMatched = 0.;
+   float N_all_lept = 0.;
+   float N_all_hadr = 0.;
+
+   float N_qMatched_lept = 0.;
+   float N_tMatched_lept = 0.;
+   float N_hMatched_lept = 0.;
+   float N_bMatched_lept = 0.;
+   float N_WqMatched_lept = 0.;
+   float N_WqbarMatched_lept = 0.;
+
+   float N_qMatched_hadr = 0.;
+   float N_tMatched_hadr = 0.;
+   float N_hMatched_hadr = 0.;
+   float N_bMatched_hadr = 0.;
+   float N_WqMatched_hadr = 0.;
+   float N_WqbarMatched_hadr = 0.;
 
 
 
@@ -658,9 +667,9 @@ void RedNtpFinalizer_THq::finalize()
 
         if( ptcorrjet[i]<20. ) continue;
         if( fabs(etajet[i])<1. ) {
-          if( nCentralJets==0 ) hardestCentralJetPt = ptcorrjet[i];
+          if( nCentralJets==0 ) hardestCentralJetPt = ptcorrjet[i]; //hardest central jet
           nCentralJets++;
-        } else if( index_qJet<0 ) {
+        } else if( index_qJet<0 ) { //hardest forward jet
           index_qJet=i;
           qJet.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
         }
@@ -684,7 +693,10 @@ void RedNtpFinalizer_THq::finalize()
         Wqbar.SetPtEtaPhiE( pt_Wqbar, eta_Wqbar, phi_Wqbar, e_Wqbar );
 
 
-        N_all+=eventWeight;
+        if( isLeptonic_t )
+          N_all_lept+=eventWeight;
+        else
+          N_all_hadr+=eventWeight;
  
         float deltaR_q = q.DeltaR(qJet);
         float deltaR_t = t.DeltaR(top);
@@ -692,14 +704,25 @@ void RedNtpFinalizer_THq::finalize()
         float deltaR_b = b.DeltaR(bJet);
         float deltaR_h = h.DeltaR(diphot);
 
-        if( deltaR_q<0.5 )
-          N_qMatched+=eventWeight;
-        if( deltaR_t<0.5 || (isLeptonic_t && deltaPhi_t<0.5) )
-          N_tMatched+=eventWeight;
-        if( deltaR_b<0.5 )
-          N_bMatched+=eventWeight;
-        if( deltaR_h<0.5 )
-          N_hMatched+=eventWeight;
+        if( deltaR_q<0.5 && isLeptonic_t )
+          N_qMatched_lept+=eventWeight;
+        if( deltaPhi_t<0.5 && isLeptonic_t )
+          N_tMatched_lept+=eventWeight;
+        if( deltaR_b<0.5 && isLeptonic_t )
+          N_bMatched_lept+=eventWeight;
+        if( deltaR_h<0.5 && isLeptonic_t )
+          N_hMatched_lept+=eventWeight;
+
+        if( deltaR_q<0.5 && !isLeptonic_t )
+          N_qMatched_hadr+=eventWeight;
+        if( deltaPhi_t<0.5 && !isLeptonic_t )
+          N_tMatched_hadr+=eventWeight;
+        if( deltaR_b<0.5 && !isLeptonic_t )
+          N_bMatched_hadr+=eventWeight;
+        if( deltaR_h<0.5 && !isLeptonic_t )
+          N_hMatched_hadr+=eventWeight;
+
+
         //if( Wq.DeltaR(qJet)<0.5 )
         //  N_WqMatched+=eventWeight
         //if( Wq.DeltaR(qJet)<0.5 )
@@ -875,10 +898,19 @@ void RedNtpFinalizer_THq::finalize()
 
 
    if( isSignalMC ) {
-     std::cout << "-> Matched Higgs in " << N_hMatched << "/" << N_all << " (" << (float)N_hMatched*100./N_all << "%%) of the cases." << std::endl;
-     std::cout << "-> Matched bJet  in " << N_bMatched << "/" << N_all << " (" << (float)N_bMatched*100./N_all << "%%) of the cases." << std::endl;
-     std::cout << "-> Matched top   in " << N_tMatched << "/" << N_all << " (" << (float)N_tMatched*100./N_all << "%%) of the cases." << std::endl;
-     std::cout << "-> Matched qJet  in " << N_qMatched << "/" << N_all << " (" << (float)N_qMatched*100./N_all << "%%) of the cases." << std::endl;
+     std::cout << std::endl;
+     std::cout << "LEPTONIC CHANNEL:" << std::endl;
+     std::cout << "-> Matched Higgs in " << (float)N_hMatched_lept*100./N_all_lept << "%% of the cases." << std::endl;
+     std::cout << "-> Matched bJet  in " << (float)N_bMatched_lept*100./N_all_lept << "%% of the cases." << std::endl;
+     std::cout << "-> Matched top   in " << (float)N_tMatched_lept*100./N_all_lept << "%% of the cases." << std::endl;
+     std::cout << "-> Matched qJet  in " << (float)N_qMatched_lept*100./N_all_lept << "%% of the cases." << std::endl;
+
+     std::cout << std::endl;
+     std::cout << "HADRONIC CHANNEL:" << std::endl;
+     std::cout << "-> Matched Higgs in " << (float)N_hMatched_hadr*100./N_all_hadr << "%% of the cases." << std::endl;
+     std::cout << "-> Matched bJet  in " << (float)N_bMatched_hadr*100./N_all_hadr << "%% of the cases." << std::endl;
+     std::cout << "-> Matched top   in " << (float)N_tMatched_hadr*100./N_all_hadr << "%% of the cases." << std::endl;
+     std::cout << "-> Matched qJet  in " << (float)N_qMatched_hadr*100./N_all_hadr << "%% of the cases." << std::endl;
    }
 
 
