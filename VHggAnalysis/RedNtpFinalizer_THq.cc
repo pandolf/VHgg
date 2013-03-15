@@ -147,6 +147,10 @@ void RedNtpFinalizer_THq::finalize()
 
    TH1D* h1_mgg= new TH1D("mgg", "", 80, 100., 180.);
    h1_mgg->Sumw2();
+   TH1D* h1_mgg_lept= new TH1D("mgg_lept", "", 80, 100., 180.);
+   h1_mgg_lept->Sumw2();
+   TH1D* h1_mgg_hadr= new TH1D("mgg_hadr", "", 80, 100., 180.);
+   h1_mgg_hadr->Sumw2();
 
 
 
@@ -195,6 +199,7 @@ void RedNtpFinalizer_THq::finalize()
 
    float mgg_t;
    float ptgg_t;
+   float etagg_t;
    float ptRungg_t;
 
    float Ht_t;
@@ -202,12 +207,14 @@ void RedNtpFinalizer_THq::finalize()
    int hasPassedSinglePhot_t;
    int hasPassedDoublePhot_t;
 
-   float m3_t;
-   float minv_lnu_t;
-   float minv_blnu_t;
-   float minv_bgg_t;
+   float mt_top_t;
+   float m_top_t;
+   float mt_W_t;
+   float m_W_t;
 
    bool isLeptonic_t;
+   float pt_lept_t;
+   float eta_lept_t;
    float pt_qJet_t;
    float eta_qJet_t;
    float qgl_qJet_t;
@@ -239,11 +246,14 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch( "etaPhot2", &etaPhot2_t, "etaPhot2_t/F" );
    tree_passedEvents->Branch( "mgg", &mgg_t, "mgg_t/F" );
    tree_passedEvents->Branch( "ptgg", &ptgg_t, "ptgg_t/F" );
+   tree_passedEvents->Branch( "etagg", &etagg_t, "etagg_t/F" );
    tree_passedEvents->Branch( "ptRungg", &ptRungg_t, "ptRungg_t/F" );
    tree_passedEvents->Branch("epfMet", &epfMet, "epfMet");
    tree_passedEvents->Branch( "hasPassedSinglePhot", &hasPassedSinglePhot_t, "hasPassedSinglePhot_t/I" );
    tree_passedEvents->Branch( "hasPassedDoublePhot", &hasPassedDoublePhot_t, "hasPassedDoublePhot_t/I" );
    tree_passedEvents->Branch("isLeptonic",          &isLeptonic_t,         "isLeptonic_t/O");
+   tree_passedEvents->Branch("pt_lept",             &pt_lept_t,            "pt_lept_t/F");
+   tree_passedEvents->Branch("eta_lept",            &eta_lept_t,           "eta_lept_t/F");
    tree_passedEvents->Branch("pt_qJet",             &pt_qJet_t,            "pt_qJet_t/F");
    tree_passedEvents->Branch("eta_qJet",            &eta_qJet_t,           "eta_qJet_t/F");
    tree_passedEvents->Branch("qgl_qJet",            &qgl_qJet_t,           "qgl_qJet_t/F");
@@ -254,6 +264,10 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("nCentralJets",        &nCentralJets_t,       "nCentralJets_t/I");
    tree_passedEvents->Branch("hardestCentralJetPt", &hardestCentralJetPt_t,"hardestCentralJetPt_t/F");
    tree_passedEvents->Branch("deltaPhi_top_higgs",  &deltaPhi_top_higgs_t, "deltaPhi_top_higgs_t/F");
+   tree_passedEvents->Branch("mt_top",  &mt_top_t, "mt_top_t/F");
+   tree_passedEvents->Branch("m_top",  &m_top_t, "m_top_t/F");
+   tree_passedEvents->Branch("mt_W",  &mt_W_t, "mt_W_t/F");
+   tree_passedEvents->Branch("m_W",  &m_W_t, "m_W_t/F");
 
  
 //   std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
@@ -570,9 +584,13 @@ void RedNtpFinalizer_THq::finalize()
 
       TLorentzVector top;
       TLorentzVector lept, neutrino;
+      TLorentzVector jetW1,jetW2;
 
 
       if( isLeptonic ) { // *** LEPTONIC CHANNEL
+
+
+        if( njets_selected > njets_upper_thresh_lept_ ) continue;
 
         if( isMu )
           lept.SetPtEtaPhiE( ptmu1, etamu1, phimu1, enemu1 );
@@ -616,7 +634,6 @@ void RedNtpFinalizer_THq::finalize()
 
         if( index_jetW1<0 && index_jetW2<0 ) continue;
 
-        TLorentzVector jetW1,jetW2;
         jetW1.SetPtEtaPhiE(ptcorrjet[index_jetW1],etajet[index_jetW1],phijet[index_jetW1],ecorrjet[index_jetW1]);
         jetW2.SetPtEtaPhiE(ptcorrjet[index_jetW2],etajet[index_jetW2],phijet[index_jetW2],ecorrjet[index_jetW2]);
 
@@ -788,11 +805,18 @@ void RedNtpFinalizer_THq::finalize()
         float deltaPhi_met_bJet = fabs(bJet.DeltaPhi(neutrino));
         h1_deltaPhi_met_bJet->Fill(deltaPhi_met_bJet,eventWeight);
 
+        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_lept->Fill( massggnewvtx, eventWeight );
+
+      } else { // hadronic channel
+
+        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_hadr->Fill( massggnewvtx, eventWeight );
+
       }
       
       float deltaPhi_top_higgs = fabs(top.DeltaPhi(diphot));
       h1_deltaPhi_top_higgs->Fill(deltaPhi_top_higgs,eventWeight);
-      
+     
+
       
       // set tree vars:
       isLeptonic_t = isLeptonic;
@@ -811,9 +835,14 @@ void RedNtpFinalizer_THq::finalize()
       }else{
         mgg_t = -1;
       }
+
       ptgg_t = diphot.Pt();
+      etagg_t = diphot.Eta();
       ptRungg_t = diphot.Pt()*120./massggnewvtx;
       
+      pt_lept_t = (isLeptonic) ? lept.Pt() : 0.;
+      eta_lept_t = (isLeptonic) ? lept.Eta() : 0.;
+
       pt_qJet_t = qJet.Pt();
       eta_qJet_t = qJet.Eta();
       qgl_qJet_t = qgl_qJet;
@@ -829,6 +858,14 @@ void RedNtpFinalizer_THq::finalize()
 
       deltaPhi_top_higgs_t = deltaPhi_top_higgs;
       
+      mt_top_t = top.Mt();
+      m_top_t = top.M();
+
+      TLorentzVector W = (isLeptonic) ? (lept + neutrino) : (jetW1+jetW2);
+
+      mt_W_t = W.Mt();
+      m_W_t = W.M();
+ 
 
 
       tree_passedEvents->Fill();
@@ -895,6 +932,8 @@ void RedNtpFinalizer_THq::finalize()
    h1_mgg_prepresel->Write();
    h1_mgg_presel->Write();
    h1_mgg->Write();
+   h1_mgg_lept->Write();
+   h1_mgg_hadr->Write();
 
 
    h1_pt_lept->Write();
@@ -1425,6 +1464,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
 
   njets_thresh_=0;
   njets_upper_thresh_=1000;
+  njets_upper_thresh_lept_ = 1000;
   nbtagloose_thresh_=0;
   nbtagmedium_thresh_=0;
 
@@ -1443,6 +1483,13 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
   if( selectionType=="presel" ) {
 
     // leave all cuts to default
+    
+  } else if( selectionType=="sel0" ) {
+
+    njets_upper_thresh_lept_ = 3;
+    ptphot1cut_ = 50.;
+    ptphot2cut_ = 25.;
+
 
 
   } else {
