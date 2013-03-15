@@ -921,6 +921,8 @@ public :
 
    int njets_thresh_;
    int njets_upper_thresh_;
+   int njets_thresh_lept_;
+   int njets_upper_thresh_lept_;
    int nbtagloose_thresh_;
    int nbtagmedium_thresh_;
 

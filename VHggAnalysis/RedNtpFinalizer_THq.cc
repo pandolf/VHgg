@@ -577,7 +577,7 @@ void RedNtpFinalizer_THq::finalize()
       if( (ptele1>ptLept_thresh_ && ptmu1>0.) || ptele2>ptLept_thresh_ || ptmu2>0. ) continue;
 
       isLeptonic_t = (ptele1>ptLept_thresh_ || ptmu1>ptLept_thresh_);//cut on pt lepton
-      isMu_t=ptmu1>0.;
+      isMu_t=ptmu1>ptLept_thresh_;
 
       int index_jetW1=-1;
       int index_jetW2=-1;
@@ -592,6 +592,7 @@ void RedNtpFinalizer_THq::finalize()
 
 
         if( njets_selected > njets_upper_thresh_lept_ ) continue;
+        if( njets_selected < njets_thresh_lept_ ) continue;
 
         if( isMu_t )
           lept.SetPtEtaPhiE( ptmu1, etamu1, phimu1, enemu1 );
@@ -1485,6 +1486,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     
   } else if( selectionType=="sel0" ) {
 
+    njets_thresh_lept_ = 2;
     njets_upper_thresh_lept_ = 3;
     ptphot1cut_ = 50.;
     ptphot2cut_ = 25.;
