@@ -576,7 +576,7 @@ void RedNtpFinalizer_THq::finalize()
       // veto events with 2 leptons:
       if( (ptele1>ptLept_thresh_ && ptmu1>0.) || ptele2>ptLept_thresh_ || ptmu2>0. ) continue;
 
-      isLeptonic_t = (ptele1>ptLept_thresh_ || ptmu1>0.);//cut on pt lepton
+      isLeptonic_t = (ptele1>ptLept_thresh_ || ptmu1>ptLept_thresh_);//cut on pt lepton
       isMu_t=ptmu1>0.;
 
       int index_jetW1=-1;
