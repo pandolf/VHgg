@@ -185,7 +185,6 @@ void RedNtpFinalizer_THq::finalize()
 
 
 
-   bool isLeptonic;
 
    int njets_t;
    int nbjets_loose_t;
@@ -213,6 +212,7 @@ void RedNtpFinalizer_THq::finalize()
    float m_W_t;
 
    bool isLeptonic_t;
+   bool isMu_t;
    float pt_lept_t;
    float eta_lept_t;
    float pt_qJet_t;
@@ -252,6 +252,7 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch( "hasPassedSinglePhot", &hasPassedSinglePhot_t, "hasPassedSinglePhot_t/I" );
    tree_passedEvents->Branch( "hasPassedDoublePhot", &hasPassedDoublePhot_t, "hasPassedDoublePhot_t/I" );
    tree_passedEvents->Branch("isLeptonic",          &isLeptonic_t,         "isLeptonic_t/O");
+   tree_passedEvents->Branch("isMu",          &isMu_t,         "isMu_t/O");
    tree_passedEvents->Branch("pt_lept",             &pt_lept_t,            "pt_lept_t/F");
    tree_passedEvents->Branch("eta_lept",            &eta_lept_t,           "eta_lept_t/F");
    tree_passedEvents->Branch("pt_qJet",             &pt_qJet_t,            "pt_qJet_t/F");
@@ -575,8 +576,8 @@ void RedNtpFinalizer_THq::finalize()
       // veto events with 2 leptons:
       if( (ptele1>ptLept_thresh_ && ptmu1>0.) || ptele2>ptLept_thresh_ || ptmu2>0. ) continue;
 
-      isLeptonic = (ptele1>ptLept_thresh_ || ptmu1>ptLept_thresh_);//cut on pt lepton
-      int isMu=ptmu1>ptLept_thresh_;
+      isLeptonic_t = (ptele1>ptLept_thresh_ || ptmu1>0.);//cut on pt lepton
+      isMu_t=ptmu1>0.;
 
       int index_jetW1=-1;
       int index_jetW2=-1;
@@ -587,12 +588,12 @@ void RedNtpFinalizer_THq::finalize()
       TLorentzVector jetW1,jetW2;
 
 
-      if( isLeptonic ) { // *** LEPTONIC CHANNEL
+      if( isLeptonic_t ) { // *** LEPTONIC CHANNEL
 
 
         if( njets_selected > njets_upper_thresh_lept_ ) continue;
 
-        if( isMu )
+        if( isMu_t )
           lept.SetPtEtaPhiE( ptmu1, etamu1, phimu1, enemu1 );
         else
           lept.SetPtEtaPhiE( ptele1, etaele1, phiele1, eneele1 );
@@ -692,7 +693,7 @@ void RedNtpFinalizer_THq::finalize()
 
         if( deltaR_q<0.5 )
           N_qMatched+=eventWeight;
-        if( deltaR_t<0.5 || (isLeptonic && deltaPhi_t<0.5) )
+        if( deltaR_t<0.5 || (isLeptonic_t && deltaPhi_t<0.5) )
           N_tMatched+=eventWeight;
         if( deltaR_b<0.5 )
           N_bMatched+=eventWeight;
@@ -794,7 +795,7 @@ void RedNtpFinalizer_THq::finalize()
       
       
       
-      if( isLeptonic ) {
+      if( isLeptonic_t ) {
 
         //leptons
         h1_pt_lept->Fill(lept.Pt(),eventWeight);
@@ -819,8 +820,6 @@ void RedNtpFinalizer_THq::finalize()
 
       
       // set tree vars:
-      isLeptonic_t = isLeptonic;
-
       njets_t  = njets_selected;
       nbjets_loose_t = njets_selected_btagloose;
       nbjets_medium_t = njets_selected_btagmedium;
@@ -840,8 +839,8 @@ void RedNtpFinalizer_THq::finalize()
       etagg_t = diphot.Eta();
       ptRungg_t = diphot.Pt()*120./massggnewvtx;
       
-      pt_lept_t = (isLeptonic) ? lept.Pt() : 0.;
-      eta_lept_t = (isLeptonic) ? lept.Eta() : 0.;
+      pt_lept_t = (isLeptonic_t) ? lept.Pt() : 0.;
+      eta_lept_t = (isLeptonic_t) ? lept.Eta() : 0.;
 
       pt_qJet_t = qJet.Pt();
       eta_qJet_t = qJet.Eta();
@@ -861,7 +860,7 @@ void RedNtpFinalizer_THq::finalize()
       mt_top_t = top.Mt();
       m_top_t = top.M();
 
-      TLorentzVector W = (isLeptonic) ? (lept + neutrino) : (jetW1+jetW2);
+      TLorentzVector W = (isLeptonic_t) ? (lept+neutrino) : (jetW1+jetW2);
 
       mt_W_t = W.Mt();
       m_W_t = W.M();
