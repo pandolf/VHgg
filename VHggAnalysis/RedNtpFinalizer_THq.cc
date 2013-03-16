@@ -686,7 +686,9 @@ void RedNtpFinalizer_THq::finalize()
       TLorentzVector qJet;
       int nCentralJets = 0;
       float hardestCentralJetPt=0.;
-      for( unsigned i=0; i<index_selected.size(); ++i ) {
+      for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
+
+        int i = index_selected[ii];
 
         if( i==index_selected_btagmedium[0] ) continue;
         if( i==index_jetW1 ) continue;
@@ -1512,6 +1514,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
 
   njets_thresh_=0;
   njets_upper_thresh_=1000;
+  njets_thresh_lept_=0;
   njets_upper_thresh_lept_ = 1000;
   nbtagloose_thresh_=0;
   nbtagmedium_thresh_=0;
