@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
   db_stack->set_noStack(false);
 
   db_stack_UL->set_lumiOnRightSide();
-  db_stack_UL->set_lumiNormalization(30000.);
+  db_stack_UL->set_lumiNormalization(20000.);
   db_stack_UL->set_noStack(false);            
 
 
@@ -212,6 +212,8 @@ int main(int argc, char* argv[]) {
   bool log = true;
 
 
+  db_nostack->set_widenLegend(false);
+
   db_nostack->drawHisto("nvertex", "Number of Primary Vertexes");
   db_nostack->drawHisto("nvertex_PUW", "Number of Primary Vertexes");
   db_nostack->reset();
@@ -234,7 +236,7 @@ int main(int argc, char* argv[]) {
 
 
   // leptonic channel plots:
-  db_stack->set_legendTitle("Leptonic Channel");
+  db_nostack->set_legendTitle("Leptonic Channel");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "epfMet",   "eventWeight*isLeptonic", 50, 0., 250., "pfMet", "Particle Flow #slash{E}_{T}", "GeV");
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "njets",   "eventWeight*isLeptonic", 9, -0.5, 8.5, "njets_lept", "Number of Jets (p_{T} > 20 GeV)");
@@ -245,13 +247,20 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_lept", "eventWeight*isLeptonic", 50, -2.5, 2.5, "eta_lept", "Lepton #eta", "");
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "nCentralJets", "eventWeight*isLeptonic", 7, -0.5, 6.5, "nCentralJets_lept", "Number of Additional Jets");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "nCentralJets25", "eventWeight*isLeptonic", 7, -0.5, 6.5, "nCentralJets25_lept", "Number of Additional Jets");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "hardestCentralJetPt", "eventWeight*isLeptonic", 50, 0., 200., "hardestCentralJetPt_lept", "Hardest Additional Jet p_{T}", "GeV", "Events", true);
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "pt_qJet",  "eventWeight*isLeptonic", 50, 0., 500., "pt_qJet_lept", "q-Jet Candidate p_{T}", "GeV");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_qJet", "eventWeight*isLeptonic", 50, -5, 5, "eta_qJet_lept", "q-Jet Candidate #eta", "");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "qgl_qJet", "eventWeight*isLeptonic", 50, 0., 1.0001, "qgl_qJet_lept", "q-Jet Candidate QGL", "");
 
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "deltaPhi_top_higgs", "eventWeight*isLeptonic", 50, 0., 3.15, "deltaPhi_top_higgs_lept", "#Delta#Phi (top-diphoton)", "rad");
 
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_top", "eventWeight*isLeptonic", 50, -5, 5, "eta_top_lept", "Top Candidate #eta", "");
+
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_lept-etagg", "eventWeight*isLeptonic", 50, -5., 5., "deltaEta_lept_higgs", "#Delta#eta (lepton-diphoton)");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_top_lept", "eventWeight*(isLeptonic)", 50, 0., 500., "mt_top",  "Top Transverse Mass", "GeV");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_W_lept", "eventWeight*(isLeptonic)", 50, 0., 250., "mt_W",  "W Transverse Mass", "GeV");
 
   db_stack->set_legendTitle("");
 
@@ -268,18 +277,19 @@ int main(int argc, char* argv[]) {
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "deltaPhi_top_higgs", "eventWeight", 50, 0., 3.15, "deltaPhi_top_higgs", "#Delta#Phi (top-diphoton)", "rad");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_bJet-etagg", "eventWeight", 50, -5., 5., "deltaEta_bJet_higgs", "#Delta#eta (bJet-diphoton)");
-  db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_lept-etagg", "eventWeight*isLeptonic", 50, -5., 5., "deltaEta_lept_higgs", "#Delta#eta (lepton-diphoton)");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_top -etagg", "eventWeight*(!isLeptonic)", 50, -5., 5., "deltaEta_top_higgs",  "#Delta#eta (top-diphoton)");
 
-  db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_top", "eventWeight*(isLeptonic)", 50, 0., 500., "mt_top",  "Reconstructed Top Transverse Mass", "GeV");
-  db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_W", "eventWeight*(isLeptonic)", 50, 0., 250., "mt_W",  "Reconstructed W Transverse Mass", "GeV");
 
 
+
+  bool doUL = (selType != "presel" );
   db_stack->set_rebin(5);
   db_stack->set_legendTitle("Leptonic Channel");
   db_stack->drawHisto("mgg_lept", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "lept", doUL );
   db_stack->set_legendTitle("Hadronic Channel");
   db_stack->drawHisto("mgg_hadr", "DiPhoton Invariant Mass", "GeV");
+  //printYields( db_stack, "lept", doUL );
   db_stack->reset();
 
 
@@ -326,28 +336,33 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
   float totalBG_ave = 0.;
   float signal = 0.;
 
-  yieldsFile << std::endl << "Yields (@ 30 fb-1): " << std::endl;
+  float massRange = (histos[0]->GetXaxis()->GetXmax()-histos[0]->GetXaxis()->GetXmin());
+
+  yieldsFile << std::endl << "Yields (@ 20 fb-1): " << std::endl;
   for( unsigned int ii=0; ii<histos.size(); ++ii ) {
     yieldsFile << db->get_mcFile(ii).datasetName << " " << histos[ii]->Integral(binXmin, binXmax) << std::endl;
-    if( db->get_mcFile(ii).datasetName != "HToGG" ) {
+    if( db->get_mcFile(ii).datasetName != "tHq" ) {
       totalBG += histos[ii]->Integral(binXmin, binXmax);
       totalBG_ave += histos[ii]->Integral(1, histos[ii]->GetNbinsX());
     } else {
       foundSignal = true;
       signal = histos[ii]->Integral(binXmin, binXmax);
+      if( Ct_minus1 ) signal/=34.;
     }
   }
 
-  totalBG_ave *= (10.)/(histos[0]->GetXaxis()->GetXmax()-histos[0]->GetXaxis()->GetXmin());
+  if( !foundSignal ) std::cout << "WARNING!!! DIDN'T FIND SIGNAL tHq!" << std::endl; 
+
+  totalBG_ave *= (10.)/massRange;
 
   yieldsFile << "Total BG: " << totalBG << " (averaged: " << totalBG_ave << ")" << std::endl;
 
-  float signal_xsec = 2.28E-03*(19.37 + 1.573 + 0.6966 + 0.3943 + 0.1302); 
+  //float signal_xsec = 2.28E-03*(19.37 + 1.573 + 0.6966 + 0.3943 + 0.1302); 
+  float signal_xsec = 2.28E-03*(15.2);
   float total_signal = signal_xsec*db->get_lumi();
   float effS = signal/total_signal;
   yieldsFile << "Signal efficiency: " << effS << std::endl;
 
-  if( !foundSignal ) std::cout << "WARNING!!! DIDN'T FIND SIGNAL HToGG!" << std::endl; 
 
   
   if( doUL && foundSignal ) {
@@ -357,10 +372,11 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
     yieldsFile << std::endl << "No error on BG:" << std::endl;
     yieldsFile << "UL: " << ul << "    (average BG): " << ul_bgave << std::endl;
     yieldsFile << "UL/SM: " << ul/signal_xsec << "    (average BG): " << ul_bgave/signal_xsec << std::endl;
-    float ul_bgerr = CLA( db->get_lumi(), 0., effS, 0., totalBG, 0.05*totalBG );
-    yieldsFile << std::endl << "5\% error on BG:" << std::endl;
-    yieldsFile << "UL: " << ul_bgerr << std::endl;
-    yieldsFile << "UL/SM: " << ul_bgerr/signal_xsec << std::endl;
+    float ul_bgerr = CLA( db->get_lumi(), 0., effS, 0., totalBG, 0.30*totalBG );
+    float ul_bgerrave = CLA( db->get_lumi(), 0., effS, 0., totalBG_ave, 0.30*totalBG_ave );
+    yieldsFile << std::endl << "30\% error on BG:" << std::endl;
+    yieldsFile << "UL: "    << ul_bgerr << "    (average BG): " << ul_bgerrave << std::endl;
+    yieldsFile << "UL/SM: " << ul_bgerr/signal_xsec << "    (average BG): " << ul_bgerrave/signal_xsec << std::endl; 
 
   }
 
