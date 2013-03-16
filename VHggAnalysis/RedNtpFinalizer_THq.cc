@@ -599,6 +599,9 @@ void RedNtpFinalizer_THq::finalize()
 
       if( index_selected_btagmedium.size()==0 ) continue;
 
+      if( njets_selected_btagmedium>nbtagmedium_upper_thresh_ ) continue;
+
+
       h1_cutFlow->Fill(7);
 
       int bJet_index = index_selected_btagmedium[0];
@@ -711,6 +714,7 @@ void RedNtpFinalizer_THq::finalize()
       h1_cutFlow->Fill(9);
 
 
+      if( nCentralJets > nCentralJets_upper_thresh_ ) continue;
 
       
       if( isSignalMC ) {
@@ -1518,6 +1522,8 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
   njets_upper_thresh_lept_ = 1000;
   nbtagloose_thresh_=0;
   nbtagmedium_thresh_=0;
+  nbtagmedium_upper_thresh_=1000;
+  nCentralJets_upper_thresh_=1000;
 
 
   invert_photonCuts_=false;
@@ -1542,6 +1548,14 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
 
     njets_thresh_lept_ = 2;
     njets_upper_thresh_lept_ = 3;
+    ptphot1cut_ = 50.;
+    ptphot2cut_ = 25.;
+    
+  } else if( selectionType=="sel1" ) {
+
+    njets_thresh_lept_ = 3;
+    nbtagmedium_upper_thresh_ = 1;
+    nCentralJets_upper_thresh_ = 1;
     ptphot1cut_ = 50.;
     ptphot2cut_ = 25.;
 

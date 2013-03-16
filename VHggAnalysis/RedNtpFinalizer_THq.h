@@ -923,8 +923,10 @@ public :
    int njets_upper_thresh_;
    int njets_thresh_lept_;
    int njets_upper_thresh_lept_;
+   int nCentralJets_upper_thresh_;
    int nbtagloose_thresh_;
    int nbtagmedium_thresh_;
+   int nbtagmedium_upper_thresh_;
 
    float ptLept_thresh_;
 
