@@ -930,6 +930,7 @@ public :
 
    float   Ht_thresh_;
    bool  invert_photonCuts_;
+   bool  useGenPhotons_;
    bool use_PUID_;
 
    int njets_PUID_thresh_;

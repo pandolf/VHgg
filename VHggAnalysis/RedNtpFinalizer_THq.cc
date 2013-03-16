@@ -62,6 +62,9 @@ void RedNtpFinalizer_THq::finalize()
    TH1D*  h1_nGenEvents = new TH1D("nGenEvents", "", 1, 0., 1.);
    h1_nGenEvents->Sumw2();
 
+   TH1D*  h1_cutFlow = new TH1D("cutFlow", "", 10, 0.5, 10.5);
+   h1_cutFlow->Sumw2();
+
 
    TH1D*  h1_nvertex = new TH1D("nvertex", "", 51, -0.5, 50.5);
    h1_nvertex->Sumw2();
@@ -342,7 +345,7 @@ void RedNtpFinalizer_THq::finalize()
       bool isMC = ( run<5 );
 
      
-
+      h1_cutFlow->Fill(1);
 
       if( isMC ) {
 
@@ -362,9 +365,26 @@ void RedNtpFinalizer_THq::finalize()
       }
 
 
+      h1_nvertex_PUW->Fill( nvtx, eventWeight );
+
+
+
+      if( useGenPhotons_ ) {
+        ptphot1 = gen_pt_gamma1;
+        ptphot2 = gen_pt_gamma2;
+      }
+
 
       TLorentzVector diphot;
-      diphot.SetPtEtaPhiM( ptggnewvtx, etagg, phigg, massggnewvtx);
+      if( useGenPhotons_ ) {
+        TLorentzVector genphot1, genphot2;
+        genphot1.SetPtEtaPhiM( gen_pt_gamma1, gen_eta_gamma1, gen_phi_gamma1, 0. );
+        genphot2.SetPtEtaPhiM( gen_pt_gamma2, gen_eta_gamma2, gen_phi_gamma2, 0. );
+        diphot = genphot1 + genphot2;
+      } else {
+        diphot.SetPtEtaPhiM( ptggnewvtx, etagg, phigg, massggnewvtx);
+      }
+
 
 
 
@@ -388,6 +408,8 @@ void RedNtpFinalizer_THq::finalize()
       if((TMath::Abs(etascphot1)>1.4442&&TMath::Abs(etascphot1)<1.566)||(TMath::Abs(etascphot2)>1.4442&&TMath::Abs(etascphot2)<1.566)
          || TMath::Abs(etascphot1)>2.5 || TMath::Abs(etascphot2)>2.5) continue;  // acceptance
 
+      h1_cutFlow->Fill(2);
+
       if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed photon eta acceptance." << std::endl;
       }
@@ -401,6 +423,8 @@ void RedNtpFinalizer_THq::finalize()
       if(ptphot1 < triggerThreshPhot1) continue; //pt first photon
       if(ptphot2 < triggerThreshPhot2) continue; //pt second photon
 
+      h1_cutFlow->Fill(3);
+
       if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed photon trigger pt thresholds." << std::endl;
         std::cout << std::endl << "Checking analysis thresholds: " << std::endl;
@@ -412,15 +436,14 @@ void RedNtpFinalizer_THq::finalize()
       if(ptphot1 < ptphot1cut_*massggnewvtx/120.) continue; //pt first photon
       if(ptphot2 < ptphot2cut_* massggnewvtx/120.) continue; //pt second photon
 
+      h1_cutFlow->Fill(4);
+
       if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed photon analysis pt thresholds." << std::endl;
       }
 
       //if(ptgg_thresh_>0 && diphot.Pt()< pthiggsmincut_) continue; //pt higgs min
 
-
-//    if(ptjet1cut>0 && (ptcorrjet1<ptjet1cut_ || TMath::Abs(etajet1)>4.7)) continue; //pt first jet
-//    if(ptjet2cut>0 && (ptcorrjet2<ptjet2cut_ || TMath::Abs(etajet2)>4.7)) continue; //pt second jet
 
 
        // photon identification
@@ -433,19 +456,10 @@ void RedNtpFinalizer_THq::finalize()
        if(TMath::Abs(etascphot1)>1.4442 && r9phot1>.94) isr9phot1 = 1;
        if(TMath::Abs(etascphot2)>1.4442 && r9phot2>.94) isr9phot2 = 1;
  
-       //if(r9cat_ == 1) {
-       //  if(!isr9phot1 || !isr9phot2) continue;
-       //} else if (r9cat_ == 0){
-       //  if(isr9phot1 && isr9phot2) continue;
-       //} 
  
        // photon id
        bool idphot1(0), idphot2(0), looseidphot1(0), looseidphot2(0), pxlphot1(1), pxlphot2(1);
  
- //       if(pixelseedcut) { 
- // 	pxlphot1 = !pid_haspixelseedphot1;
- // 	pxlphot2 = !pid_haspixelseedphot2;
- //       }
 
       if(!invert_photonCuts_){       
        idphot1 = (idcicpfphot1 >= photonID_thresh_);
@@ -455,25 +469,32 @@ void RedNtpFinalizer_THq::finalize()
 	idphot2 = (idcicpfphot2 < photonID_thresh_);
       }
 
-      if(!cs_){ // photon id no control sample
- 
-      if(photonID_thresh_>0) {
-        if(!(idphot1)) continue;
-        if(!(idphot2)) continue;
-      }else{
-        if(!(idphot1 && pxlphot1)) continue;
-        if(!(idphot2 && pxlphot2)) continue;
-      }
-      
-      }else{ // photon id for control sample
-       
-        looseidphot1 = (idcicpfphot1 > 0 );
-        looseidphot2 = (idcicpfphot2 > 0 );
-        //	  if( !( (idphot1 && looseidphot2 && !idphot2) || (idphot2 && looseidphot1 && !idphot1) ) ) continue; 
-        // Not perfect should be using the same electronVeto wrt CiC selection (now using matchedPromptEle veto)
-        if( !( (idphot1 && !idphot2 && !pid_hasMatchedPromptElephot2) || (idphot2 && !idphot1 && !pid_hasMatchedPromptElephot1) ) ) continue; 
- 
-      }
+
+      if( !useGenPhotons_ ) {
+
+        if(!cs_){ // photon id no control sample
+   
+          if(photonID_thresh_>0) {
+            if(!(idphot1)) continue;
+            if(!(idphot2)) continue;
+          }else{
+            if(!(idphot1 && pxlphot1)) continue;
+            if(!(idphot2 && pxlphot2)) continue;
+          }
+        
+        }else{ // photon id for control sample
+         
+          looseidphot1 = (idcicpfphot1 > 0 );
+          looseidphot2 = (idcicpfphot2 > 0 );
+          //	  if( !( (idphot1 && looseidphot2 && !idphot2) || (idphot2 && looseidphot1 && !idphot1) ) ) continue; 
+          // Not perfect should be using the same electronVeto wrt CiC selection (now using matchedPromptEle veto)
+          if( !( (idphot1 && !idphot2 && !pid_hasMatchedPromptElephot2) || (idphot2 && !idphot1 && !pid_hasMatchedPromptElephot1) ) ) continue; 
+   
+        }
+
+      } // if !useGenPhotons_
+
+      h1_cutFlow->Fill(5);
 
       if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed photon ID." << std::endl;
@@ -481,13 +502,14 @@ void RedNtpFinalizer_THq::finalize()
 
       if(diphot.M()<100 || diphot.M()>180) continue;
 
+      h1_cutFlow->Fill(6);
+
       if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed mgg 100-180 cut." << std::endl;
       }
 
       
       //       if( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130. ) continue;
-      h1_nvertex_PUW->Fill( nvtx, eventWeight );
       
       
       if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_prepresel->Fill( massggnewvtx, eventWeight );
@@ -577,13 +599,18 @@ void RedNtpFinalizer_THq::finalize()
 
       if( index_selected_btagmedium.size()==0 ) continue;
 
+      h1_cutFlow->Fill(7);
+
       int bJet_index = index_selected_btagmedium[0];
       TLorentzVector bJet;
       bJet.SetPtEtaPhiE(ptcorrjet[bJet_index],etajet[bJet_index],phijet[bJet_index],ecorrjet[bJet_index]);
 
 
       // veto events with 2 leptons:
-      if( (ptele1>ptLept_thresh_ && ptmu1>0.) || ptele2>ptLept_thresh_ || ptmu2>0. ) continue;
+      float leptVetoPt_thresh=5.;
+      if( (ptele1>leptVetoPt_thresh && ptmu1>leptVetoPt_thresh) || ptele2>leptVetoPt_thresh || ptmu2>leptVetoPt_thresh ) continue;
+
+      h1_cutFlow->Fill(8);
 
       isLeptonic_t = (ptele1>ptLept_thresh_ || ptmu1>ptLept_thresh_);//cut on pt lepton
       isMu_t=ptmu1>ptLept_thresh_;
@@ -679,6 +706,8 @@ void RedNtpFinalizer_THq::finalize()
       
       if( index_qJet<0 ) continue;
 
+      h1_cutFlow->Fill(9);
+
 
 
       
@@ -740,6 +769,9 @@ void RedNtpFinalizer_THq::finalize()
 
       
       if(njets_selected<njets_thresh_) continue;
+
+      h1_cutFlow->Fill(10);
+
       if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed njets cut." << std::endl;
       }
@@ -749,25 +781,6 @@ void RedNtpFinalizer_THq::finalize()
         std::cout << "-> Passed njets upper cut." << std::endl;
       }
 
-      if(njets_selected_btagloose<nbtagloose_thresh_) continue;
-      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
-        std::cout << "-> Passed nbjets loose cut." << std::endl;
-      }
-
-      if(njets_selected_btagmedium<nbtagmedium_thresh_) continue;
-      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
-        std::cout << "-> Passed nbjets medium cut." << std::endl;
-      }
-
-      
-      if(Ht_t<Ht_thresh_)continue;
-      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
-        std::cout << "-> Passed HT  cut." << std::endl;
-      }
-
-      
-      
-      
       
       
       
@@ -924,6 +937,8 @@ void RedNtpFinalizer_THq::finalize()
 
 
    h1_nGenEvents->Write();
+
+   h1_cutFlow->Write();
 
    h1_nvertex->Write();
    h1_nvertex_PUW->Write();
@@ -1485,13 +1500,14 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
   r9cat_ = 1;
   photonID_thresh_ = 4;
   cs_ = false;
+  useGenPhotons_ = false;
 
 
   ptphot1cut_ = 30.;
   ptphot2cut_ = 25.;
 
   ptjetthresh_count_ = 20.;
-  etajetthresh_count_ = 2.4;
+  etajetthresh_count_ = 5.;
 
 
   njets_thresh_=0;
@@ -1501,7 +1517,6 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
   nbtagmedium_thresh_=0;
 
 
-  Ht_thresh_=0;
   invert_photonCuts_=false;
   use_PUID_=true;
 
@@ -1515,6 +1530,10 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
   if( selectionType=="presel" ) {
 
     // leave all cuts to default
+    
+  } else if( selectionType=="preselGEN" ) {
+
+    useGenPhotons_ = true;
     
   } else if( selectionType=="sel0" ) {
 
