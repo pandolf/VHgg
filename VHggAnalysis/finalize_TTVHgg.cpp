@@ -53,8 +53,25 @@ int main( int argc, char* argv[] ) {
 
   std::vector<std::string> *datasets = new std::vector<std::string>;
 
+  if(dataset=="DATA_Run2012_ALL"){
 
-  if( dataset=="DATA_Run2011_FULL" ) {
+    finalize_oneDataset(redntpVersion, "Photon-Run2012A-13Jul2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "Photon-Run2012A-recover-06Aug2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-EcalRecover_11Dec2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-PromptReco-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton_Run2012D-PromptReco-v1", selectionType, bTaggerType, datasets);
+
+
+  } else if (dataset=="DATA_Run2012_SinglePhoton"){
+    finalize_oneDataset(redntpVersion, "Photon_Run2012A-13Jul2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "Photon-Run2012A-recover-06Aug2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-EcalRecover_11Dec2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-PromptReco-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012D-PromptReco-v1", selectionType, bTaggerType, datasets);
+
+  } else  if( dataset=="DATA_Run2011_FULL" ) {
    
     finalize_oneDataset(redntpVersion, "DoubleMu_Run2011A_FULL", selectionType, bTaggerType, datasets); //first muons! important!
     finalize_oneDataset(redntpVersion, "DoubleMu_Run2011B_v2", selectionType, bTaggerType, datasets); //first muons! important!
@@ -305,7 +322,13 @@ RedntpDirStruct get_dirs( const std::string& prodVersion ) {
     returnStruct.datadir = "redntp.52xv5_VH_feasibility.cicpfloose.regrPho_eCorr_20062012.VH_feasibility_v0/merged";
     returnStruct.mcdir = "redntp.52xv5_VH_feasibility.cicpfloose.regrPho_eCorr_20062012.VH_feasibility_v0/merged";
 
-  } else {
+  } else if ( prodVersion=="moriond_dataset"){
+
+    returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
+    returnStruct.datadir = "redntp.53xv2_data.cicpfloose.scales-Lisbon-Hgg.moriond_dataset/merged";
+    returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.qg_version_2/merged";
+
+  }else {
 
     std::cout << "-> Unknown prodVersion: '" << prodVersion << "'! Exiting." << std::endl;
     exit(11);
