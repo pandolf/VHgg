@@ -284,6 +284,8 @@ public :
    Float_t         gen_phi_lep2;
    Int_t           gen_pid_lep1;
    Int_t           gen_pid_lep2;
+   Int_t           chargeele1;
+   Int_t           chargeele2;
    Float_t         ptele1;
    Float_t         ptele2;
    Float_t         etaele1;
@@ -360,6 +362,8 @@ public :
    Float_t         nHadIso03eleloose2;
    Float_t         photIso03eleloose1;
    Float_t         photIso03eleloose2;
+   Int_t           chargemu1;
+   Int_t           chargemu2;
    Float_t         ptmu1;
    Float_t         ptmu2;
    Float_t         etamu1;
@@ -717,6 +721,8 @@ public :
    TBranch        *b_gen_phi_lep2;   //!
    TBranch        *b_gen_pid_lep1;   //!
    TBranch        *b_gen_pid_lep2;   //!
+   TBranch        *b_chargeele1;   //!
+   TBranch        *b_chargeele2;   //!
    TBranch        *b_ptele1;   //!
    TBranch        *b_ptele2;   //!
    TBranch        *b_etaele1;   //!
@@ -793,6 +799,8 @@ public :
    TBranch        *b_nHadIso03eleloose2;   //!
    TBranch        *b_photIso03eleloose1;   //!
    TBranch        *b_photIso03eleloose2;   //!
+   TBranch        *b_chargemu1;   //!
+   TBranch        *b_chargemu2;   //!
    TBranch        *b_ptmu1;   //!
    TBranch        *b_ptmu2;   //!
    TBranch        *b_etamu1;   //!
@@ -929,6 +937,8 @@ public :
    int nbtagmedium_upper_thresh_;
 
    float ptLept_thresh_;
+
+   float bdt_lept_thresh_;
 
    float   Ht_thresh_;
    bool  invert_photonCuts_;
