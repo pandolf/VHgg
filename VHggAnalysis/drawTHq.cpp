@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
 
 
   
-  std::string tHqFileName = "finalizedTrees_THq_feasibility/THq_tHqLeptonic_mH125_8TeV_testtest_00";
+  std::string tHqFileName = "finalizedTrees_THq_feasibility/THq_tHqLeptonic_mH125_8TeV_testtest";
   tHqFileName += "_" + selType;
   tHqFileName += "_" + bTaggerType;
   tHqFileName += ".root";
@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
   VHFileName += "_" + bTaggerType;
   VHFileName += ".root";
   TFile* VHFile = TFile::Open(VHFileName.c_str());
-  db_nostack->add_mcFile( VHFile, "VH", "VH", signalFillColor+1, 0);
+  //db_nostack->add_mcFile( VHFile, "VH", "VH", signalFillColor+1, 0);
   db_stack->add_mcFile( VHFile, "VH", "VH", 42, 0);
 
   
@@ -184,7 +184,7 @@ int main(int argc, char* argv[]) {
   TFile* TTFile = TFile::Open(TTFileName.c_str());
   db_stack->add_mcFile( TTFile, "TT", "Top", 44);
   db_stack_UL->add_mcFile( TTFile, "TT", "Top", 44);
-  //db_nostack->add_mcFile( TTFile, "TT", "Top", 29);
+  //db_nostack->add_mcFile( TTFile, "TT", "Top", 39);
 
   std::string TTGGFileName = inputDir +  "THq_TTbarGG_0Jet_Summer12-PU_S7_START52_V9-v1";
   TTGGFileName += "_" + selType;
@@ -237,7 +237,11 @@ int main(int argc, char* argv[]) {
 
   // leptonic channel plots:
   db_nostack->set_legendTitle("Leptonic Channel");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "isMu",   "eventWeight*isLeptonic", 2, 0., 2., "isMu", "Muonic Event");
+
   db_nostack->drawHisto_fromTree("tree_passedEvents", "epfMet",   "eventWeight*isLeptonic", 50, 0., 250., "pfMet", "Particle Flow #slash{E}_{T}", "GeV");
+
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "BDT_lept",   "eventWeight*isLeptonic", 50, -1., 1.0001, "BDT_lept", "Leptonic BDT");
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "njets",   "eventWeight*isLeptonic", 9, -0.5, 8.5, "njets_lept", "Number of Jets (p_{T} > 20 GeV)");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "nbjets_loose",   "eventWeight*isLeptonic", 5, -0.5, 4.5,  "nbjets_loose_lept", "Number of b-Jets (Loose)");
@@ -245,6 +249,7 @@ int main(int argc, char* argv[]) {
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "pt_lept",  "eventWeight*isLeptonic", 50, 0., 200., "pt_lept", "Lepton p_{T}", "GeV");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_lept", "eventWeight*isLeptonic", 50, -2.5, 2.5, "eta_lept", "Lepton #eta", "");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "charge_lept", "eventWeight*isLeptonic", 3, -1.5, 1.5, "charge_lept", "Lepton charge", "", "Events", false, 2);
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "nCentralJets", "eventWeight*isLeptonic", 7, -0.5, 6.5, "nCentralJets_lept", "Number of Additional Jets");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "nCentralJets25", "eventWeight*isLeptonic", 7, -0.5, 6.5, "nCentralJets25_lept", "Number of Additional Jets");
@@ -259,8 +264,8 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_top", "eventWeight*isLeptonic", 50, -5, 5, "eta_top_lept", "Top Candidate #eta", "");
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_lept-etagg", "eventWeight*isLeptonic", 50, -5., 5., "deltaEta_lept_higgs", "#Delta#eta (lepton-diphoton)");
-  db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_top_lept", "eventWeight*(isLeptonic)", 50, 0., 500., "mt_top",  "Top Transverse Mass", "GeV");
-  db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_W_lept", "eventWeight*(isLeptonic)", 50, 0., 250., "mt_W",  "W Transverse Mass", "GeV");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_top", "eventWeight*(isLeptonic)", 50, 0., 500., "mt_top_lept",  "Top Transverse Mass", "GeV");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_W", "eventWeight*(isLeptonic)", 50, 0., 250., "mt_W_lept",  "W Transverse Mass", "GeV");
 
   db_stack->set_legendTitle("");
 
@@ -340,25 +345,29 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
 
   yieldsFile << std::endl << "Yields (@ 20 fb-1): " << std::endl;
   for( unsigned int ii=0; ii<histos.size(); ++ii ) {
-    yieldsFile << db->get_mcFile(ii).datasetName << " " << histos[ii]->Integral(binXmin, binXmax) << std::endl;
+    std::string dataset=db->get_mcFile(ii).datasetName;
+    bool isSMH = (dataset=="VBFH"||dataset=="TTH"||dataset=="VH"||dataset=="GluGluH");
     if( db->get_mcFile(ii).datasetName != "tHq" ) {
       totalBG += histos[ii]->Integral(binXmin, binXmax);
-      totalBG_ave += histos[ii]->Integral(1, histos[ii]->GetNbinsX());
+      float SF = (isSMH) ? 1. : (10.)/massRange; //signal not averaged, as it's all under the peak
+      totalBG_ave += histos[ii]->Integral(1, histos[ii]->GetNbinsX())*SF;
+      yieldsFile << db->get_mcFile(ii).datasetName << " " << histos[ii]->Integral(1, histos[ii]->GetNbinsX())*SF << std::endl;
     } else {
       foundSignal = true;
       signal = histos[ii]->Integral(binXmin, binXmax);
+      yieldsFile << db->get_mcFile(ii).datasetName << " " << signal << std::endl;
       if( Ct_minus1 ) signal/=34.;
     }
   }
 
   if( !foundSignal ) std::cout << "WARNING!!! DIDN'T FIND SIGNAL tHq!" << std::endl; 
 
-  totalBG_ave *= (10.)/massRange;
 
-  yieldsFile << "Total BG: " << totalBG << " (averaged: " << totalBG_ave << ")" << std::endl;
+  //yieldsFile << "Total BG: " << totalBG << " (averaged: " << totalBG_ave << ")" << std::endl;
+  yieldsFile << "Total BG: " << totalBG_ave << " (averaged)" << std::endl;
 
   //float signal_xsec = 2.28E-03*(19.37 + 1.573 + 0.6966 + 0.3943 + 0.1302); 
-  float signal_xsec = 2.28E-03*(15.2);
+  float signal_xsec = 2.28E-03*(0.0152);
   float total_signal = signal_xsec*db->get_lumi();
   float effS = signal/total_signal;
   yieldsFile << "Signal efficiency: " << effS << std::endl;
@@ -367,16 +376,21 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
   
   if( doUL && foundSignal ) {
 
-    float ul = CLA( db->get_lumi(), 0., effS, 0., totalBG, 0. );
+    //float ul = CLA( db->get_lumi(), 0., effS, 0., totalBG, 0. );
     float ul_bgave = CLA( db->get_lumi(), 0., effS, 0., totalBG_ave, 0. );
     yieldsFile << std::endl << "No error on BG:" << std::endl;
-    yieldsFile << "UL: " << ul << "    (average BG): " << ul_bgave << std::endl;
-    yieldsFile << "UL/SM: " << ul/signal_xsec << "    (average BG): " << ul_bgave/signal_xsec << std::endl;
-    float ul_bgerr = CLA( db->get_lumi(), 0., effS, 0., totalBG, 0.30*totalBG );
+    yieldsFile << "UL: " << ul_bgave << std::endl;
+    yieldsFile << "UL/SM: " << ul_bgave/signal_xsec << "    (NLO signal): " << ul_bgave/(signal_xsec*1.4) << std::endl;
+    //yieldsFile << "UL: " << ul << "    (average BG): " << ul_bgave << std::endl;
+    //yieldsFile << "UL/SM: " << ul/signal_xsec << "    (average BG): " << ul_bgave/signal_xsec << std::endl;
+
+    //float ul_bgerr = CLA( db->get_lumi(), 0., effS, 0., totalBG, 0.30*totalBG );
     float ul_bgerrave = CLA( db->get_lumi(), 0., effS, 0., totalBG_ave, 0.30*totalBG_ave );
     yieldsFile << std::endl << "30\% error on BG:" << std::endl;
-    yieldsFile << "UL: "    << ul_bgerr << "    (average BG): " << ul_bgerrave << std::endl;
-    yieldsFile << "UL/SM: " << ul_bgerr/signal_xsec << "    (average BG): " << ul_bgerrave/signal_xsec << std::endl; 
+    //yieldsFile << "UL: "    << ul_bgerr << "    (average BG): " << ul_bgerrave << std::endl;
+    //yieldsFile << "UL/SM: " << ul_bgerr/signal_xsec << "    (average BG): " << ul_bgerrave/signal_xsec << std::endl; 
+    yieldsFile << "UL: " << ul_bgerrave << std::endl;
+    yieldsFile << "UL/SM: " << ul_bgerrave/signal_xsec << "    (NLO signal): " << ul_bgerrave/(signal_xsec*1.4) << std::endl;
 
   }
 
