@@ -807,7 +807,7 @@ void RedNtpFinalizer_THq::finalize()
       TLorentzVector qJet;
       int nCentralJets = 0;
       float hardestCentralJetPt=0.;
-      float eta_thresh_qJet = (isLeptonic_t) ? 1. : 1.5;
+      float eta_thresh_qJet = (isLeptonic_t) ? 1. : 2.;
       for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
 
         int i = index_selected[ii];
