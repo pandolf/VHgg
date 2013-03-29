@@ -936,6 +936,9 @@ public :
    int nbtagmedium_thresh_;
    int nbtagmedium_upper_thresh_;
 
+   float m_top_hadr_thresh_;
+   float m_W_hadr_thresh_;
+
    float ptLept_thresh_;
 
    float bdt_lept_thresh_;

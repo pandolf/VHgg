@@ -965,38 +965,19 @@ void RedNtpFinalizer_THq::finalize()
         jetW1.SetPtEtaPhiE(ptcorrjet[index_jetW1],etajet[index_jetW1],phijet[index_jetW1],ecorrjet[index_jetW1]);
         jetW2.SetPtEtaPhiE(ptcorrjet[index_jetW2],etajet[index_jetW2],phijet[index_jetW2],ecorrjet[index_jetW2]);
 
-        top = bJet + jetW1 + jetW2;
+        TLorentzVector W = jetW1 + jetW2;
+
+        top = bJet + W;
+
+        float topmass = 172.5;
+        float Wmass = 80.4;
+
+        if( fabs(top.M()-topmass)>m_top_hadr_thresh_ ) continue;
+        if( fabs(W.M()-Wmass)>m_W_hadr_thresh_ ) continue;
 
       }      
       
       
-
-//    // now look for q-jet:
-//    int index_qJet=-1;
-//    TLorentzVector qJet;
-//    int nCentralJets = 0;
-//    float hardestCentralJetPt=0.;
-//    for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
-
-//      int i = index_selected[ii];
-
-//      if( i==index_selected_btagmedium[0] ) continue;
-//      if( i==index_jetW1 ) continue;
-//      if( i==index_jetW2 ) continue;
-
-//      if( ptcorrjet[i]<20. ) continue;
-//      if( fabs(etajet[i])<1. ) {
-//        if( nCentralJets==0 ) hardestCentralJetPt = ptcorrjet[i]; //hardest central jet
-//        nCentralJets++;
-//      } else if( index_qJet<0 ) { //hardest forward jet
-//        index_qJet=i;
-//        qJet.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
-//      }
-
-//    }
-
-//    if( index_qJet<0 ) continue;
-//    h1_cutFlow->Fill(9);
 
       if( nCentralJets > nCentralJets_upper_thresh_ ) continue;
 
@@ -1903,6 +1884,8 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
   PUID_betastar_thresh_=0.67;
   chooseBtaggedJets_=true;//be careful with this
 
+  m_top_hadr_thresh_ = 10000.;
+  m_W_hadr_thresh_ = 10000.;
 
   if( selectionType=="presel" ) {
 
@@ -1934,6 +1917,9 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     nCentralJets_upper_thresh_ = 1;
     ptphot1cut_ = 50.;
     ptphot2cut_ = 25.;
+
+    m_top_hadr_thresh_ = 50.;
+    m_W_hadr_thresh_ = 30.;
 
   } else if( selectionType=="selBDT0" ) {
 
