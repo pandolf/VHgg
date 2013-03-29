@@ -233,10 +233,6 @@ int main(int argc, char* argv[]) {
   db_nostack->reset();
 
 
-  db_nostack->drawHisto_fromTree("tree_passedEvents", "njets",           "eventWeight*(!isLeptonic)", 7, -0.5, 6.5,  "njets_hadr", "Number of Jets (p_{T} > 20 GeV)");
-  db_nostack->drawHisto_fromTree("tree_passedEvents", "nbjets_loose",    "eventWeight*(!isLeptonic)", 5, -0.5, 4.5,  "nbjets_loose_hadr", "Number of b-Jets (Loose)");
-  db_nostack->drawHisto_fromTree("tree_passedEvents", "nbjets_medium",   "eventWeight*(!isLeptonic)", 5, -0.5, 4.5,  "nbjets_medium_hadr", "Number of b-Jets (Medium)");
-
   db_nostack->drawHisto_fromTree("tree_passedEvents", "ptPhot1",   "eventWeight", 50, 0., 300.,  "ptPhot1", "Leading Photon p_{T}", "GeV");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "ptPhot2",   "eventWeight", 50, 0., 150.,  "ptPhot2", "Subleading Photon p_{T}", "GeV");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "ptRunPhot1",   "eventWeight", 50, 0., 300.,  "ptRunPhot1", "Running Leading Photon p_{T}", "GeV");
