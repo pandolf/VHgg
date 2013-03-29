@@ -258,7 +258,6 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto_fromTree("tree_passedEvents", "charge_lept", "eventWeight*isLeptonic", 3, -1.5, 1.5, "charge_lept", "Lepton charge", "", "Events", false, 2);
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "nCentralJets", "eventWeight*isLeptonic", 7, -0.5, 6.5, "nCentralJets_lept", "Number of Additional Jets");
-  db_nostack->drawHisto_fromTree("tree_passedEvents", "nCentralJets25", "eventWeight*isLeptonic", 7, -0.5, 6.5, "nCentralJets25_lept", "Number of Additional Jets");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "hardestCentralJetPt", "eventWeight*isLeptonic", 50, 0., 200., "hardestCentralJetPt_lept", "Hardest Additional Jet p_{T}", "GeV", "Events", true);
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "pt_qJet",  "eventWeight*isLeptonic", 50, 0., 500., "pt_qJet_lept", "q-Jet Candidate p_{T}", "GeV");
@@ -282,7 +281,7 @@ int main(int argc, char* argv[]) {
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "nbjets_medium",   "eventWeight*(!isLeptonic)", 5, -0.5, 4.5, "nbjets_medium_hadr", "Number of b-Jets (Medium)");
 
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "nCentralJets", "eventWeight*(!isLeptonic)", 7, -0.5, 6.5, "nCentralJets_hadr", "Number of Additional Jets");
-  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "nCentralJets25", "eventWeight*(!isLeptonic)", 7, -0.5, 6.5, "nCentralJets25_hadr", "Number of Additional Jets");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "nCentralJetsHadr", "eventWeight*(!isLeptonic)", 7, -0.5, 6.5, "nCentralJetsHadr_hadr", "Number of Additional Jets");
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "hardestCentralJetPt", "eventWeight*(!isLeptonic)", 50, 0., 200., "hardestCentralJetPt_hadr", "Hardest Additional Jet p_{T}", "GeV", "Events", true);
 
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "pt_qJet",  "eventWeight*(!isLeptonic)", 50, 0., 500., "pt_qJet_hadr", "q-Jet Candidate p_{T}", "GeV");
@@ -293,6 +292,9 @@ int main(int argc, char* argv[]) {
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "qgl_jetW2", "eventWeight*(!isLeptonic)", 50, 0., 1.0001, "qgl_jetW2_hadr", "Subleading W-Jet QGL", "");
 
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "deltaPhi_top_higgs", "eventWeight*(!isLeptonic)", 50, 0., 3.15, "deltaPhi_top_higgs_hadr", "#Delta#Phi (top-diphoton)", "rad");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "eta_top-etagg", "eventWeight*(!isLeptonic)", 50, -5., 5., "deltaEta_top_higgs_hadr", "#Delta#eta (top-diphoton)", "");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "abs(eta_top)-abs(etagg)", "eventWeight*(!isLeptonic)", 50, -5., 5., "deltaFabsEta_top_higgs_hadr", "#Delta|#eta| (top-diphoton)", "");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "zeppen", "eventWeight*(!isLeptonic)", 50, -5., 5., "zeppen",  "Zeppendfeld Variable", "");
 
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "eta_top", "eventWeight*(!isLeptonic)", 50, -5, 5, "eta_top_hadr", "Top Candidate #eta", "");
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "pt_top", "eventWeight*(!isLeptonic)", 50, 0., 250., "pt_top_hadr", "Top Candidate p_{T}", "GeV");
@@ -300,6 +302,7 @@ int main(int argc, char* argv[]) {
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "m_top", "eventWeight*(!isLeptonic)", 50, 0., 500., "m_top_hadr",  "Top Mass", "GeV");
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "m_W", "eventWeight*(!isLeptonic)", 50, 0., 250., "m_W_hadr",  "W Mass", "GeV");
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "m_W", "eventWeight*(!isLeptonic && abs(m_top-172.5)<50.)", 50, 0., 250., "m_W_mTopCut_hadr",  "W Mass", "GeV");
+
 
 
 
