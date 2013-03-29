@@ -237,6 +237,12 @@ void RedNtpFinalizer_THq::finalize()
    float pt_qJet_t;
    float eta_qJet_t;
    float qgl_qJet_t;
+   float pt_jetW1_t;
+   float eta_jetW1_t;
+   float qgl_jetW1_t;
+   float pt_jetW2_t;
+   float eta_jetW2_t;
+   float qgl_jetW2_t;
    float pt_bJet_t;
    float eta_bJet_t;
    float pt_top_t;
@@ -281,6 +287,12 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("pt_qJet",             &pt_qJet_t,            "pt_qJet_t/F");
    tree_passedEvents->Branch("eta_qJet",            &eta_qJet_t,           "eta_qJet_t/F");
    tree_passedEvents->Branch("qgl_qJet",            &qgl_qJet_t,           "qgl_qJet_t/F");
+   tree_passedEvents->Branch("pt_jetW1",             &pt_jetW1_t,            "pt_jetW1_t/F");
+   tree_passedEvents->Branch("eta_jetW1",            &eta_jetW1_t,           "eta_jetW1_t/F");
+   tree_passedEvents->Branch("qgl_jetW1",            &qgl_jetW1_t,           "qgl_jetW1_t/F");
+   tree_passedEvents->Branch("pt_jetW2",             &pt_jetW2_t,            "pt_jetW2_t/F");
+   tree_passedEvents->Branch("eta_jetW2",            &eta_jetW2_t,           "eta_jetW2_t/F");
+   tree_passedEvents->Branch("qgl_jetW2",            &qgl_jetW2_t,           "qgl_jetW2_t/F");
    tree_passedEvents->Branch("pt_bJet",             &pt_bJet_t,            "pt_bJet_t/F");
    tree_passedEvents->Branch("eta_bJet",            &eta_bJet_t,           "eta_bJet_t/F");
    tree_passedEvents->Branch("pt_top",              &pt_top_t,             "pt_top_t/F");
@@ -1117,6 +1129,31 @@ void RedNtpFinalizer_THq::finalize()
       float qgl_qJet = qglikeli->computeQGLikelihood2012( qJet.Pt(), qJet.Eta(), rhoPF, nChg_QCjet[index_qJet]+nNeutral_ptCutjet[index_qJet], ptD_QCjet[index_qJet], axis2_QCjet[index_qJet] );
       qgl_qJet_t = qgl_qJet;
       
+
+      if( !isLeptonic_t ) {
+
+        pt_jetW1_t = jetW1.Pt();
+        eta_jetW1_t = jetW1.Eta();
+        float qgl_jetW1 = qglikeli->computeQGLikelihood2012( jetW1.Pt(), jetW1.Eta(), rhoPF, nChg_QCjet[index_jetW1]+nNeutral_ptCutjet[index_jetW1], ptD_QCjet[index_jetW1], axis2_QCjet[index_jetW1] );
+        qgl_jetW1_t = qgl_jetW1;
+        
+        pt_jetW2_t = jetW2.Pt();
+        eta_jetW2_t = jetW2.Eta();
+        float qgl_jetW2 = qglikeli->computeQGLikelihood2012( jetW2.Pt(), jetW2.Eta(), rhoPF, nChg_QCjet[index_jetW2]+nNeutral_ptCutjet[index_jetW2], ptD_QCjet[index_jetW2], axis2_QCjet[index_jetW2] );
+        qgl_jetW2_t = qgl_jetW2;
+
+      } else {
+      
+        pt_jetW1_t = 0.;
+        eta_jetW1_t = -10.;
+        qgl_jetW1_t = -1.;
+        
+        pt_jetW2_t = 0.;
+        eta_jetW2_t = -10.;
+        qgl_jetW2_t = -1.;
+
+      }
+
       pt_bJet_t = bJet.Pt();
       eta_bJet_t = bJet.Eta();
       
