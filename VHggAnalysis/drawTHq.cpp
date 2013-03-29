@@ -289,13 +289,17 @@ int main(int argc, char* argv[]) {
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "eta_qJet", "eventWeight*(!isLeptonic)", 50, -5, 5, "eta_qJet_hadr", "q-Jet Candidate #eta", "");
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "qgl_qJet", "eventWeight*(!isLeptonic)", 50, 0., 1.0001, "qgl_qJet_hadr", "q-Jet Candidate QGL", "");
 
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "qgl_jetW1", "eventWeight*(!isLeptonic)", 50, 0., 1.0001, "qgl_jetW1_hadr", "Leading W-Jet QGL", "");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "qgl_jetW2", "eventWeight*(!isLeptonic)", 50, 0., 1.0001, "qgl_jetW2_hadr", "Subleading W-Jet QGL", "");
+
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "deltaPhi_top_higgs", "eventWeight*(!isLeptonic)", 50, 0., 3.15, "deltaPhi_top_higgs_hadr", "#Delta#Phi (top-diphoton)", "rad");
 
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "eta_top", "eventWeight*(!isLeptonic)", 50, -5, 5, "eta_top_hadr", "Top Candidate #eta", "");
-  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "pt_top", "eventWeight*(!isLeptonic)", 50, -5, 5, "pt_top_hadr", "Top Candidate p_{T}", "GeV");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "pt_top", "eventWeight*(!isLeptonic)", 50, 0., 250., "pt_top_hadr", "Top Candidate p_{T}", "GeV");
 
-  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "m_top", "eventWeight*(!isLeptonic)", 50, 0., 500., "mt_top_hadr",  "Top Transverse Mass", "GeV");
-  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "m_W", "eventWeight*(!isLeptonic)", 50, 0., 250., "mt_W_hadr",  "W Transverse Mass", "GeV");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "m_top", "eventWeight*(!isLeptonic)", 50, 0., 500., "m_top_hadr",  "Top Mass", "GeV");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "m_W", "eventWeight*(!isLeptonic)", 50, 0., 250., "m_W_hadr",  "W Mass", "GeV");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "m_W", "eventWeight*(!isLeptonic && abs(m_top-172.5)<50.)", 50, 0., 250., "m_W_mTopCut_hadr",  "W Mass", "GeV");
 
 
 
@@ -325,7 +329,7 @@ int main(int argc, char* argv[]) {
   printYields( db_stack, "lept", doUL );
   db_stack->set_legendTitle("Hadronic Channel");
   db_stack->drawHisto("mgg_hadr", "DiPhoton Invariant Mass", "GeV");
-  //printYields( db_stack, "lept", doUL );
+  printYields( db_stack, "hadr", doUL );
   db_stack->reset();
 
 
@@ -426,6 +430,7 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
   }
 
 
+  std::cout << "-> Saved yields and ULs in " << yieldsFileName << std::endl; 
 
 }
 
