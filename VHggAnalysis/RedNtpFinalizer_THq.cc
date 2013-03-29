@@ -297,6 +297,36 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("deltaR_lept_phot",  &deltaR_lept_phot_t, "deltaR_lept_phot_t/F");
    tree_passedEvents->Branch("m_ele_phot",  &m_ele_phot_t, "m_ele_phot_t/F");
 
+   tree_passedEvents->Branch("pt_q",   &pt_q,  "pt_q/F");
+   tree_passedEvents->Branch("eta_q",  &eta_q, "eta_q/F");
+   tree_passedEvents->Branch("phi_q",  &phi_q, "phi_q/F");
+   tree_passedEvents->Branch("e_q",    &e_q,   "e_q/F");
+ 
+   tree_passedEvents->Branch("pt_h",   &pt_h,  "pt_h/F");
+   tree_passedEvents->Branch("eta_h",  &eta_h, "eta_h/F");
+   tree_passedEvents->Branch("phi_h",  &phi_h, "phi_h/F");
+   tree_passedEvents->Branch("e_h",    &e_h,   "e_h/F");
+
+   tree_passedEvents->Branch("pt_t",   &pt_t,  "pt_t/F");
+   tree_passedEvents->Branch("eta_t",  &eta_t, "eta_t/F");
+   tree_passedEvents->Branch("phi_t",  &phi_t, "phi_t/F");
+   tree_passedEvents->Branch("e_t",    &e_t,   "e_t/F");
+
+   tree_passedEvents->Branch("pt_b",  &pt_b, "pt_b/F");
+   tree_passedEvents->Branch("eta_b",  &eta_b, "eta_b/F");
+   tree_passedEvents->Branch("phi_b",  &phi_b, "phi_b/F");
+   tree_passedEvents->Branch("e_b",  &e_b, "e_b/F");
+
+   tree_passedEvents->Branch("pt_Wq",  &pt_Wq, "pt_Wq/F");
+   tree_passedEvents->Branch("eta_Wq",  &eta_Wq, "eta_Wq/F");
+   tree_passedEvents->Branch("phi_Wq",  &phi_Wq, "phi_Wq/F");
+   tree_passedEvents->Branch("e_Wq",  &e_Wq, "e_Wq/F");
+
+   tree_passedEvents->Branch("pt_Wqbar",  &pt_Wqbar, "pt_Wqbar/F");
+   tree_passedEvents->Branch("eta_Wqbar",  &eta_Wqbar, "eta_Wqbar/F");
+   tree_passedEvents->Branch("phi_Wqbar",  &phi_Wqbar, "phi_Wqbar/F");
+   tree_passedEvents->Branch("e_Wqbar",  &e_Wqbar, "e_Wqbar/F");
+
  
 //   std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
    //std::string qglFileName="/afs/cern.ch/user/m/micheli/public/ttH/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
@@ -484,8 +514,8 @@ void RedNtpFinalizer_THq::finalize()
 
       }
 
-      if(ptphot1 < ptphot1cut_*massggnewvtx/120.) continue; //pt first photon
-      if(ptphot2 < ptphot2cut_* massggnewvtx/120.) continue; //pt second photon
+      if(ptphot1 < ptphot1cut_*massggnewvtx/120.) continue; //pt first photon (running)
+      if(ptphot2 < ptphot2cut_ ) continue; //pt second photon (not running)
 
       h1_cutFlow->Fill(4);
 
@@ -756,6 +786,37 @@ void RedNtpFinalizer_THq::finalize()
       TLorentzVector top;
       TLorentzVector neutrino, lept;
       TLorentzVector jetW1,jetW2;
+  
+
+      // now look for q-jet:
+      int index_qJet=-1;
+      TLorentzVector qJet;
+      int nCentralJets = 0;
+      float hardestCentralJetPt=0.;
+      float eta_thresh_qJet = (isLeptonic_t) ? 1. : 1.5;
+      for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
+
+        int i = index_selected[ii];
+
+        if( i==index_selected_btagmedium[0] ) continue;
+        if( i==index_jetW1 ) continue;
+        if( i==index_jetW2 ) continue;
+
+        if( ptcorrjet[i]<20. ) continue;
+        if( fabs(etajet[i])<eta_thresh_qJet ) {
+          if( nCentralJets==0 ) hardestCentralJetPt = ptcorrjet[i]; //hardest central jet
+          nCentralJets++;
+        } else if( index_qJet<0 ) { //hardest forward jet
+          index_qJet=i;
+          qJet.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
+        }
+
+      }
+      if( index_qJet<0 ) continue;
+      h1_cutFlow->Fill(9);
+
+
+
 
 
       if( isLeptonic_t ) { // *** LEPTONIC CHANNEL
@@ -804,32 +865,88 @@ void RedNtpFinalizer_THq::finalize()
 
       } else { // *** HADRONIC CHANNEL
 
+        // choose top selection method:
+        bool top_max_deltaphi = true;
+        bool top_best_mass = false;
+        bool top_hardest = false;
+ 
 
-        float maxDeltaPhi=0;
-        
-        // define top candidate as the one maximising deltaPhi(top, higgs):
-        for( unsigned i=0; i<index_selected.size(); ++i ) {
-          for( unsigned j=i+1; j<index_selected.size(); ++j ) {
+        if( top_max_deltaphi ) {
 
-            if( i==index_selected_btagmedium[0] || j==index_selected_btagmedium[0] ) continue;
+          float maxDeltaPhi=0;
+          
+          // define top candidate as the one maximising deltaPhi(top, higgs):
+          for( unsigned i=0; i<index_selected.size(); ++i ) {
+            for( unsigned j=i+1; j<index_selected.size(); ++j ) {
+
+              if( i==index_selected_btagmedium[0] || j==index_selected_btagmedium[0] ) continue;
+              if( i==index_qJet ) continue;
 
 
-            TLorentzVector jetW1_tmp,jetW2_tmp;
-            jetW1_tmp.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
-            jetW2_tmp.SetPtEtaPhiE(ptcorrjet[j],etajet[j],phijet[j],ecorrjet[j]);
+              TLorentzVector jetW1_tmp,jetW2_tmp;
+              jetW1_tmp.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
+              jetW2_tmp.SetPtEtaPhiE(ptcorrjet[j],etajet[j],phijet[j],ecorrjet[j]);
 
-            TLorentzVector top_tmp = jetW1_tmp+jetW2_tmp+bJet;
+              TLorentzVector top_tmp = jetW1_tmp+jetW2_tmp+bJet;
 
-            float thisDeltaPhi = fabs(top_tmp.DeltaPhi(diphot));
-            if( thisDeltaPhi>maxDeltaPhi ) {
-              maxDeltaPhi=thisDeltaPhi;
+              float thisDeltaPhi = fabs(top_tmp.DeltaPhi(diphot));
+              if( thisDeltaPhi>maxDeltaPhi ) {
+                maxDeltaPhi=thisDeltaPhi;
+                index_jetW1 = i;
+                index_jetW2 = j;
+              }
+
+            } //j
+          } //i
+
+        } else if( top_best_mass ) {
+
+          float m_top = 175.;
+          float best_m_top = -9999.;
+          
+          // define top candidate as the one with mass closest to nominal
+          for( unsigned i=0; i<index_selected.size(); ++i ) {
+            for( unsigned j=i+1; j<index_selected.size(); ++j ) {
+
+              if( i==index_selected_btagmedium[0] || j==index_selected_btagmedium[0] ) continue;
+              if( i==index_qJet ) continue;
+
+
+              TLorentzVector jetW1_tmp,jetW2_tmp;
+              jetW1_tmp.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
+              jetW2_tmp.SetPtEtaPhiE(ptcorrjet[j],etajet[j],phijet[j],ecorrjet[j]);
+
+              TLorentzVector top_tmp = jetW1_tmp+jetW2_tmp+bJet;
+
+              float this_m_top = top.M();
+              if( fabs(this_m_top-m_top)<fabs(best_m_top-m_top) ) {
+                best_m_top=this_m_top;
+                index_jetW1 = i;
+                index_jetW2 = j;
+              }
+
+            } //j
+          } //i
+
+        } else if( top_hardest ) {
+
+          
+          // define top candidate as the one with mass closest to nominal
+          for( unsigned i=0; i<index_selected.size(); ++i ) {
+            for( unsigned j=i+1; j<index_selected.size(); ++j ) {
+
+              if( i==index_selected_btagmedium[0] || j==index_selected_btagmedium[0] ) continue;
+              if( i==index_qJet ) continue;
+
               index_jetW1 = i;
               index_jetW2 = j;
-            }
+              break;
 
-          } //j
-        } //i
-          
+            } //j
+          } //i
+
+        }
+
 
         if( index_jetW1<0 && index_jetW2<0 ) continue;
 
@@ -842,32 +959,32 @@ void RedNtpFinalizer_THq::finalize()
       
       
 
-      // now look for q-jet:
-      int index_qJet=-1;
-      TLorentzVector qJet;
-      int nCentralJets = 0;
-      float hardestCentralJetPt=0.;
-      for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
+//    // now look for q-jet:
+//    int index_qJet=-1;
+//    TLorentzVector qJet;
+//    int nCentralJets = 0;
+//    float hardestCentralJetPt=0.;
+//    for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
 
-        int i = index_selected[ii];
+//      int i = index_selected[ii];
 
-        if( i==index_selected_btagmedium[0] ) continue;
-        if( i==index_jetW1 ) continue;
-        if( i==index_jetW2 ) continue;
+//      if( i==index_selected_btagmedium[0] ) continue;
+//      if( i==index_jetW1 ) continue;
+//      if( i==index_jetW2 ) continue;
 
-        if( ptcorrjet[i]<20. ) continue;
-        if( fabs(etajet[i])<1. ) {
-          if( nCentralJets==0 ) hardestCentralJetPt = ptcorrjet[i]; //hardest central jet
-          nCentralJets++;
-        } else if( index_qJet<0 ) { //hardest forward jet
-          index_qJet=i;
-          qJet.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
-        }
+//      if( ptcorrjet[i]<20. ) continue;
+//      if( fabs(etajet[i])<1. ) {
+//        if( nCentralJets==0 ) hardestCentralJetPt = ptcorrjet[i]; //hardest central jet
+//        nCentralJets++;
+//      } else if( index_qJet<0 ) { //hardest forward jet
+//        index_qJet=i;
+//        qJet.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
+//      }
 
-      }
+//    }
 
-      if( index_qJet<0 ) continue;
-      h1_cutFlow->Fill(9);
+//    if( index_qJet<0 ) continue;
+//    h1_cutFlow->Fill(9);
 
       if( nCentralJets > nCentralJets_upper_thresh_ ) continue;
 
@@ -892,59 +1009,59 @@ void RedNtpFinalizer_THq::finalize()
 
 
       
-//    if( isSignalMC ) {
+      if( isSignalMC ) {
 
-//      TLorentzVector h, t, q, b, Wq, Wqbar;
-//      h.SetPtEtaPhiE( pt_h, eta_h, phi_h, e_h );
-//      t.SetPtEtaPhiE( pt_t, eta_t, phi_t, e_t );
-//      b.SetPtEtaPhiE( pt_b, eta_b, phi_b, e_b );
-//      q.SetPtEtaPhiE( pt_q, eta_q, phi_q, e_q );
-//      Wq.SetPtEtaPhiE( pt_Wq, eta_Wq, phi_Wq, e_Wq );
-//      Wqbar.SetPtEtaPhiE( pt_Wqbar, eta_Wqbar, phi_Wqbar, e_Wqbar );
-
-
-//      if( isLeptonic_t )
-//        N_all_lept+=eventWeight;
-//      else
-//        N_all_hadr+=eventWeight;
-
-//      float deltaR_q = q.DeltaR(qJet);
-//      float deltaR_t = t.DeltaR(top);
-//      float deltaPhi_t = fabs(t.DeltaPhi(top));
-//      float deltaR_b = b.DeltaR(bJet);
-//      float deltaR_h = h.DeltaR(diphot);
-
-//      if( deltaR_q<0.5 && isLeptonic_t )
-//        N_qMatched_lept+=eventWeight;
-//      if( deltaPhi_t<0.5 && isLeptonic_t )
-//        N_tMatched_lept+=eventWeight;
-//      if( deltaR_b<0.5 && isLeptonic_t )
-//        N_bMatched_lept+=eventWeight;
-//      if( deltaR_h<0.5 && isLeptonic_t )
-//        N_hMatched_lept+=eventWeight;
-
-//      if( deltaR_q<0.5 && !isLeptonic_t )
-//        N_qMatched_hadr+=eventWeight;
-//      if( deltaPhi_t<0.5 && !isLeptonic_t )
-//        N_tMatched_hadr+=eventWeight;
-//      if( deltaR_b<0.5 && !isLeptonic_t )
-//        N_bMatched_hadr+=eventWeight;
-//      if( deltaR_h<0.5 && !isLeptonic_t )
-//        N_hMatched_hadr+=eventWeight;
+        TLorentzVector h, t, q, b, Wq, Wqbar;
+        h.SetPtEtaPhiE( pt_h, eta_h, phi_h, e_h );
+        t.SetPtEtaPhiE( pt_t, eta_t, phi_t, e_t );
+        b.SetPtEtaPhiE( pt_b, eta_b, phi_b, e_b );
+        q.SetPtEtaPhiE( pt_q, eta_q, phi_q, e_q );
+        Wq.SetPtEtaPhiE( pt_Wq, eta_Wq, phi_Wq, e_Wq );
+        Wqbar.SetPtEtaPhiE( pt_Wqbar, eta_Wqbar, phi_Wqbar, e_Wqbar );
 
 
-//      //if( Wq.DeltaR(qJet)<0.5 )
-//      //  N_WqMatched+=eventWeight
-//      //if( Wq.DeltaR(qJet)<0.5 )
-//      //  N_qMatched+=eventWeight
+        if( isLeptonic_t )
+          N_all_lept+=eventWeight;
+        else
+          N_all_hadr+=eventWeight;
 
-//      h1_deltaR_q->  Fill( deltaR_q, eventWeight );
-//      h1_deltaR_t->  Fill( deltaR_t, eventWeight );
-//      h1_deltaPhi_t->Fill( deltaPhi_t, eventWeight );
-//      h1_deltaR_b->  Fill( deltaR_b, eventWeight );
-//      h1_deltaR_h->  Fill( deltaR_h, eventWeight );
+        float deltaR_q = q.DeltaR(qJet);
+        float deltaR_t = t.DeltaR(top);
+        float deltaPhi_t = fabs(t.DeltaPhi(top));
+        float deltaR_b = b.DeltaR(bJet);
+        float deltaR_h = h.DeltaR(diphot);
 
-//    } // if isMC
+        if( deltaR_q<0.5 && isLeptonic_t )
+          N_qMatched_lept+=eventWeight;
+        if( deltaPhi_t<0.5 && isLeptonic_t )
+          N_tMatched_lept+=eventWeight;
+        if( deltaR_b<0.5 && isLeptonic_t )
+          N_bMatched_lept+=eventWeight;
+        if( deltaR_h<0.5 && isLeptonic_t )
+          N_hMatched_lept+=eventWeight;
+
+        if( deltaR_q<0.5 && !isLeptonic_t )
+          N_qMatched_hadr+=eventWeight;
+        if( deltaPhi_t<0.5 && !isLeptonic_t )
+          N_tMatched_hadr+=eventWeight;
+        if( deltaR_b<0.5 && !isLeptonic_t )
+          N_bMatched_hadr+=eventWeight;
+        if( deltaR_h<0.5 && !isLeptonic_t )
+          N_hMatched_hadr+=eventWeight;
+
+
+        //if( Wq.DeltaR(qJet)<0.5 )
+        //  N_WqMatched+=eventWeight
+        //if( Wq.DeltaR(qJet)<0.5 )
+        //  N_qMatched+=eventWeight
+
+        h1_deltaR_q->  Fill( deltaR_q, eventWeight );
+        h1_deltaR_t->  Fill( deltaR_t, eventWeight );
+        h1_deltaPhi_t->Fill( deltaPhi_t, eventWeight );
+        h1_deltaR_b->  Fill( deltaR_b, eventWeight );
+        h1_deltaR_h->  Fill( deltaR_h, eventWeight );
+
+      } // if isMC
 
 
 
@@ -1122,17 +1239,17 @@ void RedNtpFinalizer_THq::finalize()
    if( isSignalMC ) {
      std::cout << std::endl;
      std::cout << "LEPTONIC CHANNEL:" << std::endl;
-     std::cout << "-> Matched Higgs in " << (float)N_hMatched_lept*100./N_all_lept << "%% of the cases." << std::endl;
-     std::cout << "-> Matched bJet  in " << (float)N_bMatched_lept*100./N_all_lept << "%% of the cases." << std::endl;
-     std::cout << "-> Matched top   in " << (float)N_tMatched_lept*100./N_all_lept << "%% of the cases." << std::endl;
-     std::cout << "-> Matched qJet  in " << (float)N_qMatched_lept*100./N_all_lept << "%% of the cases." << std::endl;
+     std::cout << "-> Matched Higgs in " << (float)N_hMatched_lept*100./N_all_lept << "% of the cases." << std::endl;
+     std::cout << "-> Matched bJet  in " << (float)N_bMatched_lept*100./N_all_lept << "% of the cases." << std::endl;
+     std::cout << "-> Matched top   in " << (float)N_tMatched_lept*100./N_all_lept << "% of the cases." << std::endl;
+     std::cout << "-> Matched qJet  in " << (float)N_qMatched_lept*100./N_all_lept << "% of the cases." << std::endl;
 
      std::cout << std::endl;
      std::cout << "HADRONIC CHANNEL:" << std::endl;
-     std::cout << "-> Matched Higgs in " << (float)N_hMatched_hadr*100./N_all_hadr << "%% of the cases." << std::endl;
-     std::cout << "-> Matched bJet  in " << (float)N_bMatched_hadr*100./N_all_hadr << "%% of the cases." << std::endl;
-     std::cout << "-> Matched top   in " << (float)N_tMatched_hadr*100./N_all_hadr << "%% of the cases." << std::endl;
-     std::cout << "-> Matched qJet  in " << (float)N_qMatched_hadr*100./N_all_hadr << "%% of the cases." << std::endl;
+     std::cout << "-> Matched Higgs in " << (float)N_hMatched_hadr*100./N_all_hadr << "% of the cases." << std::endl;
+     std::cout << "-> Matched bJet  in " << (float)N_bMatched_hadr*100./N_all_hadr << "% of the cases." << std::endl;
+     std::cout << "-> Matched top   in " << (float)N_tMatched_hadr*100./N_all_hadr << "% of the cases." << std::endl;
+     std::cout << "-> Matched qJet  in " << (float)N_qMatched_hadr*100./N_all_hadr << "% of the cases." << std::endl;
    }
 
 
