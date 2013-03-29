@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
   // no stack is used for shape comparisons between signal
   // and the main backgrounds (diphoton, gammajet and ttbar)
   DrawBase* db_nostack = new DrawBase("THq_nostack");
+  DrawBase* db_nostack_hadr = new DrawBase("THq_nostack_hadr");
 
   // stack is used for the MC stack after full selection
   DrawBase* db_stack = new DrawBase("THq_stack");
@@ -45,6 +46,9 @@ int main(int argc, char* argv[]) {
 
   db_nostack->set_lumiOnRightSide();
   db_nostack->set_shapeNormalization();
+
+  db_nostack_hadr->set_lumiOnRightSide();
+  db_nostack_hadr->set_shapeNormalization();
 
   db_stack->set_lumiOnRightSide();
   db_stack->set_lumiNormalization(20000.);
@@ -61,6 +65,7 @@ int main(int argc, char* argv[]) {
   outputdir_str += "_" + bTaggerType;
   if( Ct_minus1 ) outputdir_str += "_CtMinusOne";
   db_nostack->set_outputdir(outputdir_str);
+  db_nostack_hadr->set_outputdir(outputdir_str);
   db_stack->set_outputdir(outputdir_str);
   db_stack_UL->set_outputdir(outputdir_str+"/UL");
 
@@ -82,9 +87,11 @@ int main(int argc, char* argv[]) {
   TFile* tHqFile = TFile::Open(tHqFileName.c_str());
   if( !Ct_minus1 ) {
     db_nostack->add_mcFile( tHqFile, "tHq", "tHq", kBlack, 0);
+    db_nostack_hadr->add_mcFile( tHqFile, "tHq", "tHq", kBlack, 0);
     db_stack->add_mcFile( tHqFile, "tHq", "tHq", kWhite, 0);
   } else {
     db_nostack->add_mcFile( tHqFile, "tHq", "tHq", kBlack, 0);
+    db_nostack_hadr->add_mcFile( tHqFile, "tHq", "tHq", kBlack, 0);
     db_stack->add_mcFile( tHqFile, "tHq", "tHq (C_{t} = -1)", kWhite, 0);
     db_stack->set_mcWeight( "tHq", 34. );
   }
@@ -96,6 +103,7 @@ int main(int argc, char* argv[]) {
   ttHFileName += ".root";
   TFile* ttHFile = TFile::Open(ttHFileName.c_str());
   db_nostack->add_mcFile( ttHFile, "TTH", "ttH", kRed+1, 0);
+  db_nostack_hadr->add_mcFile( ttHFile, "TTH", "ttH", kRed+1, 0);
   db_stack->add_mcFile( ttHFile, "TTH", "ttH", kGray, 0);
 
 
@@ -145,7 +153,7 @@ int main(int argc, char* argv[]) {
   DiPhotonFileName += "_" + bTaggerType;
   DiPhotonFileName += ".root";
   TFile* DiPhotonFile = TFile::Open(DiPhotonFileName.c_str());
-  //db_nostack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 38);
+  db_nostack_hadr->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 38);
   db_stack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
   db_stack_UL->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 38);
 
@@ -193,6 +201,7 @@ int main(int argc, char* argv[]) {
   TTGGFileName += ".root";
   TFile* TTGGFile = TFile::Open(TTGGFileName.c_str());
   db_nostack->add_mcFile( TTGGFile, "TTGG", "tt+#gamma#gamma", 29);
+  db_nostack_hadr->add_mcFile( TTGGFile, "TTGG", "tt+#gamma#gamma", 29);
 
 
   std::string QCDFileName = inputDir +  "THq_QCD_doubleEMEnriched_TuneZ2star_8TeV-pythia6";
@@ -268,8 +277,33 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_top", "eventWeight*(isLeptonic)", 50, 0., 500., "mt_top_lept",  "Top Transverse Mass", "GeV");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_W", "eventWeight*(isLeptonic)", 50, 0., 250., "mt_W_lept",  "W Transverse Mass", "GeV");
 
-  db_stack->set_legendTitle("");
 
+  // hadronic channel plots:
+  db_nostack_hadr->set_legendTitle("Hadronic Channel");
+
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "njets",   "eventWeight*(!isLeptonic)", 9, -0.5, 8.5, "njets_hadr", "Number of Jets (p_{T} > 20 GeV)");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "nbjets_loose",   "eventWeight*(!isLeptonic)", 5, -0.5, 4.5,  "nbjets_loose_hadr", "Number of b-Jets (Loose)");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "nbjets_medium",   "eventWeight*(!isLeptonic)", 5, -0.5, 4.5, "nbjets_medium_hadr", "Number of b-Jets (Medium)");
+
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "nCentralJets", "eventWeight*(!isLeptonic)", 7, -0.5, 6.5, "nCentralJets_hadr", "Number of Additional Jets");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "nCentralJets25", "eventWeight*(!isLeptonic)", 7, -0.5, 6.5, "nCentralJets25_hadr", "Number of Additional Jets");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "hardestCentralJetPt", "eventWeight*(!isLeptonic)", 50, 0., 200., "hardestCentralJetPt_hadr", "Hardest Additional Jet p_{T}", "GeV", "Events", true);
+
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "pt_qJet",  "eventWeight*(!isLeptonic)", 50, 0., 500., "pt_qJet_hadr", "q-Jet Candidate p_{T}", "GeV");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "eta_qJet", "eventWeight*(!isLeptonic)", 50, -5, 5, "eta_qJet_hadr", "q-Jet Candidate #eta", "");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "qgl_qJet", "eventWeight*(!isLeptonic)", 50, 0., 1.0001, "qgl_qJet_hadr", "q-Jet Candidate QGL", "");
+
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "deltaPhi_top_higgs", "eventWeight*(!isLeptonic)", 50, 0., 3.15, "deltaPhi_top_higgs_hadr", "#Delta#Phi (top-diphoton)", "rad");
+
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "eta_top", "eventWeight*(!isLeptonic)", 50, -5, 5, "eta_top_hadr", "Top Candidate #eta", "");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "pt_top", "eventWeight*(!isLeptonic)", 50, -5, 5, "pt_top_hadr", "Top Candidate p_{T}", "GeV");
+
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "m_top", "eventWeight*(!isLeptonic)", 50, 0., 500., "mt_top_hadr",  "Top Transverse Mass", "GeV");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "m_W", "eventWeight*(!isLeptonic)", 50, 0., 250., "mt_W_hadr",  "W Transverse Mass", "GeV");
+
+
+
+  db_nostack->set_legendTitle("");
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "pt_qJet",  "eventWeight", 50, 0., 500., "pt_qJet", "q-Jet Candidate p_{T}", "GeV");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_qJet", "eventWeight", 50, -5, 5, "eta_qJet", "q-Jet Candidate #eta", "");
