@@ -143,6 +143,11 @@ int main( int argc, char* argv[] ) {
     finalize_oneDataset(redntpVersion, "VBF_HToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2", selectionType, bTaggerType, datasets);
 
+  } else if( dataset=="tHq_mH125_8TeV_testtest" ) {
+
+    finalize_oneDataset(redntpVersion, "tHqHadronic_mH125_8TeV_testtest", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "tHqLeptonic_mH125_8TeV_testtest", selectionType, bTaggerType, datasets);
+
   } else {
   
     finalize_oneDataset(redntpVersion, dataset, selectionType, bTaggerType, datasets );
