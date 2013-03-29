@@ -74,7 +74,8 @@ int main(int argc, char* argv[]) {
 
 
   
-  std::string tHqFileName = "finalizedTrees_THq_feasibility/THq_tHqLeptonic_mH125_8TeV_testtest";
+  //std::string tHqFileName = "finalizedTrees_THq_feasibility/THq_tHqLeptonic_mH125_8TeV_testtest";
+  std::string tHqFileName = "finalizedTrees_THq_feasibility/THq_tHq_mH125_8TeV_testtest";
   tHqFileName += "_" + selType;
   tHqFileName += "_" + bTaggerType;
   tHqFileName += ".root";
