@@ -169,6 +169,10 @@ void finalize_oneDataset( const std::string& redntpProdVersion, const std::strin
 
   RedntpDirStruct dirs = get_dirs( redntpProdVersion );
 
+  // lousy patch
+  if( dataset=="tHqLeptonic_mH125_8TeV_testtest" || dataset=="tHqHadronic_mH125_8TeV_testtest" || dataset_tstr.BeginsWith("TT_CT10") )
+    dirs.mcdir = "redntp.53xv2.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v1/merged";
+
   RedNtpFinalizer_THq* rf = new RedNtpFinalizer_THq( dataset, selectionType, bTaggerType );
   //rf->set_redNtpDir("/xrootdfs/cms/local/pandolf/HiggsGammaGamma/reduced/redntp.52xv5_VH_feasibility_signalOnly.cicpfloose.regrPho_eCorr_20062012.VH_feasibility_v0/merged");
 
@@ -207,7 +211,7 @@ void do_haddCommand( const std::string& redntpVersion, const std::string& datase
   hadd_command += suffix;
   std::string rm_command = "rm " + suffix;
   system(hadd_command.c_str());
-  if( dataset!="HToGG_M-125_8TeV-pythia6" ) //keep also separate signal processes:
+  if( dataset!="HToGG_M-125_8TeV-pythia6" && dataset!="TT_8TeV" ) //keep also separate signal and top processes:
     system(rm_command.c_str());
 
 }
@@ -250,12 +254,6 @@ RedntpDirStruct get_dirs( const std::string& prodVersion ) {
     returnStruct.datadir = "redntp.53xv1_data.cicpfloose.scales-Lisbon-Hgg.ttH_feasibility_HLT/merged";
     returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.ttH_feasibility_HLT/merged";
 
-  } else if(prodVersion=="micheli_20121112") {
-
-    returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
-    returnStruct.datadir = "redntp.53xv1_data.cicpfloose.scales-Lisbon-Hgg.micheli_20121112/merged";
-    returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.micheli_20121112/merged";
-
   }else if(prodVersion=="micheli_SinglePhoton_preselectionCS"){
     
     returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
@@ -269,6 +267,12 @@ RedntpDirStruct get_dirs( const std::string& prodVersion ) {
     returnStruct.datadir="redntp.53xv1_data.preselectionCS.scales-Lisbon-Hgg.ttH_feasibility_v1/merged";
     returnStruct.mcdir = "redntp.52xv5.preselectionCS.scales-Lisbon-Hgg.ttH_feasibility_v1/merged";
 
+  } else if(prodVersion=="micheli_20121112") {
+
+    returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
+    returnStruct.datadir = "redntp.53xv1_data.cicpfloose.scales-Lisbon-Hgg.micheli_20121112/merged";
+    returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.micheli_20121112/merged";
+
 
   }else if( prodVersion=="VH_feasibility" ) {
 
@@ -278,9 +282,10 @@ RedntpDirStruct get_dirs( const std::string& prodVersion ) {
 
   }else if( prodVersion=="THq_feasibility" ) {
 
-    returnStruct.maindir = " /xrootdfs/cms/local/micheli/Higgs/reduced/";
+    returnStruct.maindir = " /xrootdfs/cms/local/pandolf/Higgs/reduced/";
     returnStruct.datadir = "redntp.52xv5_VH_feasibility.cicpfloose.regrPho_eCorr_20062012.VH_feasibility_v0/merged";
-    returnStruct.mcdir = "redntp.53xv3.cicpfloose.scales-Lisbon-Hgg.test_tHqLeptonic_mH125_8TeV";
+    //returnStruct.mcdir = "redntp.53xv2.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v0/merged";
+    returnStruct.mcdir   = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v1/merged";
 
   } else {
 
