@@ -135,8 +135,8 @@ void RedNtpFinalizer_THq::finalize()
 
    TH1D* h1_nCentralJets = new TH1D("nCentralJets", "", 7, -0.5, 6.5 );
    h1_nCentralJets->Sumw2();
-   TH1D* h1_nCentralJets25 = new TH1D("nCentralJets25", "", 7, -0.5, 6.5 );
-   h1_nCentralJets25->Sumw2();
+   TH1D* h1_nCentralJetsHadr = new TH1D("nCentralJetsHadr", "", 7, -0.5, 6.5 );
+   h1_nCentralJetsHadr->Sumw2();
    TH1D* h1_hardestCentralJetPt = new TH1D("hardestCentralJetPt", "", 100, 0., 200.);
    h1_hardestCentralJetPt->Sumw2();
 
@@ -248,11 +248,12 @@ void RedNtpFinalizer_THq::finalize()
    float pt_top_t;
    float eta_top_t;
    int   nCentralJets_t;
-   int   nCentralJets25_t;
+   int   nCentralJetsHadr_t;
    float hardestCentralJetPt_t;
    float deltaPhi_top_higgs_t;
    float deltaR_lept_phot_t;
    float m_ele_phot_t;
+   float zeppen_t;
 
 
    float eventWeight = 1.;
@@ -298,7 +299,7 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("pt_top",              &pt_top_t,             "pt_top_t/F");
    tree_passedEvents->Branch("eta_top",             &eta_top_t,            "eta_top_t/F");
    tree_passedEvents->Branch("nCentralJets",        &nCentralJets_t,       "nCentralJets_t/I");
-   tree_passedEvents->Branch("nCentralJets25",        &nCentralJets25_t,       "nCentralJets25_t/I");
+   tree_passedEvents->Branch("nCentralJetsHadr",        &nCentralJetsHadr_t,       "nCentralJetsHadr_t/I");
    tree_passedEvents->Branch("hardestCentralJetPt", &hardestCentralJetPt_t,"hardestCentralJetPt_t/F");
    tree_passedEvents->Branch("deltaPhi_top_higgs",  &deltaPhi_top_higgs_t, "deltaPhi_top_higgs_t/F");
    tree_passedEvents->Branch("mt_top",  &mt_top_t, "mt_top_t/F");
@@ -308,6 +309,7 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("BDT_lept",  &BDT_lept_t, "BDT_lept_t/F");
    tree_passedEvents->Branch("deltaR_lept_phot",  &deltaR_lept_phot_t, "deltaR_lept_phot_t/F");
    tree_passedEvents->Branch("m_ele_phot",  &m_ele_phot_t, "m_ele_phot_t/F");
+   tree_passedEvents->Branch("zeppen",  &zeppen_t, "zeppen_t/F");
 
    tree_passedEvents->Branch("pt_q",   &pt_q,  "pt_q/F");
    tree_passedEvents->Branch("eta_q",  &eta_q, "eta_q/F");
@@ -692,7 +694,7 @@ void RedNtpFinalizer_THq::finalize()
 
       if( index_selected_btagmedium.size()==0 ) continue;
 
-      if( njets_selected_btagmedium>nbtagmedium_upper_thresh_ ) continue;
+      if( njets_selected_btagmedium>nbtagmedium_upper_thresh_lept_ ) continue;
 
 
       h1_cutFlow->Fill(7);
@@ -811,8 +813,6 @@ void RedNtpFinalizer_THq::finalize()
         int i = index_selected[ii];
 
         if( i==index_selected_btagmedium[0] ) continue;
-        if( i==index_jetW1 ) continue;
-        if( i==index_jetW2 ) continue;
 
         if( ptcorrjet[i]<20. ) continue;
         if( fabs(etajet[i])<eta_thresh_qJet ) {
@@ -830,11 +830,20 @@ void RedNtpFinalizer_THq::finalize()
 
 
 
+      // ------------------------------------
+      // ---                              ---
+      // ---   ** LEPTONIC CHANNEL **     ---
+      // ---                              ---
+      // ------------------------------------
 
-      if( isLeptonic_t ) { // *** LEPTONIC CHANNEL
+      if( isLeptonic_t ) { 
 
         if( njets_selected > njets_upper_thresh_lept_ ) continue;
         if( njets_selected < njets_thresh_lept_ ) continue;
+        if( nCentralJets > nCentralJets_upper_thresh_lept_ ) continue;
+
+        nCentralJetsHadr_t = 0;
+        zeppen_t = -999.;
 
         if( isMu_t )
           lept.SetPtEtaPhiE( ptmu1, etamu1, phimu1, enemu1 );
@@ -875,24 +884,43 @@ void RedNtpFinalizer_THq::finalize()
         }
 
 
-      } else { // *** HADRONIC CHANNEL
+
+
+
+
+      // ------------------------------------
+      // ---                              ---
+      // ---   ** HADRONIC CHANNEL **     ---
+      // ---                              ---
+      // ------------------------------------
+
+      } else { 
+
+
+        if( njets_selected < njets_thresh_hadr_ ) continue;
+        if( qJet.Pt() < pt_qJet_thresh_hadr_ ) continue;
+
 
         // choose top selection method:
         bool top_max_deltaphi = true;
         bool top_best_mass = false;
         bool top_hardest = false;
  
+        float topmass = 172.5;
 
         if( top_max_deltaphi ) {
 
           float maxDeltaPhi=0;
           
           // define top candidate as the one maximising deltaPhi(top, higgs):
-          for( unsigned i=0; i<index_selected.size(); ++i ) {
-            for( unsigned j=i+1; j<index_selected.size(); ++j ) {
+          for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
+            for( unsigned jj=ii+1; jj<index_selected.size(); ++jj ) {
+
+              int i = index_selected[ii];
+              int j = index_selected[jj];
 
               if( i==index_selected_btagmedium[0] || j==index_selected_btagmedium[0] ) continue;
-              if( i==index_qJet ) continue;
+              if( i==index_qJet || j==index_qJet ) continue;
 
 
               TLorentzVector jetW1_tmp,jetW2_tmp;
@@ -913,15 +941,17 @@ void RedNtpFinalizer_THq::finalize()
 
         } else if( top_best_mass ) {
 
-          float m_top = 175.;
           float best_m_top = -9999.;
           
           // define top candidate as the one with mass closest to nominal
-          for( unsigned i=0; i<index_selected.size(); ++i ) {
-            for( unsigned j=i+1; j<index_selected.size(); ++j ) {
+          for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
+            for( unsigned jj=ii+1; jj<index_selected.size(); ++jj ) {
+
+              int i = index_selected[ii];
+              int j = index_selected[jj];
 
               if( i==index_selected_btagmedium[0] || j==index_selected_btagmedium[0] ) continue;
-              if( i==index_qJet ) continue;
+              if( i==index_qJet || j==index_qJet ) continue;
 
 
               TLorentzVector jetW1_tmp,jetW2_tmp;
@@ -931,7 +961,7 @@ void RedNtpFinalizer_THq::finalize()
               TLorentzVector top_tmp = jetW1_tmp+jetW2_tmp+bJet;
 
               float this_m_top = top.M();
-              if( fabs(this_m_top-m_top)<fabs(best_m_top-m_top) ) {
+              if( fabs(this_m_top-topmass)<fabs(best_m_top-topmass) ) {
                 best_m_top=this_m_top;
                 index_jetW1 = i;
                 index_jetW2 = j;
@@ -944,11 +974,14 @@ void RedNtpFinalizer_THq::finalize()
 
           
           // define top candidate as the one with mass closest to nominal
-          for( unsigned i=0; i<index_selected.size(); ++i ) {
-            for( unsigned j=i+1; j<index_selected.size(); ++j ) {
+          for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
+            for( unsigned jj=ii+1; jj<index_selected.size(); ++jj ) {
+
+              int i = index_selected[ii];
+              int j = index_selected[jj];
 
               if( i==index_selected_btagmedium[0] || j==index_selected_btagmedium[0] ) continue;
-              if( i==index_qJet ) continue;
+              if( i==index_qJet || j==index_qJet ) continue;
 
               index_jetW1 = i;
               index_jetW2 = j;
@@ -960,7 +993,7 @@ void RedNtpFinalizer_THq::finalize()
         }
 
 
-        if( index_jetW1<0 && index_jetW2<0 ) continue;
+        if( index_jetW1<0 || index_jetW2<0 ) continue;
 
         jetW1.SetPtEtaPhiE(ptcorrjet[index_jetW1],etajet[index_jetW1],phijet[index_jetW1],ecorrjet[index_jetW1]);
         jetW2.SetPtEtaPhiE(ptcorrjet[index_jetW2],etajet[index_jetW2],phijet[index_jetW2],ecorrjet[index_jetW2]);
@@ -969,33 +1002,37 @@ void RedNtpFinalizer_THq::finalize()
 
         top = bJet + W;
 
-        float topmass = 172.5;
         float Wmass = 80.4;
 
-        if( fabs(top.M()-topmass)>m_top_hadr_thresh_ ) continue;
-        if( fabs(W.M()-Wmass)>m_W_hadr_thresh_ ) continue;
+        if( fabs(top.M()-topmass)>m_top_thresh_hadr_ ) continue;
+        if( fabs(W.M()-Wmass)>m_W_thresh_hadr_ ) continue;
+
+
+        zeppen_t = diphot.Eta() - 0.5*( qJet.Eta() + top.Eta() );
+
+
+        int nCentralJetsHadr=0;
+        for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
+  
+          int i = index_selected[ii];
+  
+          if( i==index_selected_btagmedium[0] ) continue;
+          if( i==index_jetW1 ) continue;
+          if( i==index_jetW2 ) continue;
+          if( i==index_qJet ) continue;
+  
+          if( fabs(etajet[i])<eta_thresh_qJet )
+            nCentralJetsHadr++;
+  
+        } 
+        nCentralJetsHadr_t = nCentralJetsHadr;
+
+        if( nCentralJetsHadr_t > nCentralJetsHadr_upper_thresh_ ) continue;
 
       }      
       
       
 
-      if( nCentralJets > nCentralJets_upper_thresh_ ) continue;
-
-
-      int nCentralJets25=0;
-      for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
-
-        int i = index_selected[ii];
-
-        if( i==index_selected_btagmedium[0] ) continue;
-        if( i==index_jetW1 ) continue;
-        if( i==index_jetW2 ) continue;
-        if( i==index_qJet ) continue;
-
-        if( fabs(etajet[i])<2.5 ) 
-          nCentralJets25++;
-
-      } 
 
             
 
@@ -1142,7 +1179,6 @@ void RedNtpFinalizer_THq::finalize()
       eta_top_t = top.Eta();
       
       nCentralJets_t = nCentralJets;
-      nCentralJets25_t = nCentralJets25;
       hardestCentralJetPt_t = hardestCentralJetPt;
 
       deltaPhi_top_higgs_t = deltaPhi_top_higgs;
@@ -1202,7 +1238,7 @@ void RedNtpFinalizer_THq::finalize()
       h1_eta_bJet->Fill( bJet.Eta(), eventWeight ); 
       
       h1_nCentralJets->Fill( nCentralJets, eventWeight );
-      h1_nCentralJets25->Fill( nCentralJets25, eventWeight );
+      h1_nCentralJetsHadr->Fill( nCentralJetsHadr_t, eventWeight );
       h1_hardestCentralJetPt->Fill( hardestCentralJetPt, eventWeight );
       
       
@@ -1314,7 +1350,7 @@ void RedNtpFinalizer_THq::finalize()
    h1_eta_top->Write();
 
    h1_nCentralJets->Write();
-   h1_nCentralJets25->Write();
+   h1_nCentralJetsHadr->Write();
    h1_hardestCentralJetPt->Write();
 
    h1_ptDiphot->Write();
@@ -1867,11 +1903,12 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
   njets_thresh_=0;
   njets_upper_thresh_=1000;
   njets_thresh_lept_=0;
+  njets_thresh_hadr_=0;
   njets_upper_thresh_lept_ = 1000;
   nbtagloose_thresh_=0;
   nbtagmedium_thresh_=0;
-  nbtagmedium_upper_thresh_=1000;
-  nCentralJets_upper_thresh_=1000;
+  nbtagmedium_upper_thresh_lept_=1000;
+  nCentralJets_upper_thresh_lept_=1000;
 
   bdt_lept_thresh_ = -10;
 
@@ -1884,8 +1921,12 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
   PUID_betastar_thresh_=0.67;
   chooseBtaggedJets_=true;//be careful with this
 
-  m_top_hadr_thresh_ = 10000.;
-  m_W_hadr_thresh_ = 10000.;
+  m_top_thresh_hadr_ = 10000.;
+  m_W_thresh_hadr_ = 10000.;
+
+  pt_qJet_thresh_hadr_ = 20.;
+  nCentralJetsHadr_upper_thresh_ = 1000;
+
 
   if( selectionType=="presel" ) {
 
@@ -1901,7 +1942,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     
   } else if( selectionType=="presel_1CSVM" ) {
 
-    nbtagmedium_upper_thresh_ = 1;
+    nbtagmedium_upper_thresh_lept_ = 1;
     
   } else if( selectionType=="sel0" ) {
 
@@ -1913,13 +1954,16 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
   } else if( selectionType=="sel1" ) {
 
     njets_thresh_lept_ = 3;
-    nbtagmedium_upper_thresh_ = 1;
-    nCentralJets_upper_thresh_ = 1;
+    njets_thresh_hadr_ = 4;
+    nbtagmedium_upper_thresh_lept_ = 1;
+    nCentralJets_upper_thresh_lept_ = 1;
     ptphot1cut_ = 50.;
     ptphot2cut_ = 25.;
 
-    m_top_hadr_thresh_ = 50.;
-    m_W_hadr_thresh_ = 30.;
+    m_top_thresh_hadr_ = 50.;
+    //m_W_thresh_hadr_ = 30.;
+    pt_qJet_thresh_hadr_ = 40.;
+    nCentralJetsHadr_upper_thresh_ = 1; 
 
   } else if( selectionType=="selBDT0" ) {
 
@@ -1939,8 +1983,8 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     ptphot2cut_ = 25.;
     bdt_lept_thresh_ = 0.2;
     njets_thresh_lept_ = 3;
-    nbtagmedium_upper_thresh_ = 1;
-    nCentralJets_upper_thresh_ = 1;
+    nbtagmedium_upper_thresh_lept_ = 1;
+    nCentralJets_upper_thresh_lept_ = 1;
 
 
 
