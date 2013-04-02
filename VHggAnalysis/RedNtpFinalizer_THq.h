@@ -935,7 +935,7 @@ public :
    int nCentralJets_upper_thresh_lept_;
    int nbtagloose_thresh_;
    int nbtagmedium_thresh_;
-   int nbtagmedium_upper_thresh_lept_;
+   int nbtagmedium_upper_thresh_;
 
    float m_top_thresh_hadr_;
    float m_W_thresh_hadr_;

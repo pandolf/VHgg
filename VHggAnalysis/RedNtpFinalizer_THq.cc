@@ -721,7 +721,7 @@ void RedNtpFinalizer_THq::finalize()
 
       if( index_selected_btagmedium.size()==0 ) continue;
 
-      if( njets_selected_btagmedium>nbtagmedium_upper_thresh_lept_ ) continue;
+      if( njets_selected_btagmedium>nbtagmedium_upper_thresh_ ) continue;
 
 
       h1_cutFlow->Fill(7);
@@ -824,7 +824,7 @@ void RedNtpFinalizer_THq::finalize()
       TLorentzVector qJet;
       int nCentralJets = 0;
       float hardestCentralJetPt=0.;
-      float eta_thresh_qJet = (isLeptonic_t) ? 1. : 2.;
+      float eta_thresh_qJet = (isLeptonic_t) ? 0. : 2.;
       for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
 
         int i = index_selected[ii];
@@ -855,6 +855,7 @@ void RedNtpFinalizer_THq::finalize()
 
       if( isLeptonic_t ) { 
 
+        if( fabs(qJet.Eta())<1. ) continue;
         if( njets_selected > njets_upper_thresh_lept_ ) continue;
         if( njets_selected < njets_thresh_lept_ ) continue;
         if( nCentralJets > nCentralJets_upper_thresh_lept_ ) continue;
@@ -912,9 +913,9 @@ void RedNtpFinalizer_THq::finalize()
 
 
         // choose top selection method:
-        bool top_max_deltaphi = false;
+        bool top_max_deltaphi = true;
         bool top_best_mass = false;
-        bool top_hardest = true;
+        bool top_hardest = false;
  
         float topmass = 172.5;
 
@@ -1064,7 +1065,7 @@ void RedNtpFinalizer_THq::finalize()
 
         if( nCentralJetsHadr_t > nCentralJetsHadr_upper_thresh_ ) continue;
 
-      }      
+      } //if is hadronic
       
       
 
@@ -1948,7 +1949,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
   njets_upper_thresh_lept_ = 1000;
   nbtagloose_thresh_=0;
   nbtagmedium_thresh_=0;
-  nbtagmedium_upper_thresh_lept_=1000;
+  nbtagmedium_upper_thresh_=1000;
   nCentralJets_upper_thresh_lept_=1000;
 
   bdt_lept_thresh_ = -10;
@@ -1983,7 +1984,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     
   } else if( selectionType=="presel_1CSVM" ) {
 
-    nbtagmedium_upper_thresh_lept_ = 1;
+    nbtagmedium_upper_thresh_ = 1;
     
   } else if( selectionType=="sel0" ) {
 
@@ -2000,7 +2001,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     //njets_thresh_lept_ = 3;
     njets_thresh_hadr_ = 4;
 
-    nbtagmedium_upper_thresh_lept_ = 1;
+    nbtagmedium_upper_thresh_ = 1;
     nCentralJets_upper_thresh_lept_ = 1;
     bdt_lept_thresh_ = 0.2;
 
@@ -2013,7 +2014,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
 
     njets_thresh_lept_ = 3;
     njets_thresh_hadr_ = 4;
-    nbtagmedium_upper_thresh_lept_ = 1;
+    nbtagmedium_upper_thresh_ = 1;
     nCentralJets_upper_thresh_lept_ = 1;
     ptphot1cut_ = 50.;
     ptphot2cut_ = 25.;
@@ -2022,6 +2023,22 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     m_W_thresh_hadr_ = 30.;
     pt_qJet_thresh_hadr_ = 40.;
     nCentralJetsHadr_upper_thresh_ = 1; 
+
+  } else if( selectionType=="sel3" ) {
+
+    ptphot1cut_ = 50.;
+    ptphot2cut_ = 25.;
+
+    //nbtagmedium_upper_thresh_ = 1;
+
+    bdt_lept_thresh_ = 0.2;
+
+    njets_thresh_hadr_ = 4;
+    m_top_thresh_hadr_ = 50.;
+    //m_W_thresh_hadr_ = 30.;
+    pt_qJet_thresh_hadr_ = 40.;
+    nCentralJetsHadr_upper_thresh_ = 1; 
+
 
   } else if( selectionType=="selBDT0" ) {
 
@@ -2041,7 +2058,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     ptphot2cut_ = 25.;
     bdt_lept_thresh_ = 0.2;
 
-    nbtagmedium_upper_thresh_lept_ = 1;
+    nbtagmedium_upper_thresh_ = 1;
     nCentralJets_upper_thresh_lept_ = 1;
 
 
