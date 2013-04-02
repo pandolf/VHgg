@@ -163,6 +163,8 @@ void RedNtpFinalizer_THq::finalize()
    h1_mgg->Sumw2();
    TH1D* h1_mgg_lept= new TH1D("mgg_lept", "", 80, 100., 180.);
    h1_mgg_lept->Sumw2();
+   TH1D* h1_mgg_lept_BDT= new TH1D("mgg_lept_BDT", "", 80, 100., 180.);
+   h1_mgg_lept_BDT->Sumw2();
    TH1D* h1_mgg_hadr= new TH1D("mgg_hadr", "", 80, 100., 180.);
    h1_mgg_hadr->Sumw2();
 
@@ -609,6 +611,26 @@ void RedNtpFinalizer_THq::finalize()
       
       if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_prepresel->Fill( massggnewvtx, eventWeight );
       
+
+      // lepton
+      TLorentzVector lept;
+      float leptVetoPt_thresh=5.;
+      if( (ptele1>leptVetoPt_thresh && ptmu1>leptVetoPt_thresh) || ptele2>leptVetoPt_thresh || ptmu2>leptVetoPt_thresh ) continue;
+
+      h1_cutFlow->Fill(8);
+
+      isLeptonic_t = (ptele1>ptLept_thresh_ || ptmu1>ptLept_thresh_);//cut on pt lepton
+      isMu_t=ptmu1>ptLept_thresh_;
+      if( isLeptonic_t ) {
+        if( isMu_t )
+          lept.SetPtEtaPhiE( ptmu1, etamu1, phimu1, enemu1 );
+        else
+          lept.SetPtEtaPhiE( ptele1, etaele1, phiele1, eneele1 );
+      }
+
+
+      if( selectionType_=="presel_isLeptonic" && !isLeptonic_t ) continue;
+
       
       
       // jets
@@ -645,6 +667,11 @@ void RedNtpFinalizer_THq::finalize()
           if( !passedPUID )continue;
         }
       
+        if( isLeptonic_t ) {
+          TLorentzVector thisJet;
+          thisJet.SetPtEtaPhiE(ptcorrjet[ijet],etajet[ijet],phijet[ijet],ecorrjet[ijet]);
+          if( thisJet.DeltaR(lept)<0.5 ) continue;
+        }
       
       
         bool btagged_loose = false;
@@ -783,22 +810,12 @@ void RedNtpFinalizer_THq::finalize()
 
 
 
-      float leptVetoPt_thresh=5.;
-      if( (ptele1>leptVetoPt_thresh && ptmu1>leptVetoPt_thresh) || ptele2>leptVetoPt_thresh || ptmu2>leptVetoPt_thresh ) continue;
-
-      h1_cutFlow->Fill(8);
-
-      isLeptonic_t = (ptele1>ptLept_thresh_ || ptmu1>ptLept_thresh_);//cut on pt lepton
-      isMu_t=ptmu1>ptLept_thresh_;
-
-      if( selectionType_=="presel_isLeptonic" && !isLeptonic_t ) continue;
-
       int index_jetW1=-1;
       int index_jetW2=-1;
       
 
       TLorentzVector top;
-      TLorentzVector neutrino, lept;
+      TLorentzVector neutrino;
       TLorentzVector jetW1,jetW2;
   
 
@@ -845,11 +862,6 @@ void RedNtpFinalizer_THq::finalize()
         nCentralJetsHadr_t = 0;
         zeppen_t = -999.;
 
-        if( isMu_t )
-          lept.SetPtEtaPhiE( ptmu1, etamu1, phimu1, enemu1 );
-        else
-          lept.SetPtEtaPhiE( ptele1, etaele1, phiele1, eneele1 );
-
 
         float deltaR1 = lept.DeltaR(phot1);
         //if( deltaR1<1. ) continue;
@@ -887,7 +899,6 @@ void RedNtpFinalizer_THq::finalize()
 
 
 
-
       // ------------------------------------
       // ---                              ---
       // ---   ** HADRONIC CHANNEL **     ---
@@ -898,13 +909,12 @@ void RedNtpFinalizer_THq::finalize()
 
 
         if( njets_selected < njets_thresh_hadr_ ) continue;
-        if( qJet.Pt() < pt_qJet_thresh_hadr_ ) continue;
 
 
         // choose top selection method:
-        bool top_max_deltaphi = true;
+        bool top_max_deltaphi = false;
         bool top_best_mass = false;
-        bool top_hardest = false;
+        bool top_hardest = true;
  
         float topmass = 172.5;
 
@@ -997,6 +1007,31 @@ void RedNtpFinalizer_THq::finalize()
 
         jetW1.SetPtEtaPhiE(ptcorrjet[index_jetW1],etajet[index_jetW1],phijet[index_jetW1],ecorrjet[index_jetW1]);
         jetW2.SetPtEtaPhiE(ptcorrjet[index_jetW2],etajet[index_jetW2],phijet[index_jetW2],ecorrjet[index_jetW2]);
+        
+
+        //for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
+      
+        //  int i = index_selected[ii];
+      
+        //  if( i==index_selected_btagmedium[0] ) continue;
+        //  if( i==index_jetW1 ) continue;
+        //  if( i==index_jetW2 ) continue;
+      
+        //  if( ptcorrjet[i]<20. ) continue;
+        //  if( fabs(etajet[i])<eta_thresh_qJet ) {
+        //    if( nCentralJets==0 ) hardestCentralJetPt = ptcorrjet[i]; //hardest central jet
+        //    nCentralJets++;
+        //  } else if( index_qJet<0 ) { //hardest forward jet
+        //    index_qJet=i;
+        //    qJet.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
+        //  }
+      
+        //}
+        //if( index_qJet<0 ) continue;
+        //h1_cutFlow->Fill(9);
+
+
+        if( qJet.Pt() < pt_qJet_thresh_hadr_ ) continue;
 
         TLorentzVector W = jetW1 + jetW2;
 
@@ -1201,7 +1236,7 @@ void RedNtpFinalizer_THq::finalize()
   
       BDT_lept_t = reader->EvaluateMVA( "BDTG method" );
 
-      if( BDT_lept_t < bdt_lept_thresh_ ) continue; 
+      //if( BDT_lept_t < bdt_lept_thresh_ ) continue; 
 
 
 
@@ -1258,6 +1293,8 @@ void RedNtpFinalizer_THq::finalize()
       
       if( isLeptonic_t ) {
 
+        h1_BDTlept_lept->Fill( BDT_lept_t, eventWeight );
+
         //leptons
         h1_pt_lept->Fill(lept.Pt(),eventWeight);
         h1_eta_lept->Fill(lept.Eta(),eventWeight);
@@ -1267,7 +1304,12 @@ void RedNtpFinalizer_THq::finalize()
         float deltaPhi_met_bJet = fabs(bJet.DeltaPhi(neutrino));
         h1_deltaPhi_met_bJet->Fill(deltaPhi_met_bJet,eventWeight);
 
-        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_lept->Fill( massggnewvtx, eventWeight );
+        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       {
+          h1_mgg_lept->Fill( massggnewvtx, eventWeight );
+          if( BDT_lept_t>bdt_lept_thresh_ ) {
+            h1_mgg_lept_BDT->Fill( massggnewvtx, eventWeight );
+          }
+        }
 
       } else { // hadronic channel
 
@@ -1279,8 +1321,6 @@ void RedNtpFinalizer_THq::finalize()
      
 
       
-      if( isLeptonic_t )
-        h1_BDTlept_lept->Fill( BDT_lept_t, eventWeight );
 
 
 
@@ -1361,6 +1401,7 @@ void RedNtpFinalizer_THq::finalize()
    h1_mgg_presel->Write();
    h1_mgg->Write();
    h1_mgg_lept->Write();
+   h1_mgg_lept_BDT->Write();
    h1_mgg_hadr->Write();
 
 
@@ -1953,6 +1994,23 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     
   } else if( selectionType=="sel1" ) {
 
+    ptphot1cut_ = 50.;
+    ptphot2cut_ = 25.;
+
+    //njets_thresh_lept_ = 3;
+    njets_thresh_hadr_ = 4;
+
+    nbtagmedium_upper_thresh_lept_ = 1;
+    nCentralJets_upper_thresh_lept_ = 1;
+    bdt_lept_thresh_ = 0.2;
+
+    m_top_thresh_hadr_ = 50.;
+    //m_W_thresh_hadr_ = 30.;
+    pt_qJet_thresh_hadr_ = 40.;
+    nCentralJetsHadr_upper_thresh_ = 1; 
+
+  } else if( selectionType=="sel2" ) {
+
     njets_thresh_lept_ = 3;
     njets_thresh_hadr_ = 4;
     nbtagmedium_upper_thresh_lept_ = 1;
@@ -1961,7 +2019,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     ptphot2cut_ = 25.;
 
     m_top_thresh_hadr_ = 50.;
-    //m_W_thresh_hadr_ = 30.;
+    m_W_thresh_hadr_ = 30.;
     pt_qJet_thresh_hadr_ = 40.;
     nCentralJetsHadr_upper_thresh_ = 1; 
 
@@ -1975,17 +2033,16 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
 
     ptphot1cut_ = 50.;
     ptphot2cut_ = 25.;
-    bdt_lept_thresh_ = 0.4;
+    bdt_lept_thresh_ = 0.3;
 
   } else if( selectionType=="selBDT2" ) {
 
     ptphot1cut_ = 50.;
     ptphot2cut_ = 25.;
     bdt_lept_thresh_ = 0.2;
-    njets_thresh_lept_ = 3;
+
     nbtagmedium_upper_thresh_lept_ = 1;
     nCentralJets_upper_thresh_lept_ = 1;
-
 
 
   } else {
