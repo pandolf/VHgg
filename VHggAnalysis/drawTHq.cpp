@@ -145,8 +145,6 @@ int main(int argc, char* argv[]) {
   HToGGFileName += "_" + bTaggerType;
   HToGGFileName += ".root";
   TFile* HToGGFile = TFile::Open(HToGGFileName.c_str());
-  if( Ct_minus1 )
-    db_stack->set_mcWeight( "HToGG", 2.5 );
 
 
 
@@ -275,6 +273,8 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_top", "eventWeight*(isLeptonic)", 50, 0., 500., "mt_top_lept",  "Top Transverse Mass", "GeV");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_W", "eventWeight*(isLeptonic)", 50, 0., 250., "mt_W_lept",  "W Transverse Mass", "GeV");
 
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "cosThetaStar", "eventWeight*(isLeptonic)", 50, -1., 1.0001, "cosThetaStar_lept",  "cos(#theta*)");
+
 
   // hadronic channel plots:
   db_nostack_hadr->set_legendTitle("Hadronic Channel");
@@ -308,8 +308,11 @@ int main(int argc, char* argv[]) {
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "m_W", "eventWeight*(!isLeptonic)", 50, 20., 250., "m_W_hadr",  "W Mass", "GeV");
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "m_W", "eventWeight*(!isLeptonic && abs(m_top-172.5)<50.)", 50, 20., 250., "m_W_mTopCut_hadr",  "W Mass", "GeV");
 
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "cosThetaStar", "eventWeight*(!isLeptonic)", 50, -1., 1.0001, "cosThetaStar_hadr",  "cos(#theta*)");
 
 
+
+  // inclusive plots:
 
   db_nostack->set_legendTitle("");
 
