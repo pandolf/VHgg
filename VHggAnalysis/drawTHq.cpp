@@ -39,7 +39,6 @@ int main(int argc, char* argv[]) {
 
   // stack is used for the MC stack after full selection
   DrawBase* db_stack = new DrawBase("THq_stack");
-  DrawBase* db_stack_UL = new DrawBase("THq_stack_UL");
 
 
 
@@ -54,9 +53,6 @@ int main(int argc, char* argv[]) {
   db_stack->set_lumiNormalization(20000.);
   db_stack->set_noStack(false);
 
-  db_stack_UL->set_lumiOnRightSide();
-  db_stack_UL->set_lumiNormalization(20000.);
-  db_stack_UL->set_noStack(false);            
 
 
 
@@ -67,7 +63,6 @@ int main(int argc, char* argv[]) {
   db_nostack->set_outputdir(outputdir_str);
   db_nostack_hadr->set_outputdir(outputdir_str);
   db_stack->set_outputdir(outputdir_str);
-  db_stack_UL->set_outputdir(outputdir_str+"/UL");
 
 
 
@@ -105,6 +100,9 @@ int main(int argc, char* argv[]) {
   db_nostack->add_mcFile( ttHFile, "TTH", "ttH", kRed+1, 0);
   db_nostack_hadr->add_mcFile( ttHFile, "TTH", "ttH", kRed+1, 0);
   db_stack->add_mcFile( ttHFile, "TTH", "ttH", kGray, 0);
+  if( Ct_minus1 )
+    db_stack->set_mcWeight( "TTH", 2.5 );
+
 
 
 
@@ -115,6 +113,8 @@ int main(int argc, char* argv[]) {
   TFile* VHFile = TFile::Open(VHFileName.c_str());
   //db_nostack->add_mcFile( VHFile, "VH", "VH", signalFillColor+1, 0);
   db_stack->add_mcFile( VHFile, "VH", "VH", 42, 0);
+  if( Ct_minus1 )
+    db_stack->set_mcWeight( "VH", 2.5 );
 
   
   std::string GluGluHFileName = inputDir +  "THq_GluGluToHToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1";
@@ -124,6 +124,9 @@ int main(int argc, char* argv[]) {
   TFile* GluGluHFile = TFile::Open(GluGluHFileName.c_str());
   //db_nostack->add_mcFile( GluGluHFile, "GluGluH", "ggF H ", signalFillColor+1, 0);
   db_stack->add_mcFile( GluGluHFile, "GluGluH", "ggF H", signalFillColor+1, 0);
+  if( Ct_minus1 )
+    db_stack->set_mcWeight( "GluGluH", 2.5 );
+
 
   std::string VBFHFileName = inputDir +  "THq_VBF_HToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1";
   VBFHFileName += "_" + selType;
@@ -131,6 +134,8 @@ int main(int argc, char* argv[]) {
   VBFHFileName += ".root";
   TFile* VBFHFile = TFile::Open(VBFHFileName.c_str());
   db_stack->add_mcFile( VBFHFile, "VBFH", "VBF H ", signalFillColor, 0);
+  if( Ct_minus1 )
+    db_stack->set_mcWeight( "VBFH", 2.5 );
   //    db_nostack->add_mcFile( VBFHFile, "VBFH", "VBF H", signalFillColor, 0);
 
 
@@ -140,7 +145,8 @@ int main(int argc, char* argv[]) {
   HToGGFileName += "_" + bTaggerType;
   HToGGFileName += ".root";
   TFile* HToGGFile = TFile::Open(HToGGFileName.c_str());
-  db_stack_UL->add_mcFile( HToGGFile, "HToGG", "H", signalFillColor, 0);
+  if( Ct_minus1 )
+    db_stack->set_mcWeight( "HToGG", 2.5 );
 
 
 
@@ -155,7 +161,6 @@ int main(int argc, char* argv[]) {
   TFile* DiPhotonFile = TFile::Open(DiPhotonFileName.c_str());
   db_nostack_hadr->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 38);
   db_stack->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 29);
-  db_stack_UL->add_mcFile( DiPhotonFile, "DiPhoton", "Diphoton", 38);
 
   std::string GammaJetFileName = inputDir +  "THq_GJet_doubleEMEnriched_TuneZ2star_8TeV-pythia6";
   GammaJetFileName += "_" + selType;
@@ -164,17 +169,13 @@ int main(int argc, char* argv[]) {
   TFile* GammaJetFile = TFile::Open(GammaJetFileName.c_str());
  //  db_nostack->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 29);
   db_stack->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 38);
-  db_stack_UL->add_mcFile( GammaJetFile, "GammaJet", "#gamma + Jet", 29);
 
   std::string DiBosonFileName = inputDir +  "THq_VV_8TeV";
   DiBosonFileName += "_" + selType;
   DiBosonFileName += "_" + bTaggerType;
   DiBosonFileName += ".root";
   TFile* DiBosonFile = TFile::Open(DiBosonFileName.c_str());
-  if( selType != "presel" )
-    db_nostack->add_mcFile( DiBosonFile, "DiBoson", "Diboson", 39);
   db_stack->add_mcFile( DiBosonFile, "DiBoson", "Diboson", 39);
-  db_stack_UL->add_mcFile( DiBosonFile, "DiBoson", "Diboson", 39);
 
 
   std::string TriBosonFileName = inputDir +  "THq_VGG_8TeV";
@@ -183,7 +184,6 @@ int main(int argc, char* argv[]) {
   TriBosonFileName += ".root";
   TFile* TriBosonFile = TFile::Open(TriBosonFileName.c_str());
   db_stack->add_mcFile( TriBosonFile, "Vgg", "V#gamma#gamma", 40);
-  db_stack_UL->add_mcFile( TriBosonFile, "Vgg", "V#gamma#gamma", 40);
 
 
   std::string TTFileName = inputDir +  "THq_TT_8TeV";
@@ -192,7 +192,6 @@ int main(int argc, char* argv[]) {
   TTFileName += ".root";
   TFile* TTFile = TFile::Open(TTFileName.c_str());
   db_stack->add_mcFile( TTFile, "TT", "Top", 44);
-  db_stack_UL->add_mcFile( TTFile, "TT", "Top", 44);
   //db_nostack->add_mcFile( TTFile, "TT", "Top", 39);
 
   std::string TTGGFileName = inputDir +  "THq_TTbarGG_0Jet_Summer12-PU_S7_START52_V9-v1";
@@ -210,7 +209,6 @@ int main(int argc, char* argv[]) {
   QCDFileName += ".root";
   TFile* QCDFile = TFile::Open(QCDFileName.c_str());
   //db_stack->add_mcFile( QCDFile, "QCD", "QCD", 41);
-  db_stack_UL->add_mcFile( QCDFile, "QCD", "QCD", 41);
 
 
 
@@ -271,8 +269,9 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_top", "eventWeight*isLeptonic", 50, -5, 5, "eta_top_lept", "Top Candidate #eta", "");
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_lept-etagg", "eventWeight*isLeptonic", 50, -5., 5., "deltaEta_lept_higgs", "#Delta#eta (lepton-diphoton)");
-  db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_lept-eta_qJet", "eventWeight*isLeptonic", 50, -5., 5., "deltaEta_lept_qJet", "#Delta#eta (lepton-qJet)");
-  db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_bJet-eta_qJet", "eventWeight*isLeptonic", 50, -5., 5., "deltaEta_bJet_qJet", "#Delta#eta (bJet-qJet)");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_lept-eta_qJet", "eventWeight*isLeptonic", 50, -5., 5., "deltaEta_lept_qJet_lept", "#Delta#eta (lepton-qJet)");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_bJet-eta_qJet", "eventWeight*isLeptonic", 50, -5., 5., "deltaEta_bJet_qJet_lept", "#Delta#eta (bJet-qJet)");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_bJet-eta_qJet", "eventWeight*isLeptonic*(abs(eta_qJet)>2.)", 50, -5., 5., "deltaEta_bJet_qJet_lept_cutEtaQJet", "#Delta#eta (bJet-qJet)");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_top", "eventWeight*(isLeptonic)", 50, 0., 500., "mt_top_lept",  "Top Transverse Mass", "GeV");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_W", "eventWeight*(isLeptonic)", 50, 0., 250., "mt_W_lept",  "W Transverse Mass", "GeV");
 
@@ -299,6 +298,8 @@ int main(int argc, char* argv[]) {
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "eta_top-etagg", "eventWeight*(!isLeptonic)", 50, -5., 5., "deltaEta_top_higgs_hadr", "#Delta#eta (top-diphoton)", "");
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "abs(eta_top)-abs(etagg)", "eventWeight*(!isLeptonic)", 50, -5., 5., "deltaFabsEta_top_higgs_hadr", "#Delta|#eta| (top-diphoton)", "");
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "zeppen", "eventWeight*(!isLeptonic)", 50, -5., 5., "zeppen",  "Zeppendfeld Variable", "");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "eta_bJet-eta_qJet", "eventWeight*(!isLeptonic)", 50, -5., 5., "deltaEta_bJet_qJet_hadr", "#Delta#eta (bJet-qJet)");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "abs(eta_bJet)-abs(eta_qJet)", "eventWeight*(!isLeptonic)", 50, -5., 5., "deltaFabsEta_bJet_qJet_hadr", "#Delta|#eta| (bJet-qJet)");
 
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "eta_top", "eventWeight*(!isLeptonic)", 50, -5, 5, "eta_top_hadr", "Top Candidate #eta", "");
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "pt_top", "eventWeight*(!isLeptonic)", 50, 0., 250., "pt_top_hadr", "Top Candidate p_{T}", "GeV");
@@ -353,10 +354,6 @@ int main(int argc, char* argv[]) {
 
 
 
-  ////Upper limits
-  //db_stack_UL->set_rebin(5);
-  //db_stack_UL->drawHisto("mgg", "DiPhoton Invariant Mass", "GeV");
-  //printYields( db_stack_UL, "all", doUL );
 
 
   return 0;
