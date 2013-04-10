@@ -256,6 +256,7 @@ void RedNtpFinalizer_THq::finalize()
    float deltaR_lept_phot_t;
    float m_ele_phot_t;
    float zeppen_t;
+   float cosThetaStar_t;
 
 
    float eventWeight = 1.;
@@ -313,6 +314,8 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("m_ele_phot",  &m_ele_phot_t, "m_ele_phot_t/F");
    tree_passedEvents->Branch("zeppen",  &zeppen_t, "zeppen_t/F");
 
+   tree_passedEvents->Branch("cosThetaStar",  &cosThetaStar_t, "cosThetaStar/F");
+
    tree_passedEvents->Branch("pt_q",   &pt_q,  "pt_q/F");
    tree_passedEvents->Branch("eta_q",  &eta_q, "eta_q/F");
    tree_passedEvents->Branch("phi_q",  &phi_q, "phi_q/F");
@@ -343,6 +346,9 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("phi_Wqbar",  &phi_Wqbar, "phi_Wqbar/F");
    tree_passedEvents->Branch("e_Wqbar",  &e_Wqbar, "e_Wqbar/F");
 
+
+   TFile* file_thq_hadronic_weights = TFile::Open("thq_hadronic_puweights.root");
+   TH1F* h1_thq_hadronic_weights = (TH1F*)file_thq_hadronic_weights->Get("puweights");
  
 //   std::string qglFileName = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/QGLikelihood/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
    //std::string qglFileName="/afs/cern.ch/user/m/micheli/public/ttH/QG_QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6_Summer12-PU_S7_START52_V9-v1.root";
@@ -456,8 +462,12 @@ void RedNtpFinalizer_THq::finalize()
         h1_nvertex->Fill( nvtx, eventWeight );
 
         // pu/pt reeventWeighting
+        if( dataset_ == "tHqHadronic_mH125_8TeV_testtest" )
+          eventWeight *= h1_thq_hadronic_weights->GetBinContent( nvtx );
+
         if(dopureeventWeight_) eventWeight *= pu_weight; 
         if(doptreeventWeight_) eventWeight *= pt_weight; 
+
 
       }
 
@@ -897,6 +907,12 @@ void RedNtpFinalizer_THq::finalize()
         }
 
 
+        // compute costhetastar:
+        TLorentzVector lept_topF(lept);
+        lept_topF.Boost(-top.BoostVector());
+        TLorentzVector qJet_topF(qJet);
+        qJet_topF.Boost(-top.BoostVector());
+        cosThetaStar_t = cos(lept_topF.Angle(qJet_topF.Vect()));
 
 
 
@@ -1064,6 +1080,17 @@ void RedNtpFinalizer_THq::finalize()
         nCentralJetsHadr_t = nCentralJetsHadr;
 
         if( nCentralJetsHadr_t > nCentralJetsHadr_upper_thresh_ ) continue;
+
+        float deltaEta_bJet_qJet = bJet.Eta()-qJet.Eta();
+        if( fabs(deltaEta_bJet_qJet)<deltaEta_bJet_qJet_thresh_hadr_ ) continue;
+
+        // compute costhetastar:
+        // first boost bjet and qjet in top mass frame
+        TLorentzVector bJet_topF(bJet);
+        bJet_topF.Boost(-top.BoostVector());
+        TLorentzVector qJet_topF(qJet);
+        qJet_topF.Boost(-top.BoostVector());
+        cosThetaStar_t = cos(bJet_topF.Angle(qJet_topF.Vect()));
 
       } //if is hadronic
       
@@ -1968,6 +1995,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
 
   pt_qJet_thresh_hadr_ = 20.;
   nCentralJetsHadr_upper_thresh_ = 1000;
+  deltaEta_bJet_qJet_thresh_hadr_ = 0.;
 
 
   if( selectionType=="presel" ) {
@@ -2040,26 +2068,20 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     nCentralJetsHadr_upper_thresh_ = 1; 
 
 
-  } else if( selectionType=="selBDT0" ) {
+  } else if( selectionType=="sel4" ) {
 
     ptphot1cut_ = 50.;
     ptphot2cut_ = 25.;
+
+    //nbtagmedium_upper_thresh_ = 1;
+    //deltaEta_bJet_qJet_thresh_hadr_ = 1.5;
+
     bdt_lept_thresh_ = 0.2;
 
-  } else if( selectionType=="selBDT1" ) {
-
-    ptphot1cut_ = 50.;
-    ptphot2cut_ = 25.;
-    bdt_lept_thresh_ = 0.3;
-
-  } else if( selectionType=="selBDT2" ) {
-
-    ptphot1cut_ = 50.;
-    ptphot2cut_ = 25.;
-    bdt_lept_thresh_ = 0.2;
-
-    nbtagmedium_upper_thresh_ = 1;
-    nCentralJets_upper_thresh_lept_ = 1;
+    njets_thresh_hadr_ = 4;
+    m_top_thresh_hadr_ = 50.;
+    //m_W_thresh_hadr_ = 30.;
+    pt_qJet_thresh_hadr_ = 40.;
 
 
   } else {
