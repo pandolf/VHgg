@@ -11,6 +11,7 @@ bool separate_signals = true;
 bool Ct_minus1 = true;
 
 void printYields( DrawBase* db, const std::string& suffix, bool doUL=false );
+void drawBDTRoc( DrawBase* db );
 
 
 int main(int argc, char* argv[]) {
@@ -244,6 +245,7 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto_fromTree("tree_passedEvents", "epfMet",   "eventWeight*isLeptonic", 50, 0., 250., "pfMet", "Particle Flow #slash{E}_{T}", "GeV");
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "BDT_lept",   "eventWeight*isLeptonic", 50, -1., 1.0001, "BDT_lept", "Leptonic BDT");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "BDTnew_lept",   "eventWeight*isLeptonic", 50, -1., 1.0001, "BDTnew_lept", "New Leptonic BDT");
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "njets",   "eventWeight*isLeptonic", 9, -0.5, 8.5, "njets_lept", "Number of Jets (p_{T} > 20 GeV)");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "nbjets_loose",   "eventWeight*isLeptonic", 5, -0.5, 4.5,  "nbjets_loose_lept", "Number of b-Jets (Loose)");
@@ -256,7 +258,7 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto_fromTree("tree_passedEvents", "nCentralJets", "eventWeight*isLeptonic", 7, -0.5, 6.5, "nCentralJets_lept", "Number of Additional Jets");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "hardestCentralJetPt", "eventWeight*isLeptonic", 50, 0., 200., "hardestCentralJetPt_lept", "Hardest Additional Jet p_{T}", "GeV", "Events", true);
 
-  db_nostack->drawHisto_fromTree("tree_passedEvents", "pt_qJet",  "eventWeight*isLeptonic", 50, 0., 500., "pt_qJet_lept", "q-Jet Candidate p_{T}", "GeV");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "pt_qJet",  "eventWeight*isLeptonic", 50, 0., 250., "pt_qJet_lept", "q-Jet Candidate p_{T}", "GeV");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_qJet", "eventWeight*isLeptonic", 50, -5, 5, "eta_qJet_lept", "q-Jet Candidate #eta", "");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "qgl_qJet", "eventWeight*isLeptonic", 50, 0., 1.0001, "qgl_qJet_lept", "q-Jet Candidate QGL", "");
 
@@ -274,6 +276,8 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_W", "eventWeight*(isLeptonic)", 50, 0., 250., "mt_W_lept",  "W Transverse Mass", "GeV");
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "cosThetaStar", "eventWeight*(isLeptonic)", 50, -1., 1.0001, "cosThetaStar_lept",  "cos(#theta*)");
+
+  drawBDTRoc( db_nostack );
 
 
   // hadronic channel plots:
@@ -444,4 +448,110 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
   std::cout << "-> Saved yields and ULs in " << yieldsFileName << std::endl; 
 
 }
+
+
+
+void drawBDTRoc( DrawBase* db ) {
+
+  TH1F::AddDirectory(kTRUE);
+
+  TFile* file_thq = db->get_mcFile("tHq").file;
+  TFile* file_tth = db->get_mcFile("TTH").file;
+
+  TTree* tree_thq = (TTree*)file_thq->Get("tree_passedEvents");
+  TTree* tree_tth = (TTree*)file_tth->Get("tree_passedEvents");
+
+  TH1F* h1_BDT_signal = new TH1F("BDT_signal", "", 100, -1., 1.0001); 
+  TH1F* h1_BDT_bg = new TH1F("BDT_bg", "", 100, -1., 1.0001); 
+
+  TH1F* h1_BDTnew_signal = new TH1F("BDTnew_signal", "", 100, -1., 1.0001); 
+  TH1F* h1_BDTnew_bg = new TH1F("BDTnew_bg", "", 100, -1., 1.0001); 
+
+  tree_thq->Project( "BDT_signal", "BDT_lept", "isLeptonic" );
+  tree_thq->Project( "BDTnew_signal", "BDTnew_lept", "isLeptonic" );
+
+  tree_tth->Project( "BDT_bg", "BDT_lept", "isLeptonic" );
+  tree_tth->Project( "BDTnew_bg", "BDTnew_lept", "isLeptonic" );
+
+
+
+  TGraph* gr_RoC_old = new TGraph(0);
+  TGraph* gr_RoC_new = new TGraph(0);
+
+  int nbins = h1_BDTnew_signal->GetNbinsX();
+
+  for( unsigned int ibin=1; ibin<nbins+1; ++ibin ) {
+
+    float eff_s_old = -1.;
+    float eff_b_old = -1.;
+  
+    if( h1_BDT_signal!=0 && h1_BDT_bg!=0 ) {
+      eff_s_old = h1_BDT_signal->Integral( nbins-ibin, nbins )/h1_BDT_signal->Integral( 1, nbins );
+      eff_b_old = h1_BDT_bg->Integral( nbins-ibin, nbins )/h1_BDT_bg->Integral( 1, nbins );
+    }
+  
+  
+    float eff_s_new = h1_BDTnew_signal->Integral( nbins-ibin, nbins )/h1_BDTnew_signal->Integral( 1, nbins );
+    float eff_b_new = h1_BDTnew_bg->Integral( nbins-ibin, nbins )/h1_BDTnew_bg->Integral( 1, nbins );
+  
+    gr_RoC_new->SetPoint( ibin-1, 1.-eff_b_new, eff_s_new );
+
+    if( h1_BDT_signal!=0 && h1_BDT_bg!=0 ) 
+      gr_RoC_old->SetPoint( ibin-1, 1.-eff_b_old, eff_s_old );
+
+  }
+
+
+  gr_RoC_new->SetMarkerSize(1.3);
+  gr_RoC_new->SetMarkerStyle(24);
+  gr_RoC_new->SetMarkerColor(kRed+3);
+
+  if( h1_BDT_signal!=0 && h1_BDT_bg!=0 ) {
+    gr_RoC_old->SetMarkerSize(1.3);
+    gr_RoC_old->SetMarkerStyle(20);
+    gr_RoC_old->SetMarkerColor(kOrange+1);
+  }
+
+
+  TCanvas* c1 = new TCanvas("c1_roc", "", 600, 600);
+  c1->cd();
+
+  TH2D* h2_axes = new TH2D("axes_roc", "", 10, 0., 1.0001, 10, 0., 1.0001);
+  h2_axes->SetXTitle( "t#bar{t}H Rejection" );
+  h2_axes->SetYTitle( "tHq Efficiency" );
+
+  h2_axes->Draw();
+
+  TLine* diag = new TLine(0., 1., 1., 0.);
+  diag->Draw("same");
+
+
+  TLegend* legend = new TLegend( 0.2, 0.2, 0.45, 0.45, "Leptonic Channel" );
+  legend->SetFillColor(0);
+  legend->SetTextSize(0.04);
+  if( h1_BDT_signal!=0 && h1_BDT_bg!=0 )
+    legend->AddEntry( gr_RoC_old, "Old BDT", "P");
+  legend->AddEntry( gr_RoC_new, "New BDT", "P");
+  legend->Draw("same");
+
+  TPaveText* labelTop = db->get_labelTop();
+  labelTop->Draw("same");
+
+
+  
+  if( h1_BDT_signal!=0 && h1_BDT_bg!=0 ) 
+    gr_RoC_old->Draw("p same");
+  gr_RoC_new->Draw("p same");
+
+  gPad->RedrawAxis();
+
+  char canvasName[500];
+  sprintf( canvasName, "%s/RoC_BDT_lept.eps", db->get_outputdir().c_str() );
+  c1->SaveAs(canvasName);
+
+  delete c1;
+  delete h2_axes;
+  delete legend;
+}
+
 
