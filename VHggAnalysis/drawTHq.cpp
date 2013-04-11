@@ -11,7 +11,7 @@ bool separate_signals = true;
 bool Ct_minus1 = true;
 
 void printYields( DrawBase* db, const std::string& suffix, bool doUL=false );
-void drawBDTRoc( DrawBase* db );
+//void drawBDTRoc( DrawBase* db );
 
 
 int main(int argc, char* argv[]) {
@@ -245,7 +245,7 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto_fromTree("tree_passedEvents", "epfMet",   "eventWeight*isLeptonic", 50, 0., 250., "pfMet", "Particle Flow #slash{E}_{T}", "GeV");
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "BDT_lept",   "eventWeight*isLeptonic", 50, -1., 1.0001, "BDT_lept", "Leptonic BDT");
-  db_nostack->drawHisto_fromTree("tree_passedEvents", "BDTnew_lept",   "eventWeight*isLeptonic", 50, -1., 1.0001, "BDTnew_lept", "New Leptonic BDT");
+//  db_nostack->drawHisto_fromTree("tree_passedEvents", "BDTnew_lept",   "eventWeight*isLeptonic", 50, -1., 1.0001, "BDTnew_lept", "New Leptonic BDT");
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "njets",   "eventWeight*isLeptonic", 9, -0.5, 8.5, "njets_lept", "Number of Jets (p_{T} > 20 GeV)");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "nbjets_loose",   "eventWeight*isLeptonic", 5, -0.5, 4.5,  "nbjets_loose_lept", "Number of b-Jets (Loose)");
@@ -451,6 +451,7 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
 
 
 
+/*
 void drawBDTRoc( DrawBase* db ) {
 
   TH1F::AddDirectory(kTRUE);
@@ -554,4 +555,4 @@ void drawBDTRoc( DrawBase* db ) {
   delete legend;
 }
 
-
+*
