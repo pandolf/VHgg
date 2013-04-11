@@ -253,6 +253,7 @@ void RedNtpFinalizer_THq::finalize()
    int   nCentralJetsHadr_t;
    float hardestCentralJetPt_t;
    float deltaPhi_top_higgs_t;
+   float deltaEta_lept_qJet_t;
    float deltaR_lept_phot_t;
    float m_ele_phot_t;
    float zeppen_t;
@@ -305,6 +306,7 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("nCentralJetsHadr",        &nCentralJetsHadr_t,       "nCentralJetsHadr_t/I");
    tree_passedEvents->Branch("hardestCentralJetPt", &hardestCentralJetPt_t,"hardestCentralJetPt_t/F");
    tree_passedEvents->Branch("deltaPhi_top_higgs",  &deltaPhi_top_higgs_t, "deltaPhi_top_higgs_t/F");
+   tree_passedEvents->Branch("deltaEta_lept_qJet",  &deltaEta_lept_qJet_t, "deltaEta_lept_qJet_t/F");
    tree_passedEvents->Branch("mt_top",  &mt_top_t, "mt_top_t/F");
    tree_passedEvents->Branch("m_top",  &m_top_t, "m_top_t/F");
    tree_passedEvents->Branch("mt_W",  &mt_W_t, "mt_W_t/F");
@@ -370,22 +372,24 @@ void RedNtpFinalizer_THq::finalize()
      float eta_qJet_bdt;
      float charge_lept_bdt;
      float pt_bJet_bdt;
+     float deltaEta_lept_qJet_bdt;
+  
   
      reader->AddVariable( "njets", &njets_bdt );
-     reader->AddVariable( "nbjets_loose", &nbjets_loose_bdt );
      reader->AddVariable( "deltaPhi_top_higgs", &deltaPhi_top_higgs_bdt );
      reader->AddVariable( "mt_top", &mt_top_bdt );
      reader->AddVariable( "eta_qJet", &eta_qJet_bdt );
      reader->AddVariable( "charge_lept", &charge_lept_bdt );
-     reader->AddVariable( "pt_bJet", &pt_bJet_bdt );
+     reader->AddVariable( "deltaEta_lept_qJet", &deltaEta_lept_qJet_bdt );
   
      TString methodName = "BDTG method";
      //TString weightfile = "TMVA/weights/prova_nonjets_BDTG.weights.xml";
      TString weightfile = "TMVA/weights/prova_BDTG.weights.xml";
+     TString weightfileNEW = "TMVA/weights/provaNEW_BDTG.weights.xml";
      
   
      std::cout << "-> Booking BDT" << std::endl;
-     reader->BookMVA( methodName, weightfile ); 
+     reader->BookMVA( methodName, weightfileNEW ); 
 
 
 
@@ -834,7 +838,7 @@ void RedNtpFinalizer_THq::finalize()
       TLorentzVector qJet;
       int nCentralJets = 0;
       float hardestCentralJetPt=0.;
-      float eta_thresh_qJet = (isLeptonic_t) ? 0. : 2.;
+      float eta_thresh_qJet = (isLeptonic_t) ? 0. : eta_qJet_thresh_hadr_;
       for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
 
         int i = index_selected[ii];
@@ -865,10 +869,15 @@ void RedNtpFinalizer_THq::finalize()
 
       if( isLeptonic_t ) { 
 
+        deltaEta_lept_qJet_t = fabs( lept.Eta() - qJet.Eta() );
+
         if( fabs(qJet.Eta())<1. ) continue;
         if( njets_selected > njets_upper_thresh_lept_ ) continue;
         if( njets_selected < njets_thresh_lept_ ) continue;
         if( nCentralJets > nCentralJets_upper_thresh_lept_ ) continue;
+        
+        if( deltaEta_lept_qJet_t < deltaEta_lept_qJet_thresh_ ) continue;
+
 
         nCentralJetsHadr_t = 0;
         zeppen_t = -999.;
@@ -1261,6 +1270,7 @@ void RedNtpFinalizer_THq::finalize()
       eta_qJet_bdt           = eta_qJet_t;
       charge_lept_bdt        = charge_lept_t;
       pt_bJet_bdt            = pt_bJet_t;
+      deltaEta_lept_qJet_bdt = deltaEta_lept_qJet_t;
   
       BDT_lept_t = reader->EvaluateMVA( "BDTG method" );
 
@@ -1994,8 +2004,10 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
   m_W_thresh_hadr_ = 10000.;
 
   pt_qJet_thresh_hadr_ = 20.;
+  eta_qJet_thresh_hadr_ = 2.;
   nCentralJetsHadr_upper_thresh_ = 1000;
   deltaEta_bJet_qJet_thresh_hadr_ = 0.;
+  deltaEta_lept_qJet_thresh_ = 0.;
 
 
   if( selectionType=="presel" ) {
@@ -2030,7 +2042,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     njets_thresh_hadr_ = 4;
 
     nbtagmedium_upper_thresh_ = 1;
-    nCentralJets_upper_thresh_lept_ = 1;
+    //nCentralJets_upper_thresh_lept_ = 1;
     bdt_lept_thresh_ = 0.2;
 
     m_top_thresh_hadr_ = 50.;
@@ -2073,15 +2085,17 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     ptphot1cut_ = 50.;
     ptphot2cut_ = 25.;
 
-    //nbtagmedium_upper_thresh_ = 1;
-    //deltaEta_bJet_qJet_thresh_hadr_ = 1.5;
+    //deltaEta_lept_qJet_thresh_ = 1.;
 
     bdt_lept_thresh_ = 0.2;
 
     njets_thresh_hadr_ = 4;
-    m_top_thresh_hadr_ = 50.;
+    m_top_thresh_hadr_ = 40.;
     //m_W_thresh_hadr_ = 30.;
-    pt_qJet_thresh_hadr_ = 40.;
+    eta_qJet_thresh_hadr_ = 2.0;
+    pt_qJet_thresh_hadr_ = 45.;
+    nCentralJetsHadr_upper_thresh_ = 1; 
+
 
 
   } else {

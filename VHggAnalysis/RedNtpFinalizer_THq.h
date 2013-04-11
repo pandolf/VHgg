@@ -940,7 +940,10 @@ public :
    float m_top_thresh_hadr_;
    float m_W_thresh_hadr_;
    float pt_qJet_thresh_hadr_;
+   float eta_qJet_thresh_hadr_;
    int  nCentralJetsHadr_upper_thresh_;
+   float deltaEta_bJet_qJet_thresh_hadr_;
+   float deltaEta_lept_qJet_thresh_;
 
    float ptLept_thresh_;
 
