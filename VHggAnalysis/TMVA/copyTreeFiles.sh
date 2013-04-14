@@ -1,0 +1,2 @@
+cp ../finalizedTrees_THq_feasibility/THq_TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_isLeptonic_CSV.root .
+cp ../finalizedTrees_THq_feasibility/THq_tHqLeptonic_mH125_8TeV_testtest_presel_isLeptonic_CSV.root .
