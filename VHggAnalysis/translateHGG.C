@@ -142,6 +142,7 @@ void translateHGG::Loop()
       
 
       if( category!=11 ) continue;
+      if( PhotonsMass<100. || PhotonsMass>180. ) continue;
       if( PhotonsMass>115. && PhotonsMass<135. ) continue; //blinding
 
       TLorentzVector phot1, phot2;
@@ -501,8 +502,8 @@ std::cout << "**************************************************  isLeptonic" <<
 
 
    std::cout << "Events passing selections: " <<std::endl;
-   std::cout << " + Hadronic Channel: " << tree->GetEntries("!isLeptonic") << std::endl;
-   std::cout << " + Leptonic Channel: " << tree->GetEntries("isLeptonic") << std::endl;
+   std::cout << " + Hadronic Channel: " << tree->GetEntries("!isLeptonic") << " (baseline)   \t" << tree->GetEntries("!isLeptonic && nCentralJets<2") << " (plus CJV)" << std::endl;
+   std::cout << " + Leptonic Channel: " << tree->GetEntries("isLeptonic") << " (baseline)  \t" << tree->GetEntries("isLeptonic && BDT_lept>0.2") << " (plus BDT)" << std::endl;
 
    outfile->cd();
 
