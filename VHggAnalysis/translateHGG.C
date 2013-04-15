@@ -232,6 +232,44 @@ void translateHGG::Loop()
       }
 
 
+
+
+
+
+      nBJetsLoose=0;
+      if( j1_algoPF1_csvBtag>0.244 ) { 
+        nBJetsLoose++;
+      }
+      if( j2_algoPF1_csvBtag>0.244 ) { 
+        nBJetsLoose++;
+      }
+      if( j3_algoPF1_csvBtag>0.244 ) { 
+        nBJetsLoose++;
+      }
+      if( j4_algoPF1_csvBtag>0.244 ) { 
+        nBJetsLoose++;
+      }
+      if( j5_algoPF1_csvBtag>0.244 ) { 
+        nBJetsLoose++;
+      }
+      if( j6_algoPF1_csvBtag>0.244 ) { 
+        nBJetsLoose++;
+      }
+      if( j7_algoPF1_csvBtag>0.244 ) { 
+        nBJetsLoose++;
+      }
+      if( j8_algoPF1_csvBtag>0.244 ) { 
+        nBJetsLoose++;
+      }
+      if( j9_algoPF1_csvBtag>0.244 ) { 
+        nBJetsLoose++;
+      }
+      if( j10_algoPF1_csvBtag>0.244 ) { 
+        nBJetsLoose++;
+      }
+
+
+
       if( nBJetsMedium<1 ) continue;
       if( bJet.Pt()< 20. ) {
         std::cout << "AAAAAAAAH!!! LE FOTTUTE SCIMMIE." << std::endl;
@@ -403,7 +441,7 @@ std::cout << "**************************************************  isLeptonic" <<
         std::cout << "-------------------------------------------------------------------------------" << std::endl;
         std::cout << "*** Event passing LEPTONIC channel selection: run: " << run << " event: " << event << std::endl;
         std::cout << "+ phot1: pt: \t" << phot1.Pt() << " eta: \t" << phot1.Eta() << " phi: \t" << phot1.Phi() << std::endl;
-        std::cout << "+ phot2: pt: \t " << phot2.Pt() << " eta: \t" << phot2.Eta() << " phi: \t" << phot2.Phi() << std::endl;
+        std::cout << "+ phot2: pt: \t" << phot2.Pt() << " eta: \t" << phot2.Eta() << " phi: \t" << phot2.Phi() << std::endl;
         std::cout << "+ Lepton: pt: \t" << lept.Pt() << " eta: \t" << lept.Eta() << " phi: \t" << lept.Phi() << std::endl;
         std::cout << "+ qJet: pt: \t" << qJet.Pt() << " eta: \t" << qJet.Eta() << " phi: \t" << qJet.Phi() << std::endl;
         std::cout << "njets             : " << njets_bdt              << std::endl;
@@ -479,11 +517,13 @@ std::cout << "**************************************************  isLeptonic" <<
         std::cout << "-------------------------------------------------------------------------------" << std::endl;
         std::cout << "*** Event passing HADRONIC channel selection: run: " << run << " event: " << event << std::endl;
         std::cout << "+ phot1: pt: \t" << phot1.Pt() << " eta: \t" << phot1.Eta() << " phi: \t" << phot1.Phi() << std::endl;
-        std::cout << "+ phot2: pt: \t " << phot2.Pt() << " eta: \t" << phot2.Eta() << " phi: \t" << phot2.Phi() << std::endl;
+        std::cout << "+ phot2: pt: \t" << phot2.Pt() << " eta: \t" << phot2.Eta() << " phi: \t" << phot2.Phi() << std::endl;
         std::cout << "+ qJet: pt: \t" << qJet.Pt() << " eta: \t" << qJet.Eta() << " phi: \t" << qJet.Phi() << std::endl;
         std::cout << "+ jetW1: pt: \t" << jetW1.Pt() << " eta: \t" << jetW1.Eta() << " phi: \t" << jetW1.Phi() << std::endl;
         std::cout << "+ jetW2: pt: \t" << jetW2.Pt() << " eta: \t" << jetW2.Eta() << " phi: \t" << jetW2.Phi() << std::endl;
         std::cout << "nJets             : " << nJets              << std::endl;
+        std::cout << "nBJetsLoose       : " << nBJetsLoose          << std::endl;
+        std::cout << "nBJetsMedium      : " << nBJetsMedium          << std::endl;
         std::cout << "nCentralJets      : " << nCentralJets              << std::endl;
         std::cout << "m_top             : " << top.M()             << std::endl;
         std::cout << "m_W               : " << W.M()             << std::endl;
