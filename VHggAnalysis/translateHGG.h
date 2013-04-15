@@ -11,6 +11,8 @@
 #include <TChain.h>
 #include <TFile.h>
 
+#include <iostream>
+
 // Header file for the classes stored in the TTree if any.
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
@@ -418,7 +420,7 @@ public :
    TBranch        *b_met_pfmet;   //!
    TBranch        *b_met_phi_pfmet;   //!
 
-   translateHGG(TTree *tree=0);
+   translateHGG(std::string suffix = "tHq_loose");
    virtual ~translateHGG();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -427,25 +429,25 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
+
+   std::string suffix_;
+
 };
 
 #endif
 
 #ifdef translateHGG_cxx
-translateHGG::translateHGG(TTree *tree) : fChain(0) 
+translateHGG::translateHGG(std::string suffix) : fChain(0) 
 {
-// if parameter tree is not specified (or zero), connect the file
-// used to generate this class and read the Tree.
-   if (tree == 0) {
 
-      // The following code should be used if you want this class to access
-      // a single tree instead of a chain
-      //TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/afs/cern.ch/work/p/pandolf/public/histograms_CMS-HGG_OLD.root");
-      TFile *f ;
-      if (!f || !f->IsOpen()) {
-         f = new TFile("/afs/cern.ch/work/p/pandolf/public/histograms_CMS-HGG_NEW.root");
-      }
-      f->GetObject("Data",tree);
+  suffix_ = suffix;
+  std::string fileName = "/afs/cern.ch/work/p/pandolf/public/histograms_" + suffix + ".root";
+  std::cout << "Opening file: " << fileName  << std::endl;
+
+  TFile *f ;
+  f = new TFile(fileName.c_str());
+  TTree* tree;
+  f->GetObject("Data",tree);
 
 //#else // SINGLE_TREE
 //
@@ -456,7 +458,6 @@ translateHGG::translateHGG(TTree *tree) : fChain(0)
 //      tree = chain;
 //#endif // SINGLE_TREE
 
-   }
    Init(tree);
 }
 
