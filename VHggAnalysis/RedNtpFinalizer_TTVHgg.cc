@@ -337,6 +337,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
    float ptRunPhot2_t;
    float etaPhot1_t;
    float etaPhot2_t;
+   float phiPhot1_t;
+   float phiPhot2_t;
    float mgg_t;
    float pt_scaled_weight_t;
    float pt_scaled_2D_weight_t;
@@ -387,6 +389,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    TTree* tree_passedEvents = new TTree();
    tree_passedEvents->SetName("tree_passedEvents");
    tree_passedEvents->Branch( "run", &run, "run/I" );
+   tree_passedEvents->Branch( "isFirstPhotAnEle", &isFirstPhotAnEle, "isFirstPhotAnEle/I" );
    tree_passedEvents->Branch( "lumi", &lumi, "lumi/I" );
    tree_passedEvents->Branch( "event", &event, "event/I" );
    tree_passedEvents->Branch( "eventWeight", &eventWeight, "eventWeight/F" );
@@ -401,6 +404,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "ptRunPhot2", &ptRunPhot2_t, "ptRunPhot2_t/F" );
    tree_passedEvents->Branch( "etaPhot1", &etaPhot1_t, "etaPhot1_t/F" );
    tree_passedEvents->Branch( "etaPhot2", &etaPhot2_t, "etaPhot2_t/F" );
+   tree_passedEvents->Branch( "phiPhot1", &phiPhot1_t, "phiPhot1_t/F" );
+   tree_passedEvents->Branch( "phiPhot2", &phiPhot2_t, "phiPhot2_t/F" );
    tree_passedEvents->Branch( "mgg", &mgg_t, "mgg_t/F" );
    tree_passedEvents->Branch( "ptgg", &ptgg_t, "ptgg_t/F" );
    tree_passedEvents->Branch( "ptRungg", &ptRungg_t, "ptRungg_t/F" );
@@ -555,6 +560,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
    h1_nGenEvents->SetBinContent(1, nGenEvents_);
 
+   int matched=0,total=0;//for gluon bb splitting NOT USEFUL
 
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
 
@@ -638,7 +644,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       }
 
       if(ptphot1 < ptphot1cut_*massggnewvtx/120.) continue; //pt first photon
-      if(ptphot2 < ptphot2cut_* massggnewvtx/120.) continue; //pt second photon
+      //      if(ptphot2 < ptphot2cut_* massggnewvtx/120.) continue; //pt second photon
 
       if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed photon analysis pt thresholds." << std::endl;
@@ -681,6 +687,20 @@ void RedNtpFinalizer_TTVHgg::finalize()
       }else{
 	idphot1 = (idcicpfphot1 >= photonID_thresh_);
 	idphot2 = (idcicpfphot2 < photonID_thresh_);
+      }
+
+      if(eleVeto_){
+	if(idcicpfphot1>0 && idcicpfphot2<0){
+	  isFirstPhotAnEle=0;
+	  idphot1 = (idcicpfphot1 >= photonID_thresh_);
+	  idphot2 = (idcicpfphot2 < photonID_thresh_);
+	}else if(idcicpfphot1<0 && idcicpfphot2>0){
+	  isFirstPhotAnEle=1;
+	  idphot1 = (idcicpfphot1 < photonID_thresh_);
+	  idphot2 = (idcicpfphot2 >= photonID_thresh_);
+	}else{
+	  continue;
+	}
       }
 
       if(!cs_){ // photon id no control sample
@@ -809,6 +829,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
         } else {
           std::cout<<"WARNING: btag type "<<bTaggerType_<<"not found"<<std::endl;
         }
+
+
       
         //// then modify btags with Scale Factors:
         if( isMC )
@@ -846,7 +868,44 @@ void RedNtpFinalizer_TTVHgg::finalize()
       
       } //for jets
       
+
+      //check gluon splitting NOT USEFUL
+
+      for( unsigned ijet=0; ijet<njets; ++ijet ) {
+      	if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
+	  std::cout << ijet << "/" << njets << " pt: " << ptcorrjet[ijet] << " eta: " << etajet[ijet] << std::endl;
+	}
+	if( ptcorrjet[ijet] < 25. ) continue;
+	if( fabs(etajet[ijet]) > 2.4 ) continue;
+	
+        //jet PU ID:
+        bool passedPUID = true;
+        if(use_PUID_){
+          if((ijet+1)>=njets_PUID_thresh_){
+            if(TMath::Abs(etajet[ijet]) < 2.5) {
+	      if(betastarjet[ijet]<0)passedPUID=false;
+	      if(betastarjet[ijet] > 0.2 * log( nvtx - PUID_betastar_thresh_ ) ) passedPUID = false;
+              if(rmsjet[ijet] > 0.06) passedPUID = false;
+            } else if(TMath::Abs(etajet[ijet]) < 3.){
+              if(rmsjet[ijet] > 0.05) passedPUID = false;
+            } else {
+              if(rmsjet[ijet] > 0.055) passedPUID = false;
+            }
+          }
+          if( !passedPUID )continue;
+        }
       
+      if( isMC && njets_selected_btagmedium>=1 && njets_selected>=1 && btagcsvjet[ijet]>0.679) {
+	if(abs(partPdgIDjet[ijet])==5){
+	  matched++;
+	}
+	total++;
+	break;
+      }
+
+      }
+
+
       
       // define m3:
       float triJetPtMax=0.;
@@ -1242,9 +1301,10 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
         category_t = 1;
         if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_ttH_hadronic->Fill( massggnewvtx, eventWeight );
-      
-      
-      
+
+	h1_ptOtherJets[lastJetIndex]->Fill(ptJet_t[lastJetIndex]);
+	//std::cout<<lastJetIndex<<" "<<ptJet_t[lastJetIndex]<<endl;      
+
       
       // *****   VH btagged category: 
       // *****   (2 jets, >=1 btag loose)
@@ -1498,6 +1558,9 @@ void RedNtpFinalizer_TTVHgg::finalize()
       ptRunPhot2_t = ptphot2*120./massggnewvtx;
       etaPhot1_t = etaphot1;
       etaPhot2_t = etaphot2;
+      phiPhot1_t = phiphot1;
+      phiPhot2_t = phiphot2;
+
       if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) ){
         mgg_t = diphot.M();
       }else{
@@ -1528,7 +1591,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
    } //for entries
 
-
+      cout<<"matched"<<matched<<" total"<<total<<" fraction:"<<(float)matched/total<<endl;
    std::cout << "-> Leading jets: Chose correct jet pair in " << correctPairs_lead/allPairs*100. << "%% of the cases." << std::endl;
    std::cout << "-> Fancy jets: Chose correct jet pair in " << correctPairs_fancy/allPairs*100. << "%% of the cases." << std::endl;
 
@@ -2184,6 +2247,7 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
 
   Ht_thresh_=0;
   invert_photonCuts_=false;
+  eleVeto_=false;
   use_PUID_=true;
 
   njets_PUID_thresh_=0;
@@ -2462,7 +2526,37 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
 
 
 
-  } else if ( selectionType=="ttHsel" ){
+  } else if ( selectionType=="elevetoOnOnePho" ){
+    //optsel4 with eleVeto
+    njets_ttH_hadronic_thresh_ = 5;
+    njets_ttH_leptonic_thresh_ = 3;
+
+    ptphot1cut_ = 60.;
+    ptphot2cut_ = 25.;
+    
+    ebeb_VHnotag_thresh_ = false;
+    
+    ptgg_VHnotag_thresh_ = 90.;
+    ptgg_VHbtag_thresh_ = 70.;
+
+    ptjet_VHnotag_thresh_ = 30.;
+    ptjet_VHbtag_thresh_ = 20.;
+
+    costhetastar_VHnotag_thresh_ = 0.57;
+    costhetastar_VHbtag_thresh_ = 0.84;
+
+    mjj_min_VHbtag_thresh_ = 60.;
+    mjj_max_VHbtag_thresh_ = 120.;
+
+    mjj_min_VHnotag_thresh_ = 60.;
+    mjj_max_VHnotag_thresh_ = 120.;
+
+    PUID_betastar_thresh_=0.64;
+    chooseBtaggedJets_=true;//be careful with this
+
+    eleVeto_=true;
+
+  }  else if ( selectionType=="ttHsel" ){
 
     ptphot1cut_ = 33.;
     ptphot2cut_ = 25.;
