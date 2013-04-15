@@ -400,11 +400,11 @@ std::cout << "**************************************************  isLeptonic" <<
 
         std::cout << std::endl << std::endl;
         std::cout << "-------------------------------------------------------------------------------" << std::endl;
-        std::cout << "*** Event passing lepton channel selection: run: " << run << " event: " << event << std::endl;
-        std::cout << "+ phot1: pt: " << phot1.Pt() << " eta: " << phot1.Eta() << " phi: " << phot1.Phi() << std::endl;
-        std::cout << "+ phot2: pt: " << phot2.Pt() << " eta: " << phot2.Eta() << " phi: " << phot2.Phi() << std::endl;
-        std::cout << "+ Lepton: pt: " << lept.Pt() << " eta: " << lept.Eta() << " phi: " << lept.Phi() << std::endl;
-        std::cout << "+ qJet: pt: " << qJet.Pt() << " eta: " << qJet.Eta() << " phi: " << qJet.Phi() << std::endl;
+        std::cout << "*** Event passing LEPTONIC channel selection: run: " << run << " event: " << event << std::endl;
+        std::cout << "+ phot1: pt: \t" << phot1.Pt() << " eta: \t" << phot1.Eta() << " phi: \t" << phot1.Phi() << std::endl;
+        std::cout << "+ phot2: pt: \t " << phot2.Pt() << " eta: \t" << phot2.Eta() << " phi: \t" << phot2.Phi() << std::endl;
+        std::cout << "+ Lepton: pt: \t" << lept.Pt() << " eta: \t" << lept.Eta() << " phi: \t" << lept.Phi() << std::endl;
+        std::cout << "+ qJet: pt: \t" << qJet.Pt() << " eta: \t" << qJet.Eta() << " phi: \t" << qJet.Phi() << std::endl;
         std::cout << "njets             : " << njets_bdt              << std::endl;
         std::cout << "deltaPhi_top_higgs: " << deltaPhi_top_higgs_bdt << std::endl;
         std::cout << "mt_top            : " << mt_top_bdt             << std::endl;
@@ -421,82 +421,77 @@ std::cout << "**************************************************  isLeptonic" <<
       } else {
 
 
-        continue;
+        // *** HADRONIC CHANNEL
 
-//      // *** HADRONIC CHANNEL
+        if( qJet.Pt()< 45. ) continue;
 
-//      if( index_qJet<0 ) continue;
-
-//      TLorentzVector qJet;
-//      int i_qJet=0;
-//      if( fabs(j1_eta)>2. && i_bJet!=1 ) {
-//        qJet.SetPtEtaPhiE( j1_pt, j1_eta, j1_phi, j1_e );
-//        i_qJet=1;
-//      } else if( fabs(j2_eta)>2. && i_bJet!=2 ) {
-//        qJet.SetPtEtaPhiE( j2_pt, j2_eta, j2_phi, j2_e );
-//        i_qJet=2;
-//      } else if( fabs(j3_eta)>2. && i_bJet!=3 ) {
-//        qJet.SetPtEtaPhiE( j3_pt, j3_eta, j3_phi, j3_e );
-//        i_qJet=3;
-//      } else if( fabs(j4_eta)>2. && i_bJet!=4 ) {
-//        qJet.SetPtEtaPhiE( j4_pt, j4_eta, j4_phi, j4_e );
-//        i_qJet=4;
-//      } else if( fabs(j5_eta)>2. && i_bJet!=5 ) {
-//        qJet.SetPtEtaPhiE( j5_pt, j5_eta, j5_phi, j5_e );
-//        i_qJet=5;
-//      } else if( fabs(j6_eta)>2. && i_bJet!=6 ) {
-//        qJet.SetPtEtaPhiE( j6_pt, j6_eta, j6_phi, j6_e );
-//        i_qJet=6;
-//      } else if( fabs(j7_eta)>2. && i_bJet!=7 ) {
-//        qJet.SetPtEtaPhiE( j7_pt, j7_eta, j7_phi, j7_e );
-//        i_qJet=7;
-//      } else if( fabs(j8_eta)>2. && i_bJet!=8 ) {
-//        qJet.SetPtEtaPhiE( j8_pt, j8_eta, j8_phi, j8_e );
-//        i_qJet=8;
-//      } else if( fabs(j9_eta)>2. && i_bJet!=9 ) {
-//        qJet.SetPtEtaPhiE( j9_pt, j9_eta, j9_phi, j9_e );
-//        i_qJet=9;
-//      } else if( fabs(j10_eta)>2. && i_bJet!=10 ) {
-//        qJet.SetPtEtaPhiE( j10_pt, j10_eta, j10_phi, j10_e );
-//        i_qJet=10;
-//      }
+        if( nJets < 4 ) continue;
 
 
-//      if( i_qJet==0 ) continue;
-//      if( qJet.Pt()< 45. ) continue;
+        float maxDeltaPhi=0;
+        int i_jetW1=-1;
+        int i_jetW2=-1;
+        
+        // define top candidate as the one maximising deltaPhi(top, higgs):
+        for( unsigned i=0; i<jets.size(); ++i ) {
+          for( unsigned j=i+1; j<jets.size(); ++j ) {
+
+            if( (i+1)==i_bJet || (j+1)==i_bJet ) continue;
+            if( (i+1)==i_qJet || (j+1)==i_qJet ) continue;
 
 
-//      nCentralJets=0;
-//      if( i_qJet!=1  && i_bJet!=1  && i_W1Jet!=1  && i_W2Jet!=1  && fabs(j1_eta)<2. && j1_pt>20. ) nCentralJets++;
-//      if( i_qJet!=2  && i_bJet!=2  && i_W1Jet!=2  && i_W2Jet!=2  && fabs(j2_eta)<2. && j2_pt>20. ) nCentralJets++;
-//      if( i_qJet!=3  && i_bJet!=3  && i_W1Jet!=3  && i_W2Jet!=3  && fabs(j3_eta)<2. && j3_pt>20. ) nCentralJets++;
-//      if( i_qJet!=4  && i_bJet!=4  && i_W1Jet!=4  && i_W2Jet!=4  && fabs(j4_eta)<2. && j4_pt>20. ) nCentralJets++;
-//      if( i_qJet!=5  && i_bJet!=5  && i_W1Jet!=5  && i_W2Jet!=5  && fabs(j5_eta)<2. && j5_pt>20. ) nCentralJets++;
-//      if( i_qJet!=6  && i_bJet!=6  && i_W1Jet!=6  && i_W2Jet!=6  && fabs(j6_eta)<2. && j6_pt>20. ) nCentralJets++;
-//      if( i_qJet!=7  && i_bJet!=7  && i_W1Jet!=7  && i_W2Jet!=7  && fabs(j7_eta)<2. && j7_pt>20. ) nCentralJets++;
-//      if( i_qJet!=8  && i_bJet!=8  && i_W1Jet!=8  && i_W2Jet!=8  && fabs(j8_eta)<2. && j8_pt>20. ) nCentralJets++;
-//      if( i_qJet!=9  && i_bJet!=9  && i_W1Jet!=9  && i_W2Jet!=9  && fabs(j9_eta)<2. && j9_pt>20. ) nCentralJets++;
-//      if( i_qJet!=10 && i_bJet!=10 && i_W1Jet!=10 && i_W2Jet!=10 && fabs(j10_eta)<2. && j10_pt>20. ) nCentralJets++;
-//      if( nCentralJets>1 ) continue;
-//    //  std::cout << "SCIMMIE FOTTUTE." << std::endl;
-//    //  exit(11);
-//    //}
+            TLorentzVector jetW1_tmp = jets[i];
+            TLorentzVector jetW2_tmp = jets[j];
 
-//    nJets=0;
-//    if( j1_pt>20. ) nJets++;
-//    if( j2_pt>20. ) nJets++;
-//    if( j3_pt>20. ) nJets++;
-//    if( j4_pt>20. ) nJets++;
-//    if( j5_pt>20. ) nJets++;
-//    if( j6_pt>20. ) nJets++;
-//    if( j7_pt>20. ) nJets++;
-//    if( j8_pt>20. ) nJets++;
-//    if( j9_pt>20. ) nJets++;
-//    if( j10_pt>20. ) nJets++;
-//    if( nJets<3 ) continue;
+            TLorentzVector top_tmp = jetW1_tmp+jetW2_tmp+bJet;
+
+            float thisDeltaPhi = fabs(top_tmp.DeltaPhi(diphot));
+            if( thisDeltaPhi>maxDeltaPhi ) {
+              maxDeltaPhi=thisDeltaPhi;
+              i_jetW1 = i;
+              i_jetW2 = j;
+            }
+
+          } //j
+        } //i
 
 
-      } // laptonic/hadronic channels
+        if( i_jetW1<0 || i_jetW2<0 ) continue;
+
+        TLorentzVector jetW1 = jets[i_jetW1];
+        TLorentzVector jetW2 = jets[i_jetW2];
+
+        if( fabs(jetW1.Eta())<2. ) nCentralJets--;
+        if( fabs(jetW2.Eta())<2. ) nCentralJets--;
+
+
+        TLorentzVector W = jetW1 + jetW2;
+
+        TLorentzVector top = bJet + W;
+
+        float Wmass = 80.4;
+
+        if( fabs(top.M()-172.5)>40. ) continue;
+
+
+        std::cout << std::endl << std::endl;
+        std::cout << "-------------------------------------------------------------------------------" << std::endl;
+        std::cout << "*** Event passing HADRONIC channel selection: run: " << run << " event: " << event << std::endl;
+        std::cout << "+ phot1: pt: \t" << phot1.Pt() << " eta: \t" << phot1.Eta() << " phi: \t" << phot1.Phi() << std::endl;
+        std::cout << "+ phot2: pt: \t " << phot2.Pt() << " eta: \t" << phot2.Eta() << " phi: \t" << phot2.Phi() << std::endl;
+        std::cout << "+ qJet: pt: \t" << qJet.Pt() << " eta: \t" << qJet.Eta() << " phi: \t" << qJet.Phi() << std::endl;
+        std::cout << "+ jetW1: pt: \t" << jetW1.Pt() << " eta: \t" << jetW1.Eta() << " phi: \t" << jetW1.Phi() << std::endl;
+        std::cout << "+ jetW2: pt: \t" << jetW2.Pt() << " eta: \t" << jetW2.Eta() << " phi: \t" << jetW2.Phi() << std::endl;
+        std::cout << "nJets             : " << nJets              << std::endl;
+        std::cout << "nCentralJets      : " << nCentralJets              << std::endl;
+        std::cout << "m_top             : " << top.M()             << std::endl;
+        std::cout << "m_W               : " << W.M()             << std::endl;
+        std::cout << "mgg: " << diphot.M() << std::endl;
+        std::cout << "-------------------------------------------------------------------------------" << std::endl;
+        std::cout << std::endl << std::endl;
+
+
+      } // leptonic/hadronic channels
 
 
       tree->Fill();
@@ -505,7 +500,9 @@ std::cout << "**************************************************  isLeptonic" <<
    }
 
 
-   std::cout << "Events passing selections: " << tree->GetEntries() << std::endl;
+   std::cout << "Events passing selections: " <<std::endl;
+   std::cout << " + Hadronic Channel: " << tree->GetEntries("!isLeptonic") << std::endl;
+   std::cout << " + Leptonic Channel: " << tree->GetEntries("isLeptonic") << std::endl;
 
    outfile->cd();
 
