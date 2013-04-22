@@ -58,20 +58,30 @@ int main( int argc, char* argv[] ) {
     finalize_oneDataset(redntpVersion, "Photon-Run2012A-13Jul2012-v1", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "Photon-Run2012A-recover-06Aug2012-v1", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-EcalRecover_11Dec2012-v1", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-PromptReco-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-24Aug2012-v2", selectionType, bTaggerType, datasets);//-EcalRecover_11Dec2012-v1 is missing
     finalize_oneDataset(redntpVersion, "DoublePhoton_Run2012D-PromptReco-v1", selectionType, bTaggerType, datasets);
 
 
-  } else if (dataset=="DATA_Run2012_SinglePhoton"){
-    finalize_oneDataset(redntpVersion, "Photon_Run2012A-13Jul2012-v1", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "Photon-Run2012A-recover-06Aug2012-v1", selectionType, bTaggerType, datasets);
+  } else if (dataset=="DATA_Run2012_SinglePhoton_ALL"){
     finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-EcalRecover_11Dec2012-v1", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-PromptReco-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-24Aug2012-v1", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012D-PromptReco-v1", selectionType, bTaggerType, datasets);
 
-  } else  if( dataset=="DATA_Run2011_FULL" ) {
+  }else if (dataset=="DATA_Run2012_SinglePhoton_ALL_2"){//run A alone since you do not have double photon
+    finalize_oneDataset(redntpVersion, "Photon_Run2012A-13Jul2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "Photon-Run2012A-recover-06Aug2012-v1", selectionType, bTaggerType, datasets);
+   
+  } else if(dataset=="DATA_Run2012_DoublePhoton_ALL"){
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-PromptReco-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-24Aug2012-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton_Run2012D-PromptReco-v1", selectionType, bTaggerType, datasets);
+
+
+    }else  if( dataset=="DATA_Run2011_FULL" ) {
    
     finalize_oneDataset(redntpVersion, "DoubleMu_Run2011A_FULL", selectionType, bTaggerType, datasets); //first muons! important!
     finalize_oneDataset(redntpVersion, "DoubleMu_Run2011B_v2", selectionType, bTaggerType, datasets); //first muons! important!
@@ -325,8 +335,20 @@ RedntpDirStruct get_dirs( const std::string& prodVersion ) {
   } else if ( prodVersion=="moriond_dataset"){
 
     returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
-    returnStruct.datadir = "redntp.53xv2_data.cicpfloose.scales-Lisbon-Hgg.moriond_dataset/merged";
+    returnStruct.datadir = "redntp.53xv2_data.cicpfloose.scales-Moriond-Hgg_2.moriond_dataset/merged";
     returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.qg_version_2/merged";
+
+  } else if ( prodVersion=="moriond_dataset_preselectionCS"){
+
+    returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
+    returnStruct.datadir = "redntp.53xv2_data.preselectionCS.scales-Moriond-Hgg_2.moriond_dataset/merged";
+    returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.qg_version_2/merged";
+
+  } else if ( prodVersion=="moriond_dataset_elevetoOnOnePho"){
+
+    returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
+    returnStruct.datadir = "redntp.53xv2_data.cicpfloosenoelevetoOnOnePho.scales-Lisbon-Hgg.moriond_dataset_eleveto/merged";
+    returnStruct.mcdir = "redntp.52xv5.cicpfloosenoelevetoOnOnePho.scales-Lisbon-Hgg.qg_version_2/merged";
 
   }else {
 
