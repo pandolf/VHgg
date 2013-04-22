@@ -1,6 +1,7 @@
 #include "RedNtpFinalizer_THq.h"
 
 #include "QGLikelihood/interface/QGLikelihoodCalculator.h"
+#include "THqStudies/THqLeptonicLikelihood/interface/THqLeptonicLikelihoodCalculator.h"
 
 #include "BTagSFUtil/interface/BTagSFUtil.h"
 
@@ -65,8 +66,18 @@ void RedNtpFinalizer_THq::finalize()
    TH1D*  h1_nGenEvents = new TH1D("nGenEvents", "", 1, 0., 1.);
    h1_nGenEvents->Sumw2();
 
-   TH1D*  h1_cutFlow = new TH1D("cutFlow", "", 10, 0.5, 10.5);
-   h1_cutFlow->Sumw2();
+   TH1D*  h1_cutFlow_lept = new TH1D("cutFlow_lept", "", 6, 0., 6.);
+   h1_cutFlow_lept->Sumw2();
+   h1_cutFlow_lept->GetXaxis()->SetLabelSize(0.1);
+   h1_cutFlow_lept->GetXaxis()->SetBinLabel(1, "#gamma presel");
+   h1_cutFlow_lept->GetXaxis()->SetBinLabel(2, "#gamma running cut");
+   h1_cutFlow_lept->GetXaxis()->SetBinLabel(3, "b-tag");
+   h1_cutFlow_lept->GetXaxis()->SetBinLabel(4, "q-Jet");
+   h1_cutFlow_lept->GetXaxis()->SetBinLabel(5, "CJV");
+   h1_cutFlow_lept->GetXaxis()->SetBinLabel(6, "BDT");
+
+   TH1D*  h1_cutFlow_hadr = new TH1D("cutFlow_hadr", "", 6, 0., 6.);
+   h1_cutFlow_hadr->Sumw2();
 
 
    TH1D*  h1_nvertex = new TH1D("nvertex", "", 51, -0.5, 50.5);
@@ -167,6 +178,8 @@ void RedNtpFinalizer_THq::finalize()
    h1_mgg_lept_BDT->Sumw2();
    TH1D* h1_mgg_hadr= new TH1D("mgg_hadr", "", 80, 100., 180.);
    h1_mgg_hadr->Sumw2();
+   TH1D* h1_mgg_hadr_centralJetVeto= new TH1D("mgg_hadr_centralJetVeto", "", 80, 100., 180.);
+   h1_mgg_hadr_centralJetVeto->Sumw2();
 
 
 
@@ -183,6 +196,9 @@ void RedNtpFinalizer_THq::finalize()
 
    TH1D* h1_BDTlept_lept = new TH1D("BDTlept_lept", "", 100, -1., 1.0001);
    h1_BDTlept_lept->Sumw2();
+
+   TH1D* h1_LDlept_lept = new TH1D("LDlept_lept", "", 100, 0., 1.0001);
+   h1_LDlept_lept->Sumw2();
 
 
    // MC:
@@ -220,7 +236,7 @@ void RedNtpFinalizer_THq::finalize()
    float etagg_t;
    float ptRungg_t;
 
-   float Ht_t;
+   float Ht_t, mHt_t, mSt_t;
 
    int hasPassedSinglePhot_t;
    int hasPassedDoublePhot_t;
@@ -230,6 +246,7 @@ void RedNtpFinalizer_THq::finalize()
    float mt_W_t;
    float m_W_t;
    float BDT_lept_t;
+   float LD_lept_t;
 
    bool isLeptonic_t;
    bool isMu_t;
@@ -254,6 +271,7 @@ void RedNtpFinalizer_THq::finalize()
    float hardestCentralJetPt_t;
    float deltaPhi_top_higgs_t;
    float deltaEta_lept_qJet_t;
+   float deltaEta_bJet_qJet_t;
    float deltaR_lept_phot_t;
    float m_ele_phot_t;
    float zeppen_t;
@@ -307,11 +325,13 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("hardestCentralJetPt", &hardestCentralJetPt_t,"hardestCentralJetPt_t/F");
    tree_passedEvents->Branch("deltaPhi_top_higgs",  &deltaPhi_top_higgs_t, "deltaPhi_top_higgs_t/F");
    tree_passedEvents->Branch("deltaEta_lept_qJet",  &deltaEta_lept_qJet_t, "deltaEta_lept_qJet_t/F");
+   tree_passedEvents->Branch("deltaEta_bJet_qJet",  &deltaEta_bJet_qJet_t, "deltaEta_bJet_qJet_t/F");
    tree_passedEvents->Branch("mt_top",  &mt_top_t, "mt_top_t/F");
    tree_passedEvents->Branch("m_top",  &m_top_t, "m_top_t/F");
    tree_passedEvents->Branch("mt_W",  &mt_W_t, "mt_W_t/F");
    tree_passedEvents->Branch("m_W",  &m_W_t, "m_W_t/F");
    tree_passedEvents->Branch("BDT_lept",  &BDT_lept_t, "BDT_lept_t/F");
+   tree_passedEvents->Branch("LD_lept",  &LD_lept_t, "LD_lept_t/F");
    tree_passedEvents->Branch("deltaR_lept_phot",  &deltaR_lept_phot_t, "deltaR_lept_phot_t/F");
    tree_passedEvents->Branch("m_ele_phot",  &m_ele_phot_t, "m_ele_phot_t/F");
    tree_passedEvents->Branch("zeppen",  &zeppen_t, "zeppen_t/F");
@@ -348,6 +368,11 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("phi_Wqbar",  &phi_Wqbar, "phi_Wqbar/F");
    tree_passedEvents->Branch("e_Wqbar",  &e_Wqbar, "e_Wqbar/F");
 
+   tree_passedEvents->Branch("Ht",  &Ht_t, "Ht_t/F");
+   tree_passedEvents->Branch("mHt",  &mHt_t, "mHt_t/F");
+   tree_passedEvents->Branch("mSt",  &mSt_t, "mSt_t/F");
+
+
 
    TFile* file_thq_hadronic_weights = TFile::Open("thq_hadronic_puweights.root");
    TH1F* h1_thq_hadronic_weights = (TH1F*)file_thq_hadronic_weights->Get("puweights");
@@ -358,6 +383,10 @@ void RedNtpFinalizer_THq::finalize()
    std::string qglFileName="/afs/cern.ch/work/p/pandolf/public/ReducedHisto_2012.root";
 
    QGLikelihoodCalculator *qglikeli = new QGLikelihoodCalculator( qglFileName );
+
+   std::string thqFile_LD = "TMVA/THq_tHqLeptonic_mH125_8TeV_testtest_presel_isLeptonic_CSV.root";
+   std::string tthFile_LD = "TMVA/THq_TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_isLeptonic_CSV.root";
+   THqLeptonicLikelihoodCalculator * thqlikeli = new THqLeptonicLikelihoodCalculator( thqFile_LD, tthFile_LD );
 
 
    BTagSFUtil* btsfutil = new BTagSFUtil(bTaggerType_, 13);
@@ -382,9 +411,10 @@ void RedNtpFinalizer_THq::finalize()
      reader->AddVariable( "charge_lept", &charge_lept_bdt );
      reader->AddVariable( "deltaEta_lept_qJet", &deltaEta_lept_qJet_bdt );
   
+
+  
      TString methodName = "BDTG method";
      //TString weightfile = "TMVA/weights/prova_nonjets_BDTG.weights.xml";
-     TString weightfile = "TMVA/weights/prova_BDTG.weights.xml";
      TString weightfileNEW = "TMVA/weights/provaNEW_BDTG.weights.xml";
      
   
@@ -452,7 +482,6 @@ void RedNtpFinalizer_THq::finalize()
       bool isMC = ( run<5 );
 
      
-      h1_cutFlow->Fill(1);
 
       if( isMC ) {
 
@@ -507,6 +536,77 @@ void RedNtpFinalizer_THq::finalize()
         std::cout << std::endl << "Diphoton pt: " << diphot.Pt() << " mass: " << diphot.M() << std::endl;
       }
 
+      TLorentzVector phot1, phot2;
+      phot1.SetPtEtaPhiM( ptphot1, etaphot1, phiphot1, 0. );
+      phot2.SetPtEtaPhiM( ptphot2, etaphot2, phiphot2, 0. );
+
+
+      
+      // tag lepton right away
+      TLorentzVector lept;
+      std::vector<TLorentzVector> electrons, muons;
+      if( ptele1>ptLept_thresh_ ) {
+        TLorentzVector l;
+        l.SetPtEtaPhiE( ptele1, etaele1, phiele1, eneele1 );
+        if( l.DeltaR( phot1 ) > 0.1 && l.DeltaR( phot2 ) > 0.1 )
+          electrons.push_back(l);
+      }
+      if( ptele2>ptLept_thresh_ ) {
+        TLorentzVector l;
+        l.SetPtEtaPhiE( ptele2, etaele2, phiele2, eneele2 );
+        if( l.DeltaR( phot2 ) > 0.1 && l.DeltaR( phot2 ) > 0.1 )
+          electrons.push_back(l);
+      }
+      if( ptmu1>ptLept_thresh_ ) {
+        TLorentzVector l;
+        l.SetPtEtaPhiE( ptmu1, etamu1, phimu1, enemu1 );
+        muons.push_back(l);
+      }
+      if( ptmu2>ptLept_thresh_ ) {
+        TLorentzVector l;
+        l.SetPtEtaPhiE( ptmu2, etamu2, phimu2, enemu2 );
+        muons.push_back(l);
+      }
+      if( electrons.size() + muons.size() > 1 ) continue;
+      else if( electrons.size() > 0 ) {
+        isLeptonic_t = true;
+        isMu_t = false;
+        lept = electrons[0];
+      } else if( muons.size() > 0 ) {
+        isLeptonic_t = true;
+        isMu_t = true;
+        lept = muons[0];
+      } else {
+        isLeptonic_t = false;
+        isMu_t = false;
+      }
+      
+      
+//      float leptVetoPt_thresh=5.;
+//      if( (ptele1>leptVetoPt_thresh && ptmu1>leptVetoPt_thresh) || ptele2>leptVetoPt_thresh || ptmu2>leptVetoPt_thresh ) continue;
+//
+//        float deltaR1 = lept.DeltaR(phot1);
+//        //if( deltaR1<1. ) continue;
+//        float deltaR2 = lept.DeltaR(phot2);
+//        //if( deltaR2<1. ) continue;
+//
+//        h1_deltaR_lept_phot1->Fill( deltaR1, eventWeight );
+//        h1_deltaR_lept_phot2->Fill( deltaR2, eventWeight );
+//        deltaR_lept_phot_t = TMath::Min( deltaR1, deltaR2 );
+//        if( deltaR_lept_phot_t < 0.5 ) continue;
+//
+//
+//      isLeptonic_t = (ptele1>ptLept_thresh_ || ptmu1>ptLept_thresh_);//cut on pt lepton
+//      isMu_t=ptmu1>ptLept_thresh_;
+//      if( isLeptonic_t ) {
+//        if( isMu_t )
+//          lept.SetPtEtaPhiE( ptmu1, etamu1, phimu1, enemu1 );
+//        else
+//          lept.SetPtEtaPhiE( ptele1, etaele1, phiele1, eneele1 );
+//      }
+
+
+      if( selectionType_=="presel_isLeptonic" && !isLeptonic_t ) continue;
 
 
       // analysis cuts:
@@ -519,7 +619,6 @@ void RedNtpFinalizer_THq::finalize()
       if((TMath::Abs(etascphot1)>1.4442&&TMath::Abs(etascphot1)<1.566)||(TMath::Abs(etascphot2)>1.4442&&TMath::Abs(etascphot2)<1.566)
          || TMath::Abs(etascphot1)>2.5 || TMath::Abs(etascphot2)>2.5) continue;  // acceptance
 
-      h1_cutFlow->Fill(2);
 
       if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed photon eta acceptance." << std::endl;
@@ -534,7 +633,6 @@ void RedNtpFinalizer_THq::finalize()
       if(ptphot1 < triggerThreshPhot1) continue; //pt first photon
       if(ptphot2 < triggerThreshPhot2) continue; //pt second photon
 
-      h1_cutFlow->Fill(3);
 
       if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed photon trigger pt thresholds." << std::endl;
@@ -543,11 +641,6 @@ void RedNtpFinalizer_THq::finalize()
         std::cout << ptphot2 << " > " << ptphot2cut_ << "*" << massggnewvtx << "/120. = " << ptphot2cut_*massggnewvtx/120. << " ? " << std::endl;
 
       }
-
-      if(ptphot1 < ptphot1cut_*massggnewvtx/120.) continue; //pt first photon (running)
-      if(ptphot2 < ptphot2cut_ ) continue; //pt second photon (not running)
-
-      h1_cutFlow->Fill(4);
 
       if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed photon analysis pt thresholds." << std::endl;
@@ -605,7 +698,6 @@ void RedNtpFinalizer_THq::finalize()
 
       } // if !useGenPhotons_
 
-      h1_cutFlow->Fill(5);
 
       if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed photon ID." << std::endl;
@@ -613,11 +705,24 @@ void RedNtpFinalizer_THq::finalize()
 
       if(diphot.M()<100 || diphot.M()>180) continue;
 
-      h1_cutFlow->Fill(6);
+      if( isLeptonic_t )
+        h1_cutFlow_lept->Fill(0., eventWeight);
+      else
+        h1_cutFlow_hadr->Fill(0., eventWeight);
 
       if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed mgg 100-180 cut." << std::endl;
       }
+
+
+      if(ptphot1 < ptphot1cut_*massggnewvtx/120.) continue; //pt first photon (running)
+      if(ptphot2 < ptphot2cut_ ) continue; //pt second photon (not running)
+
+      if( isLeptonic_t )
+        h1_cutFlow_lept->Fill(1., eventWeight);
+      else
+        h1_cutFlow_hadr->Fill(1., eventWeight);
+
 
       
       //       if( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130. ) continue;
@@ -625,25 +730,6 @@ void RedNtpFinalizer_THq::finalize()
       
       if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_prepresel->Fill( massggnewvtx, eventWeight );
       
-
-      // lepton
-      TLorentzVector lept;
-      float leptVetoPt_thresh=5.;
-      if( (ptele1>leptVetoPt_thresh && ptmu1>leptVetoPt_thresh) || ptele2>leptVetoPt_thresh || ptmu2>leptVetoPt_thresh ) continue;
-
-      h1_cutFlow->Fill(8);
-
-      isLeptonic_t = (ptele1>ptLept_thresh_ || ptmu1>ptLept_thresh_);//cut on pt lepton
-      isMu_t=ptmu1>ptLept_thresh_;
-      if( isLeptonic_t ) {
-        if( isMu_t )
-          lept.SetPtEtaPhiE( ptmu1, etamu1, phimu1, enemu1 );
-        else
-          lept.SetPtEtaPhiE( ptele1, etaele1, phiele1, eneele1 );
-      }
-
-
-      if( selectionType_=="presel_isLeptonic" && !isLeptonic_t ) continue;
 
       
       
@@ -723,9 +809,6 @@ void RedNtpFinalizer_THq::finalize()
         njets_selected++;
       
       
-        Ht_t += ptcorrjet[ijet];
-      
-      
         //AnalysisJet thisJet;
         //thisJet.set
         //selectedJets.push_back( thisJet );
@@ -738,15 +821,16 @@ void RedNtpFinalizer_THq::finalize()
       if( njets_selected_btagmedium>nbtagmedium_upper_thresh_ ) continue;
 
 
-      h1_cutFlow->Fill(7);
+      if( isLeptonic_t )
+        h1_cutFlow_lept->Fill(2., eventWeight);
+      else
+        h1_cutFlow_hadr->Fill(2., eventWeight);
+
+
 
       int bJet_index = index_selected_btagmedium[0];
       TLorentzVector bJet;
       bJet.SetPtEtaPhiE(ptcorrjet[bJet_index],etajet[bJet_index],phijet[bJet_index],ecorrjet[bJet_index]);
-
-      TLorentzVector phot1, phot2;
-      phot1.SetPtEtaPhiM( ptphot1, etaphot1, phiphot1, 0. );
-      phot2.SetPtEtaPhiM( ptphot2, etaphot2, phiphot2, 0. );
 
 
       //// veto events with 2 leptons:
@@ -838,7 +922,7 @@ void RedNtpFinalizer_THq::finalize()
       TLorentzVector qJet;
       int nCentralJets = 0;
       float hardestCentralJetPt=0.;
-      float eta_thresh_qJet = (isLeptonic_t) ? 0. : eta_qJet_thresh_hadr_;
+      float eta_thresh_qJet = (isLeptonic_t) ? 1. : eta_qJet_thresh_hadr_;
       for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
 
         int i = index_selected[ii];
@@ -856,7 +940,16 @@ void RedNtpFinalizer_THq::finalize()
 
       }
       if( index_qJet<0 ) continue;
-      h1_cutFlow->Fill(9);
+
+
+      deltaEta_bJet_qJet_t = fabs( bJet.Eta()- qJet.Eta());
+
+
+      if( isLeptonic_t )
+        h1_cutFlow_lept->Fill(3., eventWeight);
+      else
+        h1_cutFlow_hadr->Fill(3., eventWeight);
+
 
 
 
@@ -875,6 +968,9 @@ void RedNtpFinalizer_THq::finalize()
         if( njets_selected > njets_upper_thresh_lept_ ) continue;
         if( njets_selected < njets_thresh_lept_ ) continue;
         if( nCentralJets > nCentralJets_upper_thresh_lept_ ) continue;
+
+        h1_cutFlow_lept->Fill(4., eventWeight);
+
         
         if( deltaEta_lept_qJet_t < deltaEta_lept_qJet_thresh_ ) continue;
 
@@ -883,15 +979,7 @@ void RedNtpFinalizer_THq::finalize()
         zeppen_t = -999.;
 
 
-        float deltaR1 = lept.DeltaR(phot1);
-        //if( deltaR1<1. ) continue;
-        float deltaR2 = lept.DeltaR(phot2);
-        //if( deltaR2<1. ) continue;
 
-        h1_deltaR_lept_phot1->Fill( deltaR1, eventWeight );
-        h1_deltaR_lept_phot2->Fill( deltaR2, eventWeight );
-        deltaR_lept_phot_t = TMath::Min( deltaR1, deltaR2 );
-        if( deltaR_lept_phot_t < 0.5 ) continue;
 
         neutrino.SetPtEtaPhiE( epfMet,0,phipfMet,epfMet );
 
@@ -1054,7 +1142,6 @@ void RedNtpFinalizer_THq::finalize()
       
         //}
         //if( index_qJet<0 ) continue;
-        //h1_cutFlow->Fill(9);
 
 
         if( qJet.Pt() < pt_qJet_thresh_hadr_ ) continue;
@@ -1088,10 +1175,9 @@ void RedNtpFinalizer_THq::finalize()
         } 
         nCentralJetsHadr_t = nCentralJetsHadr;
 
-        if( nCentralJetsHadr_t > nCentralJetsHadr_upper_thresh_ ) continue;
+        //if( nCentralJetsHadr_t > nCentralJetsHadr_upper_thresh_ ) continue;
 
-        float deltaEta_bJet_qJet = bJet.Eta()-qJet.Eta();
-        if( fabs(deltaEta_bJet_qJet)<deltaEta_bJet_qJet_thresh_hadr_ ) continue;
+        if( deltaEta_bJet_qJet_t<deltaEta_bJet_qJet_thresh_hadr_ ) continue;
 
         // compute costhetastar:
         // first boost bjet and qjet in top mass frame
@@ -1100,6 +1186,14 @@ void RedNtpFinalizer_THq::finalize()
         TLorentzVector qJet_topF(qJet);
         qJet_topF.Boost(-top.BoostVector());
         cosThetaStar_t = cos(bJet_topF.Angle(qJet_topF.Vect()));
+
+        Ht_t = bJet.Pt() + qJet.Pt() + jetW1.Pt() + jetW2.Pt();
+
+        TLorentzVector totalHardEvent = top + qJet + diphot;
+        mHt_t = totalHardEvent.Pt();
+
+        TLorentzVector higgs_top = top + diphot;
+        mSt_t = higgs_top.Pt();
 
       } //if is hadronic
       
@@ -1170,7 +1264,6 @@ void RedNtpFinalizer_THq::finalize()
       
       if(njets_selected<njets_thresh_) continue;
 
-      h1_cutFlow->Fill(10);
 
       if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
         std::cout << "-> Passed njets cut." << std::endl;
@@ -1274,6 +1367,8 @@ void RedNtpFinalizer_THq::finalize()
   
       BDT_lept_t = reader->EvaluateMVA( "BDTG method" );
 
+      LD_lept_t = thqlikeli->computeLikelihood( njets_t, eta_qJet_t, mt_top_t, charge_lept_t, deltaEta_lept_qJet_t );
+
       //if( BDT_lept_t < bdt_lept_thresh_ ) continue; 
 
 
@@ -1332,6 +1427,7 @@ void RedNtpFinalizer_THq::finalize()
       if( isLeptonic_t ) {
 
         h1_BDTlept_lept->Fill( BDT_lept_t, eventWeight );
+        h1_LDlept_lept->Fill( LD_lept_t, eventWeight );
 
         //leptons
         h1_pt_lept->Fill(lept.Pt(),eventWeight);
@@ -1345,13 +1441,19 @@ void RedNtpFinalizer_THq::finalize()
         if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       {
           h1_mgg_lept->Fill( massggnewvtx, eventWeight );
           if( BDT_lept_t>bdt_lept_thresh_ ) {
+            h1_cutFlow_lept->Fill(5., eventWeight);
             h1_mgg_lept_BDT->Fill( massggnewvtx, eventWeight );
           }
         }
 
       } else { // hadronic channel
 
-        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_hadr->Fill( massggnewvtx, eventWeight );
+        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )  {
+          h1_mgg_hadr->Fill( massggnewvtx, eventWeight );
+          if( nCentralJetsHadr_t < nCentralJetsHadr_upper_thresh_ ) {
+            h1_mgg_hadr_centralJetVeto->Fill( massggnewvtx, eventWeight );
+          }
+        }
 
       }
       
@@ -1396,7 +1498,8 @@ void RedNtpFinalizer_THq::finalize()
 
    h1_nGenEvents->Write();
 
-   h1_cutFlow->Write();
+   h1_cutFlow_lept->Write();
+   h1_cutFlow_hadr->Write();
 
    h1_nvertex->Write();
    h1_nvertex_PUW->Write();
@@ -1441,6 +1544,7 @@ void RedNtpFinalizer_THq::finalize()
    h1_mgg_lept->Write();
    h1_mgg_lept_BDT->Write();
    h1_mgg_hadr->Write();
+   h1_mgg_hadr_centralJetVeto->Write();
 
 
    h1_pt_lept->Write();
@@ -1462,6 +1566,7 @@ void RedNtpFinalizer_THq::finalize()
    h1_deltaPhi_t->Write();
 
    h1_BDTlept_lept->Write();
+   h1_LDlept_lept->Write();
 
 } //finalize
 
@@ -2087,12 +2192,28 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
 
     //deltaEta_lept_qJet_thresh_ = 1.;
 
+    bdt_lept_thresh_ = 0.0;
+
+    njets_thresh_hadr_ = 4;
+    m_top_thresh_hadr_ = 40.;
+    //m_W_thresh_hadr_ = 30.;
+    pt_qJet_thresh_hadr_ = 45.;
+    nCentralJetsHadr_upper_thresh_ = 1; 
+
+
+  } else if( selectionType=="sel4_2" ) { //like sel4 but with lept CJV back in
+
+    ptphot1cut_ = 50.;
+    ptphot2cut_ = 25.;
+
+    //deltaEta_lept_qJet_thresh_ = 1.;
+
+    nCentralJets_upper_thresh_lept_ = 1;
     bdt_lept_thresh_ = 0.2;
 
     njets_thresh_hadr_ = 4;
     m_top_thresh_hadr_ = 40.;
     //m_W_thresh_hadr_ = 30.;
-    eta_qJet_thresh_hadr_ = 2.0;
     pt_qJet_thresh_hadr_ = 45.;
     nCentralJetsHadr_upper_thresh_ = 1; 
 
