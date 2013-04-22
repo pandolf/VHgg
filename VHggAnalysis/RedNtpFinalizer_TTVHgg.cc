@@ -23,7 +23,7 @@ RedNtpFinalizer_TTVHgg::RedNtpFinalizer_TTVHgg( const std::string& dataset, cons
 
   setSelectionType(selectionType);
 
-  BLIND_ = true;
+  BLIND_ = false;
 
 }
 
@@ -343,6 +343,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    float pt_scaled_weight_t;
    float pt_scaled_2D_weight_t;
    float pt_scaled_2D_weight_data_t;
+   float pt_eta_scaled_2D_weight_data_t;
    float ptPhot1_scaled_weight_t;
    float ptPhot2_scaled_weight_t;
    float eta_scaled_weight_t;
@@ -414,6 +415,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "pt_scaled_weight", &pt_scaled_weight_t, "pt_scaled_weight_t/F" );
    tree_passedEvents->Branch( "pt_scaled_2D_weight", &pt_scaled_2D_weight_t, "pt_scaled_2D_weight_t/F" );
    tree_passedEvents->Branch( "pt_scaled_2D_weight_data", &pt_scaled_2D_weight_data_t, "pt_scaled_2D_weight_data_t/F" );
+   tree_passedEvents->Branch( "pt_eta_scaled_2D_weight_data", &pt_eta_scaled_2D_weight_data_t, "pt_eta_scaled_2D_weight_data_t/F" );
    tree_passedEvents->Branch( "etaPhot1_scaled_weight", &etaPhot1_scaled_weight_t, "etaPhot1_scaled_weight_t/F" );
    tree_passedEvents->Branch( "etaPhot2_scaled_weight", &etaPhot2_scaled_weight_t, "etaPhot2_scaled_weight_t/F" );
    tree_passedEvents->Branch( "eta_scaled_weight", &eta_scaled_weight_t, "eta_scaled_weight_t/F" );
@@ -563,6 +565,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
    int matched=0,total=0;//for gluon bb splitting NOT USEFUL
 
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
+
+
 
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
@@ -771,6 +775,51 @@ void RedNtpFinalizer_TTVHgg::finalize()
       continue;
       }
       
+
+      //leptons
+      TLorentzVector phot0, phot1;
+      phot0.SetPtEtaPhiM( ptphot1, etaphot1, phiphot1, 0.);
+      phot1.SetPtEtaPhiM( ptphot2, etaphot2, phiphot2, 0.);
+      int isLeptonic= ((ptele1>ptlep_ttH_leptonic_thresh_ || ptmu1>ptlep_ttH_leptonic_thresh_) && (deltaRToTrackphot1>1 && deltaRToTrackphot2>1));//cut on pt lepton and gsf
+      int isMu=ptmu1>ptlep_ttH_leptonic_thresh_;
+      if(ptele1>0 && ptmu1>0){
+	isMu=(ptele1 > ptmu1) ? 0:1;
+      }
+      TLorentzVector l,nu,lnu,b,blnu,bgg;
+
+      if(isLeptonic){
+	float ptlep=ptmu1;
+	float etalep=etamu1;
+	float philep=phimu1;
+	float energylep=enemu1;
+	if(!isMu){
+	  ptlep=ptele1;
+	  etalep=etaele1;
+	  philep=phiele1;
+	  energylep=eneele1;
+	}
+
+	l.SetPtEtaPhiE(ptlep,etalep,philep,energylep);
+	nu.SetPtEtaPhiE(epfMet,0,phipfMet,epfMet);
+	lnu=l+nu;
+
+	float deltaR_lept_phot1 = l.DeltaR(phot0);
+	float deltaR_lept_phot2 = l.DeltaR(phot1);
+	//	deltaR_lept_phot_t = TMath::Min( deltaR_lept_phot1, deltaR_lept_phot2 );
+
+	TLorentzVector lept_phot1 = l + phot0;
+	TLorentzVector lept_phot2 = l + phot1;
+	//	m_lept_phot1_t = lept_phot1.M();
+	//	m_lept_phot2_t = lept_phot2.M();
+
+	minv_lnu_t=lnu.Mt();
+
+	h1_minv_lnu->Fill(minv_lnu_t,eventWeight);
+      }
+
+
+
+
       
       // jets
       int njets_selected = 0;
@@ -805,7 +854,14 @@ void RedNtpFinalizer_TTVHgg::finalize()
           }
           if( !passedPUID )continue;
         }
-      
+	TLorentzVector thisJet;
+	thisJet.SetPtEtaPhiE(ptcorrjet[ijet], etajet[ijet], phijet[ijet], ecorrjet[ijet]);
+	if( isLeptonic ) {
+
+	  if( l.DeltaR(thisJet)<0.5 ) continue;
+	}
+	if(phot0.DeltaR(thisJet)<0.5 ||phot1.DeltaR(thisJet)<0.5)continue;
+
         if( isMC ) {
           if( partMomPdgIDjet[ijet] == 23 || abs( partMomPdgIDjet[ijet] ) == 24 ) {
             h1_posMatchedJet->Fill( ijet, eventWeight );
@@ -871,7 +927,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
       //check gluon splitting NOT USEFUL
 
-      for( unsigned ijet=0; ijet<njets; ++ijet ) {
+      /*      for( unsigned ijet=0; ijet<njets; ++ijet ) {
       	if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
 	  std::cout << ijet << "/" << njets << " pt: " << ptcorrjet[ijet] << " eta: " << etajet[ijet] << std::endl;
 	}
@@ -904,7 +960,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       }
 
       }
-
+      */
 
       
       // define m3:
@@ -929,34 +985,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       m3_t=m3;
       
       
-      int isLeptonic= (ptele1>ptlep_ttH_leptonic_thresh_ || ptmu1>ptlep_ttH_leptonic_thresh_);//cut on pt lepton
-      int isMu=ptmu1>ptlep_ttH_leptonic_thresh_;
       
-      
-      //invariant mass
-      TLorentzVector l,nu,lnu,b,blnu,bgg;
-      
-      if(isLeptonic){
-      float ptlep=ptmu1;
-      float etalep=etamu1;
-      float philep=phimu1;
-      float energylep=enemu1;
-      if(!isMu){
-      ptlep=ptele1;
-      etalep=etaele1;
-      philep=phiele1;
-      energylep=eneele1;
-      }
-      
-      l.SetPtEtaPhiE(ptlep,etalep,philep,energylep);
-      nu.SetPtEtaPhiE(epfMet,0,phipfMet,epfMet);
-      lnu=l+nu;
-      
-      
-      minv_lnu_t=lnu.Mt();
-      
-      h1_minv_lnu->Fill(minv_lnu_t,eventWeight);
-      }
       
       
       
@@ -1127,9 +1156,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       float chiSquareProbZ = TMath::Prob(fitter_jetsZ->getS(), fitter_jetsZ->getNDF());
       
       
-      TLorentzVector phot0, phot1;
-      phot0.SetPtEtaPhiM( ptphot1, etaphot1, phiphot1, 0.);
-      phot1.SetPtEtaPhiM( ptphot2, etaphot2, phiphot2, 0.);
+
       
       HelicityLikelihoodDiscriminant::HelicityAngles hangles;
       if( coin->Uniform(1.)<0.5 ) hangles = helicityDiscriminator->computeHelicityAngles(phot0, phot1, jet0, jet1);
@@ -1249,32 +1276,33 @@ void RedNtpFinalizer_TTVHgg::finalize()
       // SM Higgs CATEGORIES:
       
       // *****   ttH leptonic category: 
-      // *****   (3 jets, 1 btag medium, 1 lepton)
+      // *****   (3 jets, 1 btAg () medium, 1 lepton)
       
 
-      if(dataset_ == "DATA_Run2012SinglePhoton" && invert_photonCuts_){
+      if((dataset_ == "SinglePhoton_Run2012B-13Jul2012-v1"|| dataset_ =="SinglePhoton_Run2012C-EcalRecover_11Dec2012-v1" || 
+	  dataset_ =="SinglePhoton_Run2012C-PromptReco-v2" || dataset_== "SinglePhoton_Run2012C-24Aug2012-v1" ||
+	  dataset_=="SinglePhoton_Run2012D-PromptReco-v1") && invert_photonCuts_){
 	  
 	if(hasPassedDoublePhot==1)continue;
 	   
 	if(hasPassedSinglePhot==1){
 	  if(!(hasPassedSinglePhot==1 && hasPassedDoublePhot==0))continue; 
-	}
-      }else if (dataset_ == "DATA_Run2012SinglePhoton_2" && invert_photonCuts_){
-
+	}                                                                
+      }else if ((dataset_ == "Photon_Run2012A-13Jul2012-v1" || dataset_ =="Photon-Run2012A-recover-06Aug2012-v1") && invert_photonCuts_){
 
 	//        if(hasPassedDoublePhot==1)continue;
 
-        if(hasPassedSinglePhot==1){
-          if(!(hasPassedSinglePhot==1 && hasPassedDoublePhot==0))continue;
-        }
+	//        if(hasPassedSinglePhot==1){
+	//          if(!(hasPassedSinglePhot==1 && hasPassedDoublePhot==0))continue;
+	  //        }
       }
 
 
-      if(  isLeptonic  && njets_selected>=njets_ttH_leptonic_thresh_ && (njets_selected_btagmedium>0 || invert_photonCuts_) ) {
+      if(  isLeptonic  && njets_selected>=njets_ttH_leptonic_thresh_ && (njets_selected_btagloose>0 || invert_photonCuts_) ) {
         if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
           std::cout << "-> Goes in ttH leptonic category." << std::endl;
         }
-
+	
       
         category_t = 0;
         if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )         h1_mgg_ttH_leptonic->Fill( massggnewvtx, eventWeight );
@@ -1520,7 +1548,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
       
       }
       
-      
+      pt_eta_scaled_2D_weight_data_t=pt_scaled_2D_weight_data_t*eta_scaled_2D_weight_data_t/eventWeight;      
+
       //       std::cout<<massggnewvtx<<" "<<mgg_scaled<<std::endl;
       //std::cout<<"ptweightPhot0 "<<ptweightPhot0<<"ptweightPhot1 "<<ptweightPhot1<<std::endl;
       
@@ -2212,19 +2241,19 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
 
   ebeb_VHnotag_thresh_ = false;
 
-  ptphot1cut_ = 30.;
+  ptphot1cut_ = 33.;
   ptphot2cut_ = 25.;
 
   ptgg_VHnotag_thresh_ = 0.;
   ptgg_VHbtag_thresh_ = 0.;
 
-  ptjetthresh_count_ = 20.;
+  ptjetthresh_count_ = 25.;
   etajetthresh_count_ = 2.4;
 
-  ptjet_VHnotag_thresh_ = 20.;
-  ptjet_VHbtag_thresh_ = 20.;
+  ptjet_VHnotag_thresh_ = 25.;
+  ptjet_VHbtag_thresh_ = 25.;
 
-  ptjet_ttH_hadronic_thresh_=20.;
+  ptjet_ttH_hadronic_thresh_=25.;
 
   zeppenfeld_thresh_ = 1000.;
 
@@ -2242,8 +2271,8 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   nbtagloose_thresh_=0;
   nbtagmedium_thresh_=0;
 
-  njets_ttH_hadronic_thresh_ = 4;
-  njets_ttH_leptonic_thresh_ = 3;
+  njets_ttH_hadronic_thresh_ = 2;
+  njets_ttH_leptonic_thresh_ = 2;
 
   Ht_thresh_=0;
   invert_photonCuts_=false;
@@ -2253,7 +2282,7 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   njets_PUID_thresh_=0;
   ptlep_ttH_leptonic_thresh_=20;
 
-  PUID_betastar_thresh_=0.67;
+  PUID_betastar_thresh_=0.64;
   chooseBtaggedJets_=true;//be careful with this
 
 
@@ -2500,6 +2529,36 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
     //optsel3 with different  puid thresh
     njets_ttH_hadronic_thresh_ = 5;
     njets_ttH_leptonic_thresh_ = 3;
+
+    ptphot1cut_ = 60.;
+    ptphot2cut_ = 25.;
+    
+    ebeb_VHnotag_thresh_ = false;
+    
+    ptgg_VHnotag_thresh_ = 90.;
+    ptgg_VHbtag_thresh_ = 70.;
+
+    ptjet_VHnotag_thresh_ = 30.;
+    ptjet_VHbtag_thresh_ = 20.;
+
+    costhetastar_VHnotag_thresh_ = 0.57;
+    costhetastar_VHbtag_thresh_ = 0.84;
+
+    mjj_min_VHbtag_thresh_ = 60.;
+    mjj_max_VHbtag_thresh_ = 120.;
+
+    mjj_min_VHnotag_thresh_ = 60.;
+    mjj_max_VHnotag_thresh_ = 120.;
+
+    PUID_betastar_thresh_=0.64;
+    chooseBtaggedJets_=true;//be careful with this
+
+
+
+  } else if ( selectionType=="optsel4_2jet" ){
+    //optsel3 with different  puid thresh
+    njets_ttH_hadronic_thresh_ = 5;
+    njets_ttH_leptonic_thresh_ = 2;
 
     ptphot1cut_ = 60.;
     ptphot2cut_ = 25.;
