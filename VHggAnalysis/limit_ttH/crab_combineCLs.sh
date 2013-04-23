@@ -34,10 +34,11 @@ fi
 # first, link locally the executable:
 # ln -s ../../../../bin/slc5_amd64_gcc434/combine .
 
-echo "job number: seed #$i with $n toys"
-./combine model.root -t$n -s$i -M HybridNew -m $mass -H ProfileLikelihood -U >& log.txt
-./combine datacard_VH_cat6-7_tth_wggH.dat -t10 -s$1 -M HybridNew  --saveToys --saveHybridResult -H ProfileLikelihood --fork 4 >& log.txt
-mv *.root outputToy/
+echo "job number: seed #$i"
+#./combine datacard_VH_cat6-7_tth_wggH.dat -m125 -s$i -M HybridNew --freq  --saveToys --saveHybridResult -H ProfileLikelihood >& log.txt
+./combine -M HybridNew --frequentist datacard_VH_cat6-7_tth_wggH.dat --expectedFromGrid=0.5 --saveToys --fullBToys --saveHybridResult -m125 -T400 -s$i -H ProfileLikelihood >& log.txt
+#./combine d.txt -m125 -s$i -M HybridNew --freq  --saveToys --saveHybridResult -H ProfileLikelihood >& log.txt
+mv higgsCombineTest.HybridNew.mH12*.root outputToy/
 mv log.txt outputToy/
 echo "pack the results"
 tar cvfz outputToy.tgz outputToy/
