@@ -176,6 +176,8 @@ void RedNtpFinalizer_THq::finalize()
    h1_mgg_lept->Sumw2();
    TH1D* h1_mgg_lept_BDT= new TH1D("mgg_lept_BDT", "", 80, 100., 180.);
    h1_mgg_lept_BDT->Sumw2();
+   TH1D* h1_mgg_lept_LD= new TH1D("mgg_lept_LD", "", 80, 100., 180.);
+   h1_mgg_lept_LD->Sumw2();
    TH1D* h1_mgg_hadr= new TH1D("mgg_hadr", "", 80, 100., 180.);
    h1_mgg_hadr->Sumw2();
    TH1D* h1_mgg_hadr_centralJetVeto= new TH1D("mgg_hadr_centralJetVeto", "", 80, 100., 180.);
@@ -246,6 +248,8 @@ void RedNtpFinalizer_THq::finalize()
    float mt_W_t;
    float m_W_t;
    float BDT_lept_t;
+   float BDT2_lept_t;
+   float BDTold_lept_t;
    float LD_lept_t;
 
    bool isLeptonic_t;
@@ -331,6 +335,8 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("mt_W",  &mt_W_t, "mt_W_t/F");
    tree_passedEvents->Branch("m_W",  &m_W_t, "m_W_t/F");
    tree_passedEvents->Branch("BDT_lept",  &BDT_lept_t, "BDT_lept_t/F");
+   tree_passedEvents->Branch("BDT2_lept",  &BDT2_lept_t, "BDT2_lept_t/F");
+   tree_passedEvents->Branch("BDTold_lept",  &BDTold_lept_t, "BDTold_lept_t/F");
    tree_passedEvents->Branch("LD_lept",  &LD_lept_t, "LD_lept_t/F");
    tree_passedEvents->Branch("deltaR_lept_phot",  &deltaR_lept_phot_t, "deltaR_lept_phot_t/F");
    tree_passedEvents->Branch("m_ele_phot",  &m_ele_phot_t, "m_ele_phot_t/F");
@@ -393,6 +399,8 @@ void RedNtpFinalizer_THq::finalize()
 
 
      TMVA::Reader *reader = new TMVA::Reader( "!Color:!Silent" ); 
+     TMVA::Reader *reader2 = new TMVA::Reader( "!Color:!Silent" ); 
+     TMVA::Reader *readerold = new TMVA::Reader( "!Color:!Silent" ); 
   
      float njets_bdt;
      float nbjets_loose_bdt;
@@ -405,21 +413,42 @@ void RedNtpFinalizer_THq::finalize()
   
   
      reader->AddVariable( "njets", &njets_bdt );
-     reader->AddVariable( "deltaPhi_top_higgs", &deltaPhi_top_higgs_bdt );
+     //reader->AddVariable( "deltaPhi_top_higgs", &deltaPhi_top_higgs_bdt );
      reader->AddVariable( "mt_top", &mt_top_bdt );
      reader->AddVariable( "eta_qJet", &eta_qJet_bdt );
      reader->AddVariable( "charge_lept", &charge_lept_bdt );
      reader->AddVariable( "deltaEta_lept_qJet", &deltaEta_lept_qJet_bdt );
   
+  
+     reader2->AddVariable( "njets", &njets_bdt );
+     reader2->AddVariable( "nbjets_loose", &nbjets_loose_bdt );
+     reader2->AddVariable( "deltaPhi_top_higgs", &deltaPhi_top_higgs_bdt );
+     reader2->AddVariable( "mt_top", &mt_top_bdt );
+     reader2->AddVariable( "eta_qJet", &eta_qJet_bdt );
+     reader2->AddVariable( "charge_lept", &charge_lept_bdt );
+     reader2->AddVariable( "deltaEta_lept_qJet", &deltaEta_lept_qJet_bdt );
+     reader2->AddVariable( "pt_bJet", &pt_bJet_bdt );
+  
+     readerold->AddVariable( "njets", &njets_bdt );
+     readerold->AddVariable( "nbjets_loose", &nbjets_loose_bdt );
+     readerold->AddVariable( "deltaPhi_top_higgs", &deltaPhi_top_higgs_bdt );
+     readerold->AddVariable( "mt_top", &mt_top_bdt );
+     readerold->AddVariable( "eta_qJet", &eta_qJet_bdt );
+     readerold->AddVariable( "charge_lept", &charge_lept_bdt );
+     readerold->AddVariable( "pt_bJet", &pt_bJet_bdt );
 
   
      TString methodName = "BDTG method";
      //TString weightfile = "TMVA/weights/prova_nonjets_BDTG.weights.xml";
      TString weightfileNEW = "TMVA/weights/provaNEW_BDTG.weights.xml";
+     TString weightfile2 = "TMVA/weights/provaNEW3_BDTG.weights.xml";
+     TString weightfileold = "TMVA/weights/prova_BDTG.weights.xml";
      
   
      std::cout << "-> Booking BDT" << std::endl;
      reader->BookMVA( methodName, weightfileNEW ); 
+     reader2->BookMVA( methodName, weightfile2 ); 
+     readerold->BookMVA( methodName, weightfileold ); 
 
 
 
@@ -1366,6 +1395,11 @@ void RedNtpFinalizer_THq::finalize()
       deltaEta_lept_qJet_bdt = deltaEta_lept_qJet_t;
   
       BDT_lept_t = reader->EvaluateMVA( "BDTG method" );
+      BDT2_lept_t = reader2->EvaluateMVA( "BDTG method" );
+      BDTold_lept_t = readerold->EvaluateMVA( "BDTG method" );
+
+      // choose old BDT:
+      //BDT_lept_t = readerold->EvaluateMVA( "BDTG method" );
 
       LD_lept_t = thqlikeli->computeLikelihood( njets_t, eta_qJet_t, mt_top_t, charge_lept_t, deltaEta_lept_qJet_t );
 
@@ -1443,6 +1477,9 @@ void RedNtpFinalizer_THq::finalize()
           if( BDT_lept_t>bdt_lept_thresh_ ) {
             h1_cutFlow_lept->Fill(5., eventWeight);
             h1_mgg_lept_BDT->Fill( massggnewvtx, eventWeight );
+          }
+          if( LD_lept_t>ld_lept_thresh_ ) {
+            h1_mgg_lept_LD->Fill( massggnewvtx, eventWeight );
           }
         }
 
@@ -1543,6 +1580,7 @@ void RedNtpFinalizer_THq::finalize()
    h1_mgg->Write();
    h1_mgg_lept->Write();
    h1_mgg_lept_BDT->Write();
+   h1_mgg_lept_LD->Write();
    h1_mgg_hadr->Write();
    h1_mgg_hadr_centralJetVeto->Write();
 
@@ -2095,6 +2133,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
   nCentralJets_upper_thresh_lept_=1000;
 
   bdt_lept_thresh_ = -10;
+  ld_lept_thresh_ = -10;
 
   invert_photonCuts_=false;
   use_PUID_=true;
@@ -2192,7 +2231,8 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
 
     //deltaEta_lept_qJet_thresh_ = 1.;
 
-    bdt_lept_thresh_ = 0.0;
+    bdt_lept_thresh_ = -0.4;
+    ld_lept_thresh_ = 0.25;
 
     njets_thresh_hadr_ = 4;
     m_top_thresh_hadr_ = 40.;
