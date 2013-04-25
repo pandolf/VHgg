@@ -11,7 +11,7 @@ bool separate_signals = true;
 bool Ct_minus1 = true;
 
 void printYields( DrawBase* db, const std::string& suffix, bool doUL=false );
-//void drawBDTRoc( DrawBase* db );
+void drawBDTRoc( DrawBase* db );
 
 
 int main(int argc, char* argv[]) {
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
   db_nostack_hadr->add_mcFile( ttHFile, "TTH", "ttH", kRed+1, 0);
   db_stack->add_mcFile( ttHFile, "TTH", "ttH", kGray, 0);
   if( Ct_minus1 )
-    db_stack->set_mcWeight( "TTH", 2.5 );
+    db_stack->set_mcWeight( "TTH", 2.4 );
 
 
 
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
   //db_nostack->add_mcFile( VHFile, "VH", "VH", signalFillColor+1, 0);
   db_stack->add_mcFile( VHFile, "VH", "VH", 42, 0);
   if( Ct_minus1 )
-    db_stack->set_mcWeight( "VH", 2.5 );
+    db_stack->set_mcWeight( "VH", 2.4 );
 
   
   std::string GluGluHFileName = inputDir +  "THq_GluGluToHToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1";
@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
   //db_nostack->add_mcFile( GluGluHFile, "GluGluH", "ggF H ", signalFillColor+1, 0);
   db_stack->add_mcFile( GluGluHFile, "GluGluH", "ggF H", signalFillColor+1, 0);
   if( Ct_minus1 )
-    db_stack->set_mcWeight( "GluGluH", 2.5 );
+    db_stack->set_mcWeight( "GluGluH", 2.4 );
 
 
   std::string VBFHFileName = inputDir +  "THq_VBF_HToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1";
@@ -136,7 +136,7 @@ int main(int argc, char* argv[]) {
   TFile* VBFHFile = TFile::Open(VBFHFileName.c_str());
   db_stack->add_mcFile( VBFHFile, "VBFH", "VBF H ", signalFillColor, 0);
   if( Ct_minus1 )
-    db_stack->set_mcWeight( "VBFH", 2.5 );
+    db_stack->set_mcWeight( "VBFH", 2.4 );
   //    db_nostack->add_mcFile( VBFHFile, "VBFH", "VBF H", signalFillColor, 0);
 
 
@@ -207,7 +207,7 @@ int main(int argc, char* argv[]) {
   QCDFileName += "_" + bTaggerType;
   QCDFileName += ".root";
   TFile* QCDFile = TFile::Open(QCDFileName.c_str());
-  //db_stack->add_mcFile( QCDFile, "QCD", "QCD", 41);
+  db_stack->add_mcFile( QCDFile, "QCD", "QCD", 41);
 
 
 
@@ -245,7 +245,10 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto_fromTree("tree_passedEvents", "epfMet",   "eventWeight*isLeptonic", 50, 0., 250., "pfMet", "Particle Flow #slash{E}_{T}", "GeV");
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "BDT_lept",   "eventWeight*isLeptonic", 50, -1., 1.0001, "BDT_lept", "Leptonic BDT");
-//  db_nostack->drawHisto_fromTree("tree_passedEvents", "BDTnew_lept",   "eventWeight*isLeptonic", 50, -1., 1.0001, "BDTnew_lept", "New Leptonic BDT");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "BDT2_lept",   "eventWeight*isLeptonic", 50, -1., 1.0001, "BDT2_lept", "Leptonic BDT");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "BDTold_lept",   "eventWeight*isLeptonic", 50, -1., 1.0001, "BDTold_lept", "Leptonic BDT");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "LD_lept",   "eventWeight*isLeptonic", 50, 0., 1.0001, "LD_lept", "Leptonic LD");
+//  db_nostack->drawHisto_fromTree("tree_passedEvents", "BDTBDT_lept",   "eventWeight*isLeptonic", 50, -1., 1.0001, "BDTBDT_lept", "BDT Leptonic BDT");
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "njets",   "eventWeight*isLeptonic", 9, -0.5, 8.5, "njets_lept", "Number of Jets (p_{T} > 20 GeV)");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "nbjets_loose",   "eventWeight*isLeptonic", 5, -0.5, 4.5,  "nbjets_loose_lept", "Number of b-Jets (Loose)");
@@ -288,7 +291,6 @@ int main(int argc, char* argv[]) {
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "nbjets_medium",   "eventWeight*(!isLeptonic)", 5, -0.5, 4.5, "nbjets_medium_hadr", "Number of b-Jets (Medium)");
 
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "nCentralJets", "eventWeight*(!isLeptonic)", 7, -0.5, 6.5, "nCentralJets_hadr", "Number of Additional Jets");
-  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "nCentralJetsHadr", "eventWeight*(!isLeptonic)", 7, -0.5, 6.5, "nCentralJetsHadr_hadr", "Number of Additional Jets");
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "hardestCentralJetPt", "eventWeight*(!isLeptonic)", 50, 0., 200., "hardestCentralJetPt_hadr", "Hardest Additional Jet p_{T}", "GeV", "Events", true);
 
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "pt_qJet",  "eventWeight*(!isLeptonic)", 50, 20., 120., "pt_qJet_hadr", "q-Jet Candidate p_{T}", "GeV");
@@ -345,10 +347,14 @@ int main(int argc, char* argv[]) {
   printYields( db_stack, "lept", doUL );
   db_stack->drawHisto("mgg_lept_BDT", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "lept_BDT", doUL );
+  db_stack->drawHisto("mgg_lept_LD", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "lept_LD", doUL );
 
   db_stack->set_legendTitle("Hadronic Channel");
   db_stack->drawHisto("mgg_hadr", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "hadr", doUL );
+  db_stack->drawHisto("mgg_hadr_centralJetVeto", "DiPhoton Invariant Mass", "GeV");
+  printYields( db_stack, "hadr_centralJetVeto", doUL );
   db_stack->reset();
 
 
@@ -398,15 +404,47 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
     std::string dataset=db->get_mcFile(ii).datasetName;
     bool isSMH = (dataset=="VBFH"||dataset=="TTH"||dataset=="VH"||dataset=="GluGluH");
     if( db->get_mcFile(ii).datasetName != "tHq" ) {
-      totalBG += histos[ii]->Integral(binXmin, binXmax);
-      float SF = (isSMH) ? 1. : (10.)/massRange; //signal not averaged, as it's all under the peak
-      totalBG_ave += histos[ii]->Integral(1, histos[ii]->GetNbinsX())*SF;
-      yieldsFile << db->get_mcFile(ii).datasetName << " " << histos[ii]->Integral(1, histos[ii]->GetNbinsX())*SF << std::endl;
+
+      if( isSMH ) { 
+    
+        // also SM H BR is enhanced by 2.4, but the enhancement over SM expectation is signal for us:
+        float BG_SF = 1.;
+        float S_SF = 0.;
+        if( Ct_minus1 ) {
+          BG_SF = 1./2.4;
+          S_SF = 1.4/2.4;
+        }
+
+        float BG = histos[ii]->Integral(binXmin, binXmax)*BG_SF;
+        float BG_ave = histos[ii]->Integral(1, histos[ii]->GetNbinsX())*BG_SF;
+
+        float s = histos[ii]->Integral(binXmin, binXmax)*S_SF;
+
+        totalBG += BG;
+        totalBG_ave += BG_ave;
+
+        signal += s;
+
+        yieldsFile << db->get_mcFile(ii).datasetName << " (SM) " << BG_ave << std::endl;
+        yieldsFile << db->get_mcFile(ii).datasetName << " (extra) " << s << std::endl;
+
+      } else {
+
+        totalBG += histos[ii]->Integral(binXmin, binXmax);
+
+      
+        float SF = (10.)/massRange; 
+        totalBG_ave += histos[ii]->Integral(1, histos[ii]->GetNbinsX())*SF;
+        yieldsFile << db->get_mcFile(ii).datasetName << " " << histos[ii]->Integral(1, histos[ii]->GetNbinsX())*SF << std::endl;
+
+      }
+
     } else {
       foundSignal = true;
-      signal = histos[ii]->Integral(binXmin, binXmax);
-      yieldsFile << db->get_mcFile(ii).datasetName << " " << signal << std::endl;
-      if( Ct_minus1 ) signal/=34.;
+      float thq = histos[ii]->Integral(binXmin, binXmax);
+      signal += thq;
+      yieldsFile << db->get_mcFile(ii).datasetName << " " << thq << std::endl;
+      //if( Ct_minus1 ) signal/=34.;
     }
   }
 
@@ -414,10 +452,12 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
 
 
   //yieldsFile << "Total BG: " << totalBG << " (averaged: " << totalBG_ave << ")" << std::endl;
+  yieldsFile << "Total signal: " << signal << std::endl;
   yieldsFile << "Total BG: " << totalBG_ave << " (averaged)" << std::endl;
 
   //float signal_xsec = 2.28E-03*(19.37 + 1.573 + 0.6966 + 0.3943 + 0.1302); 
-  float signal_xsec = 2.28E-03*(0.0152);
+  float signal_xsec = 2.28E-03*(0.0152*34. + 1.4*(19.37 + 1.573 + 0.6966 + 0.3943 + 0.1302));
+  //float signal_xsec = 2.28E-03*(0.0152*34.);
   float total_signal = signal_xsec*db->get_lumi();
   float effS = signal/total_signal;
   yieldsFile << "Signal efficiency: " << effS << std::endl;
@@ -430,7 +470,7 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
     float ul_bgave = CLA( db->get_lumi(), 0., effS, 0., totalBG_ave, 0. );
     yieldsFile << std::endl << "No error on BG:" << std::endl;
     yieldsFile << "UL: " << ul_bgave << std::endl;
-    yieldsFile << "UL/SM: " << ul_bgave/signal_xsec << "    (NLO signal): " << ul_bgave/(signal_xsec*1.4) << std::endl;
+    yieldsFile << "UL/SM: " << ul_bgave/signal_xsec << std::endl;
     //yieldsFile << "UL: " << ul << "    (average BG): " << ul_bgave << std::endl;
     //yieldsFile << "UL/SM: " << ul/signal_xsec << "    (average BG): " << ul_bgave/signal_xsec << std::endl;
 
@@ -440,7 +480,7 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
     //yieldsFile << "UL: "    << ul_bgerr << "    (average BG): " << ul_bgerrave << std::endl;
     //yieldsFile << "UL/SM: " << ul_bgerr/signal_xsec << "    (average BG): " << ul_bgerrave/signal_xsec << std::endl; 
     yieldsFile << "UL: " << ul_bgerrave << std::endl;
-    yieldsFile << "UL/SM: " << ul_bgerrave/signal_xsec << "    (NLO signal): " << ul_bgerrave/(signal_xsec*1.4) << std::endl;
+    yieldsFile << "UL/SM: " << ul_bgerrave/signal_xsec << std::endl;
 
   }
 
@@ -451,7 +491,7 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
 
 
 
-/*
+
 void drawBDTRoc( DrawBase* db ) {
 
   TH1F::AddDirectory(kTRUE);
@@ -465,53 +505,50 @@ void drawBDTRoc( DrawBase* db ) {
   TH1F* h1_BDT_signal = new TH1F("BDT_signal", "", 100, -1., 1.0001); 
   TH1F* h1_BDT_bg = new TH1F("BDT_bg", "", 100, -1., 1.0001); 
 
-  TH1F* h1_BDTnew_signal = new TH1F("BDTnew_signal", "", 100, -1., 1.0001); 
-  TH1F* h1_BDTnew_bg = new TH1F("BDTnew_bg", "", 100, -1., 1.0001); 
+  TH1F* h1_LD_signal = new TH1F("LD_signal", "", 100, 0., 1.0001); 
+  TH1F* h1_LD_bg = new TH1F("LD_bg", "", 100, 0., 1.0001); 
+
+  //TH1F* h1_LD_signal = new TH1F("LD_signal", "", 100, 0., 1.0001); 
+  //TH1F* h1_LD_bg = new TH1F("LD_bg", "", 100, 0., 1.0001); 
 
   tree_thq->Project( "BDT_signal", "BDT_lept", "isLeptonic" );
-  tree_thq->Project( "BDTnew_signal", "BDTnew_lept", "isLeptonic" );
+  tree_thq->Project( "LD_signal", "LD_lept", "isLeptonic" );
+  //tree_thq->Project( "LD_signal", "LD_lept", "isLeptonic" );
 
   tree_tth->Project( "BDT_bg", "BDT_lept", "isLeptonic" );
-  tree_tth->Project( "BDTnew_bg", "BDTnew_lept", "isLeptonic" );
+  tree_tth->Project( "LD_bg", "LD_lept", "isLeptonic" );
+  //tree_tth->Project( "LD_bg", "LD_lept", "isLeptonic" );
 
 
 
-  TGraph* gr_RoC_old = new TGraph(0);
-  TGraph* gr_RoC_new = new TGraph(0);
+  TGraph* gr_RoC_LD = new TGraph(0);
+  TGraph* gr_RoC_BDT = new TGraph(0);
 
-  int nbins = h1_BDTnew_signal->GetNbinsX();
+  int nbins = h1_LD_signal->GetNbinsX();
 
   for( unsigned int ibin=1; ibin<nbins+1; ++ibin ) {
 
-    float eff_s_old = -1.;
-    float eff_b_old = -1.;
   
-    if( h1_BDT_signal!=0 && h1_BDT_bg!=0 ) {
-      eff_s_old = h1_BDT_signal->Integral( nbins-ibin, nbins )/h1_BDT_signal->Integral( 1, nbins );
-      eff_b_old = h1_BDT_bg->Integral( nbins-ibin, nbins )/h1_BDT_bg->Integral( 1, nbins );
-    }
-  
-  
-    float eff_s_new = h1_BDTnew_signal->Integral( nbins-ibin, nbins )/h1_BDTnew_signal->Integral( 1, nbins );
-    float eff_b_new = h1_BDTnew_bg->Integral( nbins-ibin, nbins )/h1_BDTnew_bg->Integral( 1, nbins );
-  
-    gr_RoC_new->SetPoint( ibin-1, 1.-eff_b_new, eff_s_new );
+    float eff_s_BDT = h1_BDT_signal->Integral( nbins-ibin, nbins )/h1_BDT_signal->Integral( 1, nbins );
+    float eff_b_BDT = h1_BDT_bg->Integral( nbins-ibin, nbins )/h1_BDT_bg->Integral( 1, nbins );
 
-    if( h1_BDT_signal!=0 && h1_BDT_bg!=0 ) 
-      gr_RoC_old->SetPoint( ibin-1, 1.-eff_b_old, eff_s_old );
+    gr_RoC_BDT->SetPoint( ibin-1, 1.-eff_b_BDT, eff_s_BDT );
+  
+    float eff_s_LD = h1_LD_signal->Integral( nbins-ibin, nbins )/h1_LD_signal->Integral( 1, nbins );
+    float eff_b_LD = h1_LD_bg->Integral( nbins-ibin, nbins )/h1_LD_bg->Integral( 1, nbins );
+  
+    gr_RoC_LD->SetPoint( ibin-1, 1.-eff_b_LD, eff_s_LD );
 
   }
 
 
-  gr_RoC_new->SetMarkerSize(1.3);
-  gr_RoC_new->SetMarkerStyle(24);
-  gr_RoC_new->SetMarkerColor(kRed+3);
+  gr_RoC_BDT->SetMarkerSize(1.3);
+  gr_RoC_BDT->SetMarkerStyle(24);
+  gr_RoC_BDT->SetMarkerColor(kRed+3);
 
-  if( h1_BDT_signal!=0 && h1_BDT_bg!=0 ) {
-    gr_RoC_old->SetMarkerSize(1.3);
-    gr_RoC_old->SetMarkerStyle(20);
-    gr_RoC_old->SetMarkerColor(kOrange+1);
-  }
+  gr_RoC_LD->SetMarkerSize(1.3);
+  gr_RoC_LD->SetMarkerStyle(20);
+  gr_RoC_LD->SetMarkerColor(kOrange+1);
 
 
   TCanvas* c1 = new TCanvas("c1_roc", "", 600, 600);
@@ -531,8 +568,8 @@ void drawBDTRoc( DrawBase* db ) {
   legend->SetFillColor(0);
   legend->SetTextSize(0.04);
   if( h1_BDT_signal!=0 && h1_BDT_bg!=0 )
-    legend->AddEntry( gr_RoC_old, "Old BDT", "P");
-  legend->AddEntry( gr_RoC_new, "New BDT", "P");
+    legend->AddEntry( gr_RoC_LD, "LD", "P");
+  legend->AddEntry( gr_RoC_BDT, "BDT", "P");
   legend->Draw("same");
 
   TPaveText* labelTop = db->get_labelTop();
@@ -541,8 +578,8 @@ void drawBDTRoc( DrawBase* db ) {
 
   
   if( h1_BDT_signal!=0 && h1_BDT_bg!=0 ) 
-    gr_RoC_old->Draw("p same");
-  gr_RoC_new->Draw("p same");
+    gr_RoC_LD->Draw("p same");
+  gr_RoC_BDT->Draw("p same");
 
   gPad->RedrawAxis();
 
@@ -555,4 +592,3 @@ void drawBDTRoc( DrawBase* db ) {
   delete legend;
 }
 
-*

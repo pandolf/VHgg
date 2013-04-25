@@ -941,13 +941,14 @@ public :
    float m_W_thresh_hadr_;
    float pt_qJet_thresh_hadr_;
    float eta_qJet_thresh_hadr_;
-   int  nCentralJetsHadr_upper_thresh_;
+   int  nCentralJets_upper_thresh_hadr_;
    float deltaEta_bJet_qJet_thresh_hadr_;
    float deltaEta_lept_qJet_thresh_;
 
    float ptLept_thresh_;
 
    float bdt_lept_thresh_;
+   float ld_lept_thresh_;
 
    float   Ht_thresh_;
    bool  invert_photonCuts_;

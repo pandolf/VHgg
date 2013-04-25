@@ -74,7 +74,7 @@ void RedNtpFinalizer_THq::finalize()
    h1_cutFlow_lept->GetXaxis()->SetBinLabel(3, "b-tag");
    h1_cutFlow_lept->GetXaxis()->SetBinLabel(4, "q-Jet");
    h1_cutFlow_lept->GetXaxis()->SetBinLabel(5, "CJV");
-   h1_cutFlow_lept->GetXaxis()->SetBinLabel(6, "BDT");
+   h1_cutFlow_lept->GetXaxis()->SetBinLabel(6, "LD");
 
    TH1D*  h1_cutFlow_hadr = new TH1D("cutFlow_hadr", "", 6, 0., 6.);
    h1_cutFlow_hadr->Sumw2();
@@ -146,8 +146,6 @@ void RedNtpFinalizer_THq::finalize()
 
    TH1D* h1_nCentralJets = new TH1D("nCentralJets", "", 7, -0.5, 6.5 );
    h1_nCentralJets->Sumw2();
-   TH1D* h1_nCentralJetsHadr = new TH1D("nCentralJetsHadr", "", 7, -0.5, 6.5 );
-   h1_nCentralJetsHadr->Sumw2();
    TH1D* h1_hardestCentralJetPt = new TH1D("hardestCentralJetPt", "", 100, 0., 200.);
    h1_hardestCentralJetPt->Sumw2();
 
@@ -271,7 +269,6 @@ void RedNtpFinalizer_THq::finalize()
    float pt_top_t;
    float eta_top_t;
    int   nCentralJets_t;
-   int   nCentralJetsHadr_t;
    float hardestCentralJetPt_t;
    float deltaPhi_top_higgs_t;
    float deltaEta_lept_qJet_t;
@@ -325,7 +322,6 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("pt_top",              &pt_top_t,             "pt_top_t/F");
    tree_passedEvents->Branch("eta_top",             &eta_top_t,            "eta_top_t/F");
    tree_passedEvents->Branch("nCentralJets",        &nCentralJets_t,       "nCentralJets_t/I");
-   tree_passedEvents->Branch("nCentralJetsHadr",        &nCentralJetsHadr_t,       "nCentralJetsHadr_t/I");
    tree_passedEvents->Branch("hardestCentralJetPt", &hardestCentralJetPt_t,"hardestCentralJetPt_t/F");
    tree_passedEvents->Branch("deltaPhi_top_higgs",  &deltaPhi_top_higgs_t, "deltaPhi_top_higgs_t/F");
    tree_passedEvents->Branch("deltaEta_lept_qJet",  &deltaEta_lept_qJet_t, "deltaEta_lept_qJet_t/F");
@@ -949,7 +945,7 @@ void RedNtpFinalizer_THq::finalize()
       // now look for q-jet:
       int index_qJet=-1;
       TLorentzVector qJet;
-      int nCentralJets = 0;
+       nCentralJets_t = 0;
       float hardestCentralJetPt=0.;
       float eta_thresh_qJet = (isLeptonic_t) ? 1. : eta_qJet_thresh_hadr_;
       for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
@@ -960,8 +956,8 @@ void RedNtpFinalizer_THq::finalize()
 
         if( ptcorrjet[i]<20. ) continue;
         if( fabs(etajet[i])<eta_thresh_qJet ) {
-          if( nCentralJets==0 ) hardestCentralJetPt = ptcorrjet[i]; //hardest central jet
-          nCentralJets++;
+          if( nCentralJets_t==0 ) hardestCentralJetPt = ptcorrjet[i]; //hardest central jet
+          nCentralJets_t++;
         } else if( index_qJet<0 ) { //hardest forward jet
           index_qJet=i;
           qJet.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
@@ -996,7 +992,7 @@ void RedNtpFinalizer_THq::finalize()
         if( fabs(qJet.Eta())<1. ) continue;
         if( njets_selected > njets_upper_thresh_lept_ ) continue;
         if( njets_selected < njets_thresh_lept_ ) continue;
-        if( nCentralJets > nCentralJets_upper_thresh_lept_ ) continue;
+        if( nCentralJets_t > nCentralJets_upper_thresh_lept_ ) continue;
 
         h1_cutFlow_lept->Fill(4., eventWeight);
 
@@ -1004,7 +1000,6 @@ void RedNtpFinalizer_THq::finalize()
         if( deltaEta_lept_qJet_t < deltaEta_lept_qJet_thresh_ ) continue;
 
 
-        nCentralJetsHadr_t = 0;
         zeppen_t = -999.;
 
 
@@ -1150,6 +1145,9 @@ void RedNtpFinalizer_THq::finalize()
 
         jetW1.SetPtEtaPhiE(ptcorrjet[index_jetW1],etajet[index_jetW1],phijet[index_jetW1],ecorrjet[index_jetW1]);
         jetW2.SetPtEtaPhiE(ptcorrjet[index_jetW2],etajet[index_jetW2],phijet[index_jetW2],ecorrjet[index_jetW2]);
+
+        if( fabs(jetW1.Eta())<2. ) nCentralJets_t--;
+        if( fabs(jetW2.Eta())<2. ) nCentralJets_t--;
         
 
         //for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
@@ -1188,23 +1186,7 @@ void RedNtpFinalizer_THq::finalize()
         zeppen_t = diphot.Eta() - 0.5*( qJet.Eta() + top.Eta() );
 
 
-        int nCentralJetsHadr=0;
-        for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
-  
-          int i = index_selected[ii];
-  
-          if( i==index_selected_btagmedium[0] ) continue;
-          if( i==index_jetW1 ) continue;
-          if( i==index_jetW2 ) continue;
-          if( i==index_qJet ) continue;
-  
-          if( fabs(etajet[i])<eta_thresh_qJet )
-            nCentralJetsHadr++;
-  
-        } 
-        nCentralJetsHadr_t = nCentralJetsHadr;
-
-        //if( nCentralJetsHadr_t > nCentralJetsHadr_upper_thresh_ ) continue;
+        //if( nCentralJetsHadr_t > nCentralJets_upper_thresh_hadr_ ) continue;
 
         if( deltaEta_bJet_qJet_t<deltaEta_bJet_qJet_thresh_hadr_ ) continue;
 
@@ -1372,7 +1354,6 @@ void RedNtpFinalizer_THq::finalize()
       pt_top_t = top.Pt();
       eta_top_t = top.Eta();
       
-      nCentralJets_t = nCentralJets;
       hardestCentralJetPt_t = hardestCentralJetPt;
 
       deltaPhi_top_higgs_t = deltaPhi_top_higgs;
@@ -1439,8 +1420,7 @@ void RedNtpFinalizer_THq::finalize()
       h1_pt_bJet->Fill( bJet.Pt(), eventWeight ); 
       h1_eta_bJet->Fill( bJet.Eta(), eventWeight ); 
       
-      h1_nCentralJets->Fill( nCentralJets, eventWeight );
-      h1_nCentralJetsHadr->Fill( nCentralJetsHadr_t, eventWeight );
+      h1_nCentralJets->Fill( nCentralJets_t, eventWeight );
       h1_hardestCentralJetPt->Fill( hardestCentralJetPt, eventWeight );
       
       
@@ -1475,10 +1455,10 @@ void RedNtpFinalizer_THq::finalize()
         if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       {
           h1_mgg_lept->Fill( massggnewvtx, eventWeight );
           if( BDT_lept_t>bdt_lept_thresh_ ) {
-            h1_cutFlow_lept->Fill(5., eventWeight);
             h1_mgg_lept_BDT->Fill( massggnewvtx, eventWeight );
           }
           if( LD_lept_t>ld_lept_thresh_ ) {
+            h1_cutFlow_lept->Fill(5., eventWeight);
             h1_mgg_lept_LD->Fill( massggnewvtx, eventWeight );
           }
         }
@@ -1487,7 +1467,7 @@ void RedNtpFinalizer_THq::finalize()
 
         if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )  {
           h1_mgg_hadr->Fill( massggnewvtx, eventWeight );
-          if( nCentralJetsHadr_t < nCentralJetsHadr_upper_thresh_ ) {
+          if( nCentralJets_t < nCentralJets_upper_thresh_hadr_ ) {
             h1_mgg_hadr_centralJetVeto->Fill( massggnewvtx, eventWeight );
           }
         }
@@ -1568,7 +1548,6 @@ void RedNtpFinalizer_THq::finalize()
    h1_eta_top->Write();
 
    h1_nCentralJets->Write();
-   h1_nCentralJetsHadr->Write();
    h1_hardestCentralJetPt->Write();
 
    h1_ptDiphot->Write();
@@ -2149,7 +2128,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
 
   pt_qJet_thresh_hadr_ = 20.;
   eta_qJet_thresh_hadr_ = 2.;
-  nCentralJetsHadr_upper_thresh_ = 1000;
+  nCentralJets_upper_thresh_hadr_ = 1000;
   deltaEta_bJet_qJet_thresh_hadr_ = 0.;
   deltaEta_lept_qJet_thresh_ = 0.;
 
@@ -2192,7 +2171,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     m_top_thresh_hadr_ = 50.;
     //m_W_thresh_hadr_ = 30.;
     pt_qJet_thresh_hadr_ = 40.;
-    nCentralJetsHadr_upper_thresh_ = 1; 
+    nCentralJets_upper_thresh_hadr_ = 1; 
 
   } else if( selectionType=="sel2" ) {
 
@@ -2206,7 +2185,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     m_top_thresh_hadr_ = 50.;
     m_W_thresh_hadr_ = 30.;
     pt_qJet_thresh_hadr_ = 40.;
-    nCentralJetsHadr_upper_thresh_ = 1; 
+    nCentralJets_upper_thresh_hadr_ = 1; 
 
   } else if( selectionType=="sel3" ) {
 
@@ -2221,7 +2200,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     m_top_thresh_hadr_ = 50.;
     //m_W_thresh_hadr_ = 30.;
     pt_qJet_thresh_hadr_ = 40.;
-    nCentralJetsHadr_upper_thresh_ = 1; 
+    nCentralJets_upper_thresh_hadr_ = 1; 
 
 
   } else if( selectionType=="sel4" ) {
@@ -2238,7 +2217,7 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     m_top_thresh_hadr_ = 40.;
     //m_W_thresh_hadr_ = 30.;
     pt_qJet_thresh_hadr_ = 45.;
-    nCentralJetsHadr_upper_thresh_ = 1; 
+    nCentralJets_upper_thresh_hadr_ = 1; 
 
 
   } else if( selectionType=="sel4_2" ) { //like sel4 but with lept CJV back in
@@ -2252,10 +2231,10 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     bdt_lept_thresh_ = 0.2;
 
     njets_thresh_hadr_ = 4;
-    m_top_thresh_hadr_ = 40.;
+    m_top_thresh_hadr_ = 50.;
     //m_W_thresh_hadr_ = 30.;
-    pt_qJet_thresh_hadr_ = 45.;
-    nCentralJetsHadr_upper_thresh_ = 1; 
+    pt_qJet_thresh_hadr_ = 40.;
+    nCentralJets_upper_thresh_hadr_ = 1; 
 
 
 
