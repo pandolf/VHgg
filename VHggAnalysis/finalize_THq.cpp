@@ -63,6 +63,16 @@ int main( int argc, char* argv[] ) {
     finalize_oneDataset(redntpVersion, "MuEG_Run2011A_FULL", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "MuEG_Run2011B", selectionType, bTaggerType, datasets);
 
+  } else if( dataset=="DATA_Run2012" ) {
+   
+
+    finalize_oneDataset(redntpVersion, "Photon_Run2012A-13Jul2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "Photon-Run2012A-recover-06Aug2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-PromptReco-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-24Aug2012-v2", selectionType, bTaggerType, datasets);//-EcalRecover_11Dec2012-v1 is missing
+    finalize_oneDataset(redntpVersion, "DoublePhoton_Run2012D-PromptReco-v1", selectionType, bTaggerType, datasets);
+
   } else if( dataset=="DATA_Run2012ABC" ) {
    
     finalize_oneDataset(redntpVersion, "Photon-Run2012A-13Jul2012-v1", selectionType, bTaggerType, datasets);
@@ -119,7 +129,15 @@ int main( int argc, char* argv[] ) {
     //    finalize_oneDataset(redntpVersion, "TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "TT_CT10_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v2", selectionType, bTaggerType, datasets);
 
-  //} else if( dataset=="VG_8TeV" ) {
+  } else if( dataset=="T_8TeV" ) {
+
+    finalize_oneDataset(redntpVersion, "Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1" , selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "T_t-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1" , selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1" , selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "T_s-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1" , selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1" , selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A" , selectionType, bTaggerType, datasets);
+
 
   } else if( dataset=="VV_8TeV" ) {
 
@@ -175,8 +193,8 @@ void finalize_oneDataset( const std::string& redntpProdVersion, const std::strin
   RedntpDirStruct dirs = get_dirs( redntpProdVersion );
 
   // lousy patch
-  if( dataset=="tHqLeptonic_mH125_8TeV_testtest" || dataset=="tHqHadronic_mH125_8TeV_testtest" || dataset_tstr.BeginsWith("TT_CT10") )
-    dirs.mcdir = "redntp.53xv2.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v1/merged";
+  if( dataset=="tHqLeptonic_mH125_8TeV_testtest" || dataset=="tHqHadronic_mH125_8TeV_testtest" || dataset_tstr.BeginsWith("TT_CT10") || dataset_tstr.BeginsWith("T_") || dataset_tstr.BeginsWith("Tbar_") )
+    dirs.mcdir = "/xrootdfs/cms/local/pandolf/Higgs/reduced/redntp.53xv2.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v1/merged";
 
   RedNtpFinalizer_THq* rf = new RedNtpFinalizer_THq( dataset, selectionType, bTaggerType );
   //rf->set_redNtpDir("/xrootdfs/cms/local/pandolf/HiggsGammaGamma/reduced/redntp.52xv5_VH_feasibility_signalOnly.cicpfloose.regrPho_eCorr_20062012.VH_feasibility_v0/merged");
@@ -216,7 +234,7 @@ void do_haddCommand( const std::string& redntpVersion, const std::string& datase
   hadd_command += suffix;
   std::string rm_command = "rm " + suffix;
   system(hadd_command.c_str());
-  if( dataset!="HToGG_M-125_8TeV-pythia6" && dataset!="TT_8TeV" ) //keep also separate signal and top processes:
+  if( dataset!="HToGG_M-125_8TeV-pythia6" && dataset!="TT_8TeV" && dataset!="tHq_mH125_8TeV_testtest" ) //keep also separate signal and top processes:
     system(rm_command.c_str());
 
 }
@@ -287,10 +305,11 @@ RedntpDirStruct get_dirs( const std::string& prodVersion ) {
 
   }else if( prodVersion=="THq_feasibility" ) {
 
-    returnStruct.maindir = " /xrootdfs/cms/local/pandolf/Higgs/reduced/";
-    returnStruct.datadir = "redntp.52xv5_VH_feasibility.cicpfloose.regrPho_eCorr_20062012.VH_feasibility_v0/merged";
+    returnStruct.maindir = "/";
+    //returnStruct.maindir = "/xrootdfs/cms/local/pandolf/Higgs/reduced/";
+    returnStruct.datadir = "/xrootdfs/cms/local/micheli/Higgs/reduced/redntp.53xv2_data.preselectionMVA.scales-Moriond-Hgg_2.moriond_dataset_chargeLeptons/merged";
     //returnStruct.mcdir = "redntp.53xv2.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v0/merged";
-    returnStruct.mcdir   = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v1/merged";
+    returnStruct.mcdir   = "/xrootdfs/cms/local/pandolf/Higgs/reduced/redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v1/merged";
 
   } else {
 
