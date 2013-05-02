@@ -331,6 +331,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    int njets_t;
    int nbjets_loose_t;
    int nbjets_medium_t;
+   int isLeptonic_t;
    float ptPhot1_t;
    float ptPhot2_t;
    float ptRunPhot1_t;
@@ -356,6 +357,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    // these are just leading 20 jets in event:
    float ptJet_t[20];
    float etaJet_t[20];
+   float phiJet_t[20];
    bool  btaggedLooseJet_t[20];
    bool  btaggedMediumJet_t[20];
    float Ht_t;
@@ -399,6 +401,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "njets", &njets_t, "njets_t/I" );
    tree_passedEvents->Branch( "nbjets_loose", &nbjets_loose_t, "nbjets_loose_t/I" );
    tree_passedEvents->Branch( "nbjets_medium", &nbjets_medium_t, "nbjets_medium_t/I" );
+   tree_passedEvents->Branch( "isLeptonic", &isLeptonic_t, "isLeptonic_t/I" );
    tree_passedEvents->Branch( "ptPhot1", &ptPhot1_t, "ptPhot1_t/F" );
    tree_passedEvents->Branch( "ptPhot2", &ptPhot2_t, "ptPhot2_t/F" );
    tree_passedEvents->Branch( "ptRunPhot1", &ptRunPhot1_t, "ptRunPhot1_t/F" );
@@ -423,6 +426,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "eta_scaled_2D_weight_data", &eta_scaled_2D_weight_data_t, "eta_scaled_2D_weight_data_t/F" );
    tree_passedEvents->Branch( "ptJet", ptJet_t, "ptJet_t[njets_t]/F" );
    tree_passedEvents->Branch( "etaJet", etaJet_t, "etaJet_t[njets_t]/F" );
+   tree_passedEvents->Branch( "phiJet", phiJet_t, "phiJet_t[njets_t]/F" );
    tree_passedEvents->Branch( "btaggedLooseJet", btaggedLooseJet_t, "btaggedLooseJet_t[njets_t]/O" );
    tree_passedEvents->Branch( "btaggedMediumJet", btaggedMediumJet_t, "btaggedMediumJet_t[njets_t]/O" );
    tree_passedEvents->Branch( "Ht", &Ht_t, "Ht_t/F" );
@@ -621,7 +625,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       //if(npu>=30) continue;
 
       // if(massggnewvtx<90 || massggnewvtx>190) continue;
-      //      if(diphot.M()<100 || diphot.M()>180) continue;
+      //     if(diphot.M()<100 || diphot.M()>180) continue;
 
       if((TMath::Abs(etascphot1)>1.4442&&TMath::Abs(etascphot1)<1.566)||(TMath::Abs(etascphot2)>1.4442&&TMath::Abs(etascphot2)<1.566)
          || TMath::Abs(etascphot1)>2.5 || TMath::Abs(etascphot2)>2.5) continue;  // acceptance
@@ -693,6 +697,12 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	idphot2 = (idcicpfphot2 < photonID_thresh_);
       }
 
+
+      if(invert_photonCuts_){
+	if(pid_hasMatchedPromptElephot1 || pid_hasMatchedPromptElephot2) continue;
+		if(deltaRToTrackphot1<1 ||deltaRToTrackphot2<1) continue;
+      }
+
       if(eleVeto_){
 	if(idcicpfphot1>0 && idcicpfphot2<0){
 	  isFirstPhotAnEle=0;
@@ -706,6 +716,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	  continue;
 	}
       }
+
 
       if(!cs_){ // photon id no control sample
  
@@ -781,6 +792,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       phot0.SetPtEtaPhiM( ptphot1, etaphot1, phiphot1, 0.);
       phot1.SetPtEtaPhiM( ptphot2, etaphot2, phiphot2, 0.);
       int isLeptonic= ((ptele1>ptlep_ttH_leptonic_thresh_ || ptmu1>ptlep_ttH_leptonic_thresh_) && (deltaRToTrackphot1>1 && deltaRToTrackphot2>1));//cut on pt lepton and gsf
+      isLeptonic_t=isLeptonic;
       int isMu=ptmu1>ptlep_ttH_leptonic_thresh_;
       if(ptele1>0 && ptmu1>0){
 	isMu=(ptele1 > ptmu1) ? 0:1;
@@ -908,6 +920,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
         if( njets_selected<20 ) {
           ptJet_t[njets_selected] = ptcorrjet[ijet];
           etaJet_t[njets_selected] = etajet[ijet];
+          phiJet_t[njets_selected] = phijet[ijet];
           btaggedLooseJet_t[njets_selected] = btagged_loose;
           btaggedMediumJet_t[njets_selected] = btagged_medium;
         }
@@ -1288,7 +1301,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	if(hasPassedSinglePhot==1){
 	  if(!(hasPassedSinglePhot==1 && hasPassedDoublePhot==0))continue; 
 	}                                                                
-      }else if ((dataset_ == "Photon_Run2012A-13Jul2012-v1" || dataset_ =="Photon-Run2012A-recover-06Aug2012-v1") && invert_photonCuts_){
+      }else if ((dataset_ == "Photon_Run2012A-13Jul2012-v1" ||dataset_ =="Photon-Run2012A-13Jul2012-v1" || dataset_ =="Photon-Run2012A-recover-06Aug2012-v1") && invert_photonCuts_){
 
 	//        if(hasPassedDoublePhot==1)continue;
 
