@@ -344,6 +344,18 @@ RedntpDirStruct get_dirs( const std::string& prodVersion ) {
     returnStruct.datadir = "redntp.53xv2_data.preselectionCS.scales-Moriond-Hgg_2.moriond_dataset/merged";
     returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.qg_version_2/merged";
 
+  } else if ( prodVersion=="less_than_moriond_dataset"){
+
+    returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
+    returnStruct.datadir = "redntp.53xv3_data.cicpfloose.scales-Moriond-Hgg_2.less_than_moriond/merged";
+    returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.qg_version_2/merged";
+
+  } else if ( prodVersion=="less_than_moriond_dataset_preselectionCS"){
+
+    returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
+    returnStruct.datadir = "redntp.53xv3_data.preselectionCS.scales-Moriond-Hgg_2.less_than_moriond/merged";
+    returnStruct.mcdir = "redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.qg_version_2/merged";
+
   } else if ( prodVersion=="moriond_dataset_elevetoOnOnePho"){
 
     returnStruct.maindir = "/xrootdfs/cms/local/micheli/Higgs/reduced/";
