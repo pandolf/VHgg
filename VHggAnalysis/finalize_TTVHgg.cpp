@@ -63,6 +63,15 @@ int main( int argc, char* argv[] ) {
     finalize_oneDataset(redntpVersion, "DoublePhoton_Run2012D-PromptReco-v1", selectionType, bTaggerType, datasets);
 
 
+  } else if (dataset=="DATA_Run2012_less_than_moriond"){
+
+    finalize_oneDataset(redntpVersion, "Photon_Run2012A-13Jul2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-PromptReco-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-24Aug2012-v2", selectionType, bTaggerType, datasets);//-EcalRecover_11Dec2012-v1 is missing
+    finalize_oneDataset(redntpVersion, "DoublePhoton_Run2012D-PromptReco-v1", selectionType, bTaggerType, datasets);
+
+
   } else if (dataset=="DATA_Run2012_SinglePhoton_ALL"){
     finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-EcalRecover_11Dec2012-v1", selectionType, bTaggerType, datasets);
@@ -76,7 +85,21 @@ int main( int argc, char* argv[] ) {
    
   } else if(dataset=="DATA_Run2012_DoublePhoton_ALL"){
     finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
-    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-PromptReco-v2", selectionType, bTaggerType, datasets);
+       finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-PromptReco-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-24Aug2012-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton_Run2012D-PromptReco-v1", selectionType, bTaggerType, datasets);
+
+
+    }else if (dataset=="DATA_Run2012_SinglePhoton_ALL_less_than_moriond"){
+    finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-EcalRecover_11Dec2012-v1", selectionType, bTaggerType, datasets);
+    //    finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-PromptReco-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-24Aug2012-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012D-PromptReco-v1", selectionType, bTaggerType, datasets);
+
+  }else if(dataset=="DATA_Run2012_DoublePhoton_ALL_less_than_moriond"){
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
+    //    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-PromptReco-v2", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-24Aug2012-v2", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "DoublePhoton_Run2012D-PromptReco-v1", selectionType, bTaggerType, datasets);
 
@@ -180,7 +203,12 @@ int main( int argc, char* argv[] ) {
     finalize_oneDataset(redntpVersion, "VBF_HToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2", selectionType, bTaggerType, datasets);
 
-  } else {
+  } else if( dataset=="tHq_mH125_8TeV_testtest" ) {
+
+    finalize_oneDataset(redntpVersion, "tHqHadronic_mH125_8TeV_testtest", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "tHqLeptonic_mH125_8TeV_testtest", selectionType, bTaggerType, datasets);
+
+  }else {
   
     finalize_oneDataset(redntpVersion, dataset, selectionType, bTaggerType, datasets );
 
@@ -205,6 +233,10 @@ void finalize_oneDataset( const std::string& redntpProdVersion, const std::strin
   std::cout << "####     b-Tagger: " << bTaggerType << std::endl << std::endl;
 
   RedntpDirStruct dirs = get_dirs( redntpProdVersion );
+
+  // lousy patch
+  if( dataset=="tHqLeptonic_mH125_8TeV_testtest" || dataset=="tHqHadronic_mH125_8TeV_testtest" || dataset_tstr.BeginsWith("TT_CT10") || dataset_tstr.BeginsWith("T_") || dataset_tstr.BeginsWith("Tbar_") )
+    dirs.mcdir = "/xrootdfs/cms/local/pandolf/Higgs/reduced/redntp.53xv2.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v1/merged";
 
   RedNtpFinalizer_TTVHgg* rf = new RedNtpFinalizer_TTVHgg( dataset, selectionType, bTaggerType );
   //rf->set_redNtpDir("/xrootdfs/cms/local/pandolf/HiggsGammaGamma/reduced/redntp.52xv5_VH_feasibility_signalOnly.cicpfloose.regrPho_eCorr_20062012.VH_feasibility_v0/merged");
@@ -245,7 +277,7 @@ void do_haddCommand( const std::string& redntpVersion, const std::string& datase
   hadd_command += suffix;
   std::string rm_command = "rm " + suffix;
   system(hadd_command.c_str());
-  if( dataset!="HToGG_M-125_8TeV-pythia6" ) //keep also separate signal processes:
+  if( dataset!="HToGG_M-125_8TeV-pythia6"&& dataset!="TT_8TeV" && dataset!="tHq_mH125_8TeV_testtest"  ) //keep also separate signal and top processes:
     system(rm_command.c_str());
 
 }
@@ -362,7 +394,15 @@ RedntpDirStruct get_dirs( const std::string& prodVersion ) {
     returnStruct.datadir = "redntp.53xv2_data.cicpfloosenoelevetoOnOnePho.scales-Lisbon-Hgg.moriond_dataset_eleveto/merged";
     returnStruct.mcdir = "redntp.52xv5.cicpfloosenoelevetoOnOnePho.scales-Lisbon-Hgg.qg_version_2/merged";
 
-  }else {
+  }else if( prodVersion=="THq_feasibility" ) {
+
+    returnStruct.maindir = "/";
+    //returnStruct.maindir = "/xrootdfs/cms/local/pandolf/Higgs/reduced/";
+    returnStruct.datadir = "/xrootdfs/cms/local/micheli/Higgs/reduced/redntp.53xv2_data.preselectionMVA.scales-Moriond-Hgg_2.moriond_dataset_chargeLeptons/merged";
+    //returnStruct.mcdir = "redntp.53xv2.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v0/merged";
+    returnStruct.mcdir   = "/xrootdfs/cms/local/pandolf/Higgs/reduced/redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v1/merged";
+
+  }else{
 
     std::cout << "-> Unknown prodVersion: '" << prodVersion << "'! Exiting." << std::endl;
     exit(11);
