@@ -329,6 +329,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
    bool isBSMEvent_t;
 
    int njets_t;
+   int isMu_t;
    int nbjets_loose_t;
    int nbjets_medium_t;
    int isLeptonic_t;
@@ -386,6 +387,10 @@ void RedNtpFinalizer_TTVHgg::finalize()
    float minv_lnu_t;
    float minv_blnu_t;
    float minv_bgg_t;
+   float minv_lphot1_t;
+   float minv_lphot2_t;
+   float deltaR_lphot1_t;
+   float deltaR_lphot2_t;
 
    float eventWeight = 1.;
 
@@ -411,6 +416,11 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch( "phiPhot1", &phiPhot1_t, "phiPhot1_t/F" );
    tree_passedEvents->Branch( "phiPhot2", &phiPhot2_t, "phiPhot2_t/F" );
    tree_passedEvents->Branch( "mgg", &mgg_t, "mgg_t/F" );
+   tree_passedEvents->Branch( "isMu", &isMu_t, "isMu_t/I" );
+   tree_passedEvents->Branch( "minv_lphot1", &minv_lphot1_t, "minv_lphot1_t/F" );
+   tree_passedEvents->Branch( "minv_lphot2", &minv_lphot2_t, "minv_lphot2_t/F" );
+   tree_passedEvents->Branch( "deltaR_lphot1", &deltaR_lphot1_t, "deltaR_lphot1_t/F" );
+   tree_passedEvents->Branch( "deltaR_lphot2", &deltaR_lphot2_t, "deltaR_lphot2_t/F" );
    tree_passedEvents->Branch( "ptgg", &ptgg_t, "ptgg_t/F" );
    tree_passedEvents->Branch( "ptRungg", &ptRungg_t, "ptRungg_t/F" );
    tree_passedEvents->Branch( "ptPhot1_scaled_weight", &ptPhot1_scaled_weight_t, "ptPhot1_scaled_weight_t/F" );
@@ -625,7 +635,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
       //if(npu>=30) continue;
 
       // if(massggnewvtx<90 || massggnewvtx>190) continue;
-      //     if(diphot.M()<100 || diphot.M()>180) continue;
+           if(diphot.M()<100 || diphot.M()>180) continue;
 
       if((TMath::Abs(etascphot1)>1.4442&&TMath::Abs(etascphot1)<1.566)||(TMath::Abs(etascphot2)>1.4442&&TMath::Abs(etascphot2)<1.566)
          || TMath::Abs(etascphot1)>2.5 || TMath::Abs(etascphot2)>2.5) continue;  // acceptance
@@ -698,8 +708,9 @@ void RedNtpFinalizer_TTVHgg::finalize()
       }
 
 
-      if(invert_photonCuts_){
 	if(pid_hasMatchedPromptElephot1 || pid_hasMatchedPromptElephot2) continue;
+      if(invert_photonCuts_){
+
 		if(deltaRToTrackphot1<1 ||deltaRToTrackphot2<1) continue;
       }
 
@@ -797,9 +808,10 @@ void RedNtpFinalizer_TTVHgg::finalize()
       if(ptele1>0 && ptmu1>0){
 	isMu=(ptele1 > ptmu1) ? 0:1;
       }
-      TLorentzVector l,nu,lnu,b,blnu,bgg;
+      TLorentzVector l,nu,lnu,b,blnu,bgg,ele;
 
       if(isLeptonic){
+	isMu_t=isMu;
 	float ptlep=ptmu1;
 	float etalep=etamu1;
 	float philep=phimu1;
@@ -810,6 +822,7 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	  philep=phiele1;
 	  energylep=eneele1;
 	}
+
 
 	l.SetPtEtaPhiE(ptlep,etalep,philep,energylep);
 	nu.SetPtEtaPhiE(epfMet,0,phipfMet,epfMet);
@@ -824,13 +837,31 @@ void RedNtpFinalizer_TTVHgg::finalize()
 	//	m_lept_phot1_t = lept_phot1.M();
 	//	m_lept_phot2_t = lept_phot2.M();
 
+	TLorentzVector ele;
+
+
+
+	  minv_lphot1_t=lept_phot1.M();
+	  minv_lphot2_t=lept_phot2.M();
+	  deltaR_lphot1_t=l.DeltaR(phot0);
+	  deltaR_lphot2_t=l.DeltaR(phot1);
+	  
+	  if(minv_lphot1_t<0){
+	    //	    cout<<"minv:"<<lept_phot1.M()<<"elept"<<l.Pt()<<"phopt"<<phot0.Pt()<<"deltaR"<<l.DeltaR(phot0)<<endl;
+
+	  }
+
 	minv_lnu_t=lnu.Mt();
-
+	
 	h1_minv_lnu->Fill(minv_lnu_t,eventWeight);
+
+      }else{
+	minv_lphot1_t=-500;
+	minv_lphot2_t=-500;
+	deltaR_lphot1_t=-500;
+	deltaR_lphot2_t=-500;
+
       }
-
-
-
 
       
       // jets
