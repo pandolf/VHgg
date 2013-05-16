@@ -37,7 +37,80 @@ RedNtpFinalizer_TTVHgg::~RedNtpFinalizer_TTVHgg()
    delete tree_->GetCurrentFile();
 }
 
+std::vector<int> RedNtpFinalizer_TTVHgg::selectLeptons(std::vector<float> ptLeptons,std::vector<float> etaLeptons,std::vector<float> phiLeptons,TVector3 phot0,TVector3 phot1){
 
+  //first two are electrons, other two are muons
+
+  std::vector<float> ptlep=ptLeptons;
+  std::vector<int> indexlep;
+  int indexlep_dummy[4];
+  float ptlep_dummy[4];
+  float myptcut=20.;
+
+  indexlep_dummy[0]= ptele1>myptcut ? 0:-1;
+  indexlep_dummy[1]= ptele2>myptcut ? 1:-1;
+  indexlep_dummy[2]= ptmu1>myptcut ? 2:-1;
+  indexlep_dummy[3]= ptmu2>myptcut ? 3:-1;
+
+  ptlep_dummy[0]= ptele1>myptcut ? ptele1:-500;
+  ptlep_dummy[1]= ptele2>myptcut ? ptele2:-500;
+  ptlep_dummy[2]= ptmu1>myptcut ? ptmu1:-500;
+  ptlep_dummy[3]= ptmu2>myptcut ? ptmu2:-500;
+  
+
+  for(int i=0;i<4;i++){
+    //    cout<<indexlep_dummy[i]<<endl;
+    //    indexlep.push_back(indexlep_dummy[i]);
+    indexlep.push_back(indexlep_dummy[i]);
+  }
+
+  //check deltaRToTrackPhot for electrons
+   if(deltaRToTrackphot1<1 || deltaRToTrackphot2<1){
+    indexlep[0]=-1;
+    ptlep[0]=-500;
+    
+    indexlep[1]=-1;
+    ptlep[1]=-500;
+    }
+
+    //check deltaR with photons
+    for(int i=0;i<4;i++){
+      if(indexlep[i]>=0){
+	TVector3 lep_3d;
+	lep_3d.SetPtEtaPhi(ptlep[indexlep[i]],etaLeptons[indexlep[i]],phiLeptons[indexlep[i]]);
+	if(lep_3d.DeltaR(phot0)<0.5 || lep_3d.DeltaR(phot1)<0.5){
+	  indexlep[i]=-1;
+	  ptlep[i]=-500;
+	}
+      }
+    }
+
+  
+    for(int nStartIndex = 0; nStartIndex < ptLeptons.size(); nStartIndex++){
+
+	// nBiggestIndex is the index of the biggest element
+	// we've encountered so far.
+	int nBiggestIndex = nStartIndex;
+
+	// Search through every element starting at nStartIndex+1
+	for (int nCurrentIndex = nStartIndex + 1; nCurrentIndex < ptLeptons.size(); nCurrentIndex++)
+	  {
+	    // If the current element is smaller than our previously found biggest
+	    if (ptlep[nCurrentIndex] > ptlep[nBiggestIndex])
+	      // Store the index in nBiggestIndex
+	      nBiggestIndex = nCurrentIndex;
+	  }
+
+	// Swap our start element wih our biggest element
+	swap(ptlep[nStartIndex], ptlep[nBiggestIndex]);
+	swap(indexlep[nStartIndex], indexlep[nBiggestIndex]);
+
+      }
+
+
+  return indexlep;
+  
+    }
 
 
 
@@ -392,6 +465,9 @@ void RedNtpFinalizer_TTVHgg::finalize()
    float deltaR_lphot1_t;
    float deltaR_lphot2_t;
 
+   float ptlep1_t,etalep1_t,philep1_t,enelep1_t;
+   float ptlep2_t,etalep2_t,philep2_t,enelep2_t;
+
    float eventWeight = 1.;
 
    TTree* tree_passedEvents = new TTree();
@@ -465,6 +541,14 @@ void RedNtpFinalizer_TTVHgg::finalize()
    tree_passedEvents->Branch("ptmu2", &ptmu2, "ptmu2/F");
    tree_passedEvents->Branch("etamu2", &etamu2, "etamu2/F");
    tree_passedEvents->Branch("phimu2", &phimu2, "phimu2/F");
+   tree_passedEvents->Branch("ptlep1", &ptlep1_t, "ptlep1/F");
+   tree_passedEvents->Branch("etalep1", &etalep1_t, "etalep1/F");
+   tree_passedEvents->Branch("philep1", &philep1_t, "philep1/F");
+   tree_passedEvents->Branch("enelep1", &enelep1_t, "enelep1/F");
+   tree_passedEvents->Branch("ptlep2", &ptlep2_t, "ptlep2/F");
+   tree_passedEvents->Branch("etalep2", &etalep2_t, "etalep2/F");
+   tree_passedEvents->Branch("philep2", &philep2_t, "philep2/F");
+   tree_passedEvents->Branch("enelep2", &enelep2_t, "enelep2/F");
    tree_passedEvents->Branch("epfMet", &epfMet, "epfMet");
    tree_passedEvents->Branch( "hasPassedSinglePhot", &hasPassedSinglePhot_t, "hasPassedSinglePhot_t/I" );
    tree_passedEvents->Branch( "hasPassedDoublePhot", &hasPassedDoublePhot_t, "hasPassedDoublePhot_t/I" );
@@ -505,7 +589,9 @@ void RedNtpFinalizer_TTVHgg::finalize()
    //2D weights 
    std::string ptweight2DFileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_pt_preselectionCS_onlyPhotonCuts_4GeVbinning.root";
    //2D data
-   std::string ptweight2DFileName_data="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_pt_data_4GeVbinning.root";
+   //   std::string ptweight2DFileName_data="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_pt_data_4GeVbinning.root";
+   //weight giuseppe
+   std::string ptweight2DFileName_data="weight_giuseppe/scales_2D_pt_data_moriond.root";
 
 
    TFile* ptweightPhot1File=TFile::Open(ptweightPhot1FileName.c_str());
@@ -526,6 +612,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
    //2D weights
    std::string etaweight2DFileName="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_eta_preselectionCS_onlyPhotonCuts_01binning.root";
    //2D data
+   //   std::string etaweight2DFileName_data="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_eta_data_01binning.root";
+   //weight giuseppe
    std::string etaweight2DFileName_data="/afs/cern.ch/user/m/micheli/public/ttH/scales/scales_2D_eta_data_01binning.root";
 
 
@@ -703,8 +791,12 @@ void RedNtpFinalizer_TTVHgg::finalize()
        idphot1 = (idcicpfphot1 >= photonID_thresh_);
        idphot2 = (idcicpfphot2 >= photonID_thresh_);
       }else{
-	idphot1 = (idcicpfphot1 >= photonID_thresh_);
-	idphot2 = (idcicpfphot2 < photonID_thresh_);
+	//	idphot1 = (idcicpfphot1 >= photonID_thresh_);
+	//	idphot2 = (idcicpfphot2 < photonID_thresh_);
+	        idphot1 = ((idcicpfphot1 >= photonID_thresh_)&&(idcicpfphot2 < photonID_thresh_))||((idcicpfphot1 < photonID_thresh_)&&(idcicpfphot2 >= photonID_thresh_));
+	        idphot2 = ((idcicpfphot1 >= photonID_thresh_)&&(idcicpfphot2 < photonID_thresh_))||((idcicpfphot1 < photonID_thresh_)&&(idcicpfphot2 >= photonID_thresh_));
+
+
       }
 
 
@@ -799,58 +891,109 @@ void RedNtpFinalizer_TTVHgg::finalize()
       
 
       //leptons
+      int isLeptonic=0;
+      int eventWithLepton= ((ptele1>20. || ptmu1>20.));
+
       TLorentzVector phot0, phot1;
       phot0.SetPtEtaPhiM( ptphot1, etaphot1, phiphot1, 0.);
       phot1.SetPtEtaPhiM( ptphot2, etaphot2, phiphot2, 0.);
-      int isLeptonic= ((ptele1>ptlep_ttH_leptonic_thresh_ || ptmu1>ptlep_ttH_leptonic_thresh_) && (deltaRToTrackphot1>1 && deltaRToTrackphot2>1));//cut on pt lepton and gsf
-      isLeptonic_t=isLeptonic;
-      int isMu=ptmu1>ptlep_ttH_leptonic_thresh_;
-      if(ptele1>0 && ptmu1>0){
-	isMu=(ptele1 > ptmu1) ? 0:1;
-      }
-      TLorentzVector l,nu,lnu,b,blnu,bgg,ele;
+      
+      TVector3 phot1_3d;
+      TVector3 phot2_3d;
+      phot1_3d.SetPtEtaPhi( ptphot1, etaphot1, phiphot1);
+      phot2_3d.SetPtEtaPhi( ptphot2, etaphot2, phiphot2);
 
-      if(isLeptonic){
-	isMu_t=isMu;
-	float ptlep=ptmu1;
-	float etalep=etamu1;
-	float philep=phimu1;
-	float energylep=enemu1;
-	if(!isMu){
-	  ptlep=ptele1;
-	  etalep=etaele1;
-	  philep=phiele1;
-	  energylep=eneele1;
+
+      std::vector<float> lepton_pt_vector;
+      std::vector<float> lepton_eta_vector;
+      std::vector<float> lepton_phi_vector;
+      std::vector<float> lepton_ene_vector;
+
+      lepton_pt_vector.push_back(ptele1);
+      lepton_pt_vector.push_back(ptele2);
+      lepton_pt_vector.push_back(ptmu1);
+      lepton_pt_vector.push_back(ptmu2);
+
+      lepton_eta_vector.push_back(etaele1);
+      lepton_eta_vector.push_back(etaele2);
+      lepton_eta_vector.push_back(etamu1);
+      lepton_eta_vector.push_back(etamu2);
+
+      lepton_phi_vector.push_back(phiele1);
+      lepton_phi_vector.push_back(phiele2);
+      lepton_phi_vector.push_back(phimu1);
+      lepton_phi_vector.push_back(phimu2);
+
+      lepton_ene_vector.push_back(eneele1);
+      lepton_ene_vector.push_back(eneele2);
+      lepton_ene_vector.push_back(enemu1);
+      lepton_ene_vector.push_back(enemu2);
+
+
+      std::vector<int> index_leptons=selectLeptons(lepton_pt_vector,lepton_eta_vector,lepton_phi_vector,phot1_3d,phot2_3d);
+
+      /*      for(int i=0;i<4;i++){
+	if(lepton_pt_vector[0]>0 && lepton_pt_vector[1]>0){
+	  cout<<"original pt n."<<i<<" "<<lepton_pt_vector[i]<<endl;
 	}
+      }
+      if(lepton_pt_vector[0]>0 && lepton_pt_vector[1]>0)      cout<<"--------------"<<endl;
+      for(int i=0;i<4;i++){
+	if(lepton_pt_vector[0]>0 && lepton_pt_vector[1]>0){
+	  cout<<"pt lep n."<<i<<" index "<<index_leptons[i]<<endl;
+	  	if(index_leptons[i]>=0) cout<<" pt:"<<lepton_pt_vector[index_leptons[i]]<<endl;
+	}
+      }*/
 
+      int isMu;
+      if( index_leptons[0] == 0 || index_leptons[0] == 1){
+	isLeptonic=1;
+	isMu=0;
+      }else if(index_leptons[0]== 2 || index_leptons[0]==3){
+	isLeptonic=1;
+	isMu=1;
+      }
 
-	l.SetPtEtaPhiE(ptlep,etalep,philep,energylep);
+      isLeptonic_t=isLeptonic;
+      isMu_t=isMu;
+
+      TLorentzVector l,nu,lnu,b,blnu,bgg,ele;
+      if(isLeptonic){
+
+	l.SetPtEtaPhiE(lepton_pt_vector[index_leptons[0]],lepton_eta_vector[index_leptons[0]],lepton_phi_vector[index_leptons[0]],lepton_ene_vector[index_leptons[0]]);
 	nu.SetPtEtaPhiE(epfMet,0,phipfMet,epfMet);
 	lnu=l+nu;
 
-	float deltaR_lept_phot1 = l.DeltaR(phot0);
-	float deltaR_lept_phot2 = l.DeltaR(phot1);
-	//	deltaR_lept_phot_t = TMath::Min( deltaR_lept_phot1, deltaR_lept_phot2 );
 
-	TLorentzVector lept_phot1 = l + phot0;
-	TLorentzVector lept_phot2 = l + phot1;
-	//	m_lept_phot1_t = lept_phot1.M();
-	//	m_lept_phot2_t = lept_phot2.M();
+	TVector3 lep1_3d;
+	TVector3 lep2_3d;
+	TVector3 lep1_phot1_3d;
+	TVector3 lep1_phot2_3d;
 
-	TLorentzVector ele;
+	lep1_3d.SetPtEtaPhi(lepton_pt_vector[index_leptons[0]],lepton_eta_vector[index_leptons[0]],lepton_phi_vector[index_leptons[0]]);
+	ptlep1_t=lepton_pt_vector[index_leptons[0]];
+	etalep2_t=lepton_eta_vector[index_leptons[0]];
+	philep2_t=lepton_phi_vector[index_leptons[0]];
+	enelep2_t=lepton_ene_vector[index_leptons[0]];
 
-
-
-	  minv_lphot1_t=lept_phot1.M();
-	  minv_lphot2_t=lept_phot2.M();
-	  deltaR_lphot1_t=l.DeltaR(phot0);
-	  deltaR_lphot2_t=l.DeltaR(phot1);
+	ptlep2_t=index_leptons[1]>=0 ? lepton_pt_vector[index_leptons[1]]:-500;
+	etalep2_t=index_leptons[1]>=0 ? lepton_eta_vector[index_leptons[1]]:-500;
+	philep2_t=index_leptons[1]>=0 ? lepton_phi_vector[index_leptons[1]]:-500;
+	enelep2_t=index_leptons[1]>=0 ? lepton_ene_vector[index_leptons[1]]:-500;
 	  
-	  if(minv_lphot1_t<0){
-	    //	    cout<<"minv:"<<lept_phot1.M()<<"elept"<<l.Pt()<<"phopt"<<phot0.Pt()<<"deltaR"<<l.DeltaR(phot0)<<endl;
 
-	  }
 
+	lep1_phot1_3d=lep1_3d+phot1_3d;
+	lep1_phot2_3d=lep1_3d+phot2_3d;
+
+	minv_lphot1_t=lep1_phot1_3d.Mag();
+	minv_lphot2_t=lep1_phot2_3d.Mag();
+	deltaR_lphot1_t=lep1_3d.DeltaR(phot1_3d);
+	deltaR_lphot2_t=lep1_3d.DeltaR(phot2_3d);
+
+
+	
+	
 	minv_lnu_t=lnu.Mt();
 	
 	h1_minv_lnu->Fill(minv_lnu_t,eventWeight);
@@ -2333,6 +2476,9 @@ void RedNtpFinalizer_TTVHgg::setSelectionType( const std::string& selectionType 
   if( selectionType=="presel" ) {
 
     // leave all cuts to default
+
+  }else if(selectionType=="presel_cutPhotons"){
+    ptphot1cut_ = 60.;
 
   } else if( selectionType=="presel_plusMjj" ) {
 
