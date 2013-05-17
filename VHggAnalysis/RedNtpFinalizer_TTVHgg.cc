@@ -800,11 +800,8 @@ void RedNtpFinalizer_TTVHgg::finalize()
       }
 
 
-	if(pid_hasMatchedPromptElephot1 || pid_hasMatchedPromptElephot2) continue;
-      if(invert_photonCuts_){
+      if(pid_hasMatchedPromptElephot1 || pid_hasMatchedPromptElephot2) continue;
 
-		if(deltaRToTrackphot1<1 ||deltaRToTrackphot2<1) continue;
-      }
 
       if(eleVeto_){
 	if(idcicpfphot1>0 && idcicpfphot2<0){
