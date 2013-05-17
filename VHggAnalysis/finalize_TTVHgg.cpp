@@ -93,13 +93,13 @@ int main( int argc, char* argv[] ) {
     }else if (dataset=="DATA_Run2012_SinglePhoton_ALL_less_than_moriond"){
     finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-EcalRecover_11Dec2012-v1", selectionType, bTaggerType, datasets);
-    //    finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-PromptReco-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-PromptReco-v2", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012C-24Aug2012-v1", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "SinglePhoton_Run2012D-PromptReco-v1", selectionType, bTaggerType, datasets);
 
   }else if(dataset=="DATA_Run2012_DoublePhoton_ALL_less_than_moriond"){
     finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012B-13Jul2012-v1", selectionType, bTaggerType, datasets);
-    //    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-PromptReco-v2", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-PromptReco-v2", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "DoublePhoton-Run2012C-24Aug2012-v2", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "DoublePhoton_Run2012D-PromptReco-v1", selectionType, bTaggerType, datasets);
 
@@ -181,7 +181,15 @@ int main( int argc, char* argv[] ) {
 
   //} else if( dataset=="VG_8TeV" ) {
 
-  } else if( dataset=="VV_8TeV" ) {
+  } else if(dataset == "TTgg_8TeV"){
+    // finalize_oneDataset(redntpVersion, "TT_CT10_TuneZ2star_8TeV-powheg-tauola_Summer12_DR53X-PU_S10_START53_V7A-v2", selectionType, bTaggerType, datasets);
+      finalize_oneDataset(redntpVersion, "TTJets_TuneZ2star_8TeV-madgraph-tauola_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "TTbarGG_0Jet_Summer12-PU_S7_START52_V9-v1" , selectionType, bTaggerType, datasets);
+    finalize_oneDataset(redntpVersion, "TTGJets_8TeV-madgraph_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
+
+
+
+  }else if( dataset=="VV_8TeV" ) {
 
     //finalize_oneDataset("WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola");
     finalize_oneDataset(redntpVersion, "WW_TuneZ2star_8TeV_pythia6_tauola_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
@@ -203,7 +211,11 @@ int main( int argc, char* argv[] ) {
     finalize_oneDataset(redntpVersion, "VBF_HToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2", selectionType, bTaggerType, datasets);
 
-  } else if( dataset=="tHq_mH125_8TeV_testtest" ) {
+  } else if(dataset=="onlyTTH"){
+
+    finalize_oneDataset(redntpVersion, "TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2", selectionType, bTaggerType, datasets);
+
+  }else if( dataset=="tHq_mH125_8TeV_testtest" ) {
 
     finalize_oneDataset(redntpVersion, "tHqHadronic_mH125_8TeV_testtest", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "tHqLeptonic_mH125_8TeV_testtest", selectionType, bTaggerType, datasets);
@@ -235,8 +247,8 @@ void finalize_oneDataset( const std::string& redntpProdVersion, const std::strin
   RedntpDirStruct dirs = get_dirs( redntpProdVersion );
 
   // lousy patch
-  if( dataset=="tHqLeptonic_mH125_8TeV_testtest" || dataset=="tHqHadronic_mH125_8TeV_testtest" || dataset_tstr.BeginsWith("TT_CT10") || dataset_tstr.BeginsWith("T_") || dataset_tstr.BeginsWith("Tbar_") )
-    dirs.mcdir = "/xrootdfs/cms/local/pandolf/Higgs/reduced/redntp.53xv2.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v1/merged";
+  //  if( dataset=="tHqLeptonic_mH125_8TeV_testtest" || dataset=="tHqHadronic_mH125_8TeV_testtest" || dataset_tstr.BeginsWith("TT_CT10") || dataset_tstr.BeginsWith("T_") || dataset_tstr.BeginsWith("Tbar_") )
+  //dirs.mcdir = "/xrootdfs/cms/local/pandolf/Higgs/reduced/redntp.53xv2.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v1/merged";
 
   RedNtpFinalizer_TTVHgg* rf = new RedNtpFinalizer_TTVHgg( dataset, selectionType, bTaggerType );
   //rf->set_redNtpDir("/xrootdfs/cms/local/pandolf/HiggsGammaGamma/reduced/redntp.52xv5_VH_feasibility_signalOnly.cicpfloose.regrPho_eCorr_20062012.VH_feasibility_v0/merged");
