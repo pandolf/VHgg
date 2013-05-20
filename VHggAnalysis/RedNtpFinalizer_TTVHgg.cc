@@ -969,9 +969,9 @@ void RedNtpFinalizer_TTVHgg::finalize()
 
 	lep1_3d.SetPtEtaPhi(lepton_pt_vector[index_leptons[0]],lepton_eta_vector[index_leptons[0]],lepton_phi_vector[index_leptons[0]]);
 	ptlep1_t=lepton_pt_vector[index_leptons[0]];
-	etalep2_t=lepton_eta_vector[index_leptons[0]];
-	philep2_t=lepton_phi_vector[index_leptons[0]];
-	enelep2_t=lepton_ene_vector[index_leptons[0]];
+	etalep1_t=lepton_eta_vector[index_leptons[0]];
+	philep1_t=lepton_phi_vector[index_leptons[0]];
+	enelep1_t=lepton_ene_vector[index_leptons[0]];
 
 	ptlep2_t=index_leptons[1]>=0 ? lepton_pt_vector[index_leptons[1]]:-500;
 	etalep2_t=index_leptons[1]>=0 ? lepton_eta_vector[index_leptons[1]]:-500;
