@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.13 2012/11/13 09:38:19 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.14 2012/11/13 11:45:39 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -175,7 +175,8 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
    // note that you may also use variable expressions, such as: "3*var1/var2*abs(var3)"
    // [all types of expressions that can also be parsed by TTree::Draw( "expression" )]
    //factory->AddVariable( "ptLept3"       , "Third Lepton p_{T}", "GeV", 'F');
-   factory->AddVariable( "ptRungg"            , "Running DiPhoton p_{T}", "GeV", 'F');
+   //factory->AddVariable( "ptRungg"            , "Running DiPhoton p_{T}", "GeV", 'F');
+   factory->AddVariable( "ptRungg"            , "DiPhoton p_{T}", "GeV", 'F');
    if( category>1 ) { // VH stuff:
      //factory->AddVariable( "njets"         , "N Jets", "", 'I');
      //factory->AddVariable( "ptRunPhot1"            , "Running Lead Photon p_{T}", "GeV", 'F');
@@ -185,15 +186,16 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
      //factory->AddVariable( "ptJet1"            , "Lead Jet p_{T}", "GeV", 'F');
      factory->AddVariable( "absCosThetaStar"            , "|cos(#theta*)|", "", 'F');
      //factory->AddVariable( "cosTheta2"            , "cos(#theta_2)", "", 'F');
-     factory->AddVariable( "ptJet2"            , "Sublead Jet p_{T}", "GeV", 'F');
+     //if( category==3 )
+       factory->AddVariable( "ptJet2"            , "Sublead Jet p_{T}", "GeV", 'F');
      //factory->AddVariable( "ptjj"            , "DiJet p_{T}", "GeV", 'F');
    } else { //ttH
      factory->AddVariable( "njets"         , "N Jets", "", 'I');
      factory->AddVariable( "Alt$(ptJet[2],0)"            , "Third Jet p_{T}", "GeV", 'F');
      factory->AddVariable( "Alt$(ptJet[3],0)"            , "Fourth Jet p_{T}", "GeV", 'F');
      factory->AddVariable( "Alt$(ptJet[4],0)"            , "Fifth Jet p_{T}", "GeV", 'F');
-     factory->AddVariable( "m3"            , "M3", "GeV", 'F');
-     //factory->AddVariable( "Ht"            , "H_{T}", "GeV", 'F');
+     //factory->AddVariable( "m3"            , "M3", "GeV", 'F');
+     factory->AddVariable( "Ht"            , "H_{T}", "GeV", 'F');
    }
 
    // You can add so-called "Spectator variables", which are not used in the MVA training, 
@@ -248,9 +250,15 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
 
       TChain* background = new TChain("tree_passedEvents");
       std::string bgFileName = treeDir;
-      if( category==0 ) bgFileName += "/TTVHgg_TT_8TeV_presel_CSV.root";
-      else              bgFileName += "/TTVHgg_DiPhoton_8TeV-pythia6_presel_CSV.root";
+      //if( category==0 ) bgFileName += "/TTVHgg_TT_8TeV_presel_CSV.root";
+      if( category==0 || category==1 ) bgFileName += "/TTVHgg_DATA_Run2012ABC_presel_invertedPhotID_CSV.root"; //ttH
+      else              bgFileName += "/TTVHgg_GluGluToHToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1_presel_CSV.root"; //VH
+      //else              bgFileName += "/TTVHgg_DiPhoton_8TeV-pythia6_presel_CSV.root"; //VH
       background->Add(bgFileName.c_str());
+
+      std::cout << std::endl << "Opening files: " << std::endl;
+      std::cout << "Signal: " << signalFileName << std::endl;
+      std::cout << "Background: " << bgFileName << std::endl;
 
       //TFile* file_TTJ = TFile::Open("../TTZTrilepton_TTJ_Fall11_highstat_presel_TCHE_ALL.root");
       //TFile* file_VV = TFile::Open("../TTZTrilepton_VV_Summer11_presel_TCHE_ALL.root");
@@ -336,19 +344,22 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
      mycuts = "mgg>100. && mgg<180. && ptRunPhot1>60. && ptRunPhot2>25. && category==1";
      mycutb = "mgg>100. && mgg<180. && ptRunPhot1>60. && ptRunPhot2>25. && category==1";
    } else if( category==2 ) { //VH b-tagged
-     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==2";
-     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==2";
+     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptPhot2>25. && ptJet2>25. && category==2";
+     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptPhot2>25. && ptJet2>25. && category==2";
    } else if( category==3 ) { //VH no-tag
      //mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==4";
      //mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==4";
-     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && abs(etaPhot1)<1.4442 && abs(etaPhot2)<1.4442 && category==3";
-     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && abs(etaPhot1)<1.4442 && abs(etaPhot2)<1.4442 && category==3";
+     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptPhot2>25. && ptJet2>25. && category==3";
+     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptPhot2>25. && ptJet2>25. && category==3";
    } else if( category==4 ) { //VH tag+notag but with mjj>70, to be used for VH tag (assume ptgg and costhetastar dont depend on btag)
      mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category>=2";
      mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category>=2";
    } else if( category==5 ) { //VH tagged using medium WP
      mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==2 && nbjets_medium>=1";
      mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptRunPhot2>25. && category==2 && nbjets_medium>=1";
+   } else if( category==6 ) { //VH tagged using medium WP
+     mycuts = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptPhot2>25. && ptJet2>25. && (category==2 || category==3)";
+     mycutb = "mgg>100. && mgg<180. && mjj>60. && mjj<120. && ptRunPhot1>60. && ptPhot2>25. && ptJet2>25. && (category==2 || category==3)";
    }
    //TCut mycuts = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
    //TCut mycutb = "mjj>60. && mjj<120. && ptPhot1>60. && nbjets_loose==0"; // for example: TCut mycutb = "abs(var1)<0.5";
@@ -385,9 +396,12 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
       bookConditions = "H:!V:FitMethod=MC";
       bookConditions += ":VarProp[0]=FMax"; //ptgg
       bookConditions += ":VarProp[1]=FMin"; //abs costhetastar
-      bookConditions += ":VarProp[2]=FMax"; //ptJet2
+      //if( category==3 )
+        bookConditions += ":VarProp[2]=FMax"; //ptJet2
 
-      bookConditions += ":EffSel:SampleSize=200000000"; // this for the actual opt
+      //bookConditions += ":CutRangeMax[0]=100";
+      //bookConditions += ":EffSel:SampleSize=50000000"; // this for the actual opt
+      bookConditions += ":EffSel:SampleSize=150000000"; // this for the actual opt
       //bookConditions += ":EffSel:SampleSize=50000"; // this for the ranking
 
 
@@ -618,12 +632,8 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
        // preselection cuts (if not optimized):
        ofs << "mgg 100. 180." << std::endl;
        ofs << "ptRunPhot1 60. 100000." << std::endl;
-       ofs << "ptRunPhot2 25. 100000." << std::endl;
+       ofs << "ptPhot2 25. 100000." << std::endl;
        ofs << "mjj 60. 120." << std::endl;
-       if( category==3 ) { //VH no tag
-         ofs << "etaPhot1 -1.4442 1.4442" << std::endl;
-         ofs << "etaPhot2 -1.4442 1.4442" << std::endl;
-       }
        char btagcutline[300];
        sprintf( btagcutline, "category %d %d", category, category+1);
        std::string btagcutline_str(btagcutline);
