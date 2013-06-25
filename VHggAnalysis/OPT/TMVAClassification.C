@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.14 2012/11/13 11:45:39 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.15 2013/06/24 14:15:45 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -79,10 +79,10 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
    // default MVA methods to be trained + tested
    std::map<std::string,int> Use;
 
-   Use["Cuts"]            = 1;
+   Use["Cuts"]            = 0;
    Use["CutsD"]           = 0;
    Use["CutsPCA"]         = 0;
-   Use["CutsGA"]          = 0;
+   Use["CutsGA"]          = 1;
    Use["CutsSA"]          = 0;
    // ---
    Use["Likelihood"]      = 0;
@@ -252,8 +252,8 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
       std::string bgFileName = treeDir;
       //if( category==0 ) bgFileName += "/TTVHgg_TT_8TeV_presel_CSV.root";
       if( category==0 || category==1 ) bgFileName += "/TTVHgg_DATA_Run2012ABC_presel_invertedPhotID_CSV.root"; //ttH
-      else              bgFileName += "/TTVHgg_GluGluToHToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1_presel_CSV.root"; //VH
-      //else              bgFileName += "/TTVHgg_DiPhoton_8TeV-pythia6_presel_CSV.root"; //VH
+      //else              bgFileName += "/TTVHgg_GluGluToHToGG_M-125_8TeV-powheg-pythia6_Summer12-PU_S7_START52_V9-v1_presel_CSV.root"; //VH
+      else              bgFileName += "/TTVHgg_DiPhoton_8TeV-pythia6_presel_CSV.root"; //VH
       background->Add(bgFileName.c_str());
 
       std::cout << std::endl << "Opening files: " << std::endl;
@@ -422,7 +422,8 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
 
    if (Use["CutsGA"])
       factory->BookMethod( TMVA::Types::kCuts, "CutsGA",
-                           "H:!V:FitMethod=GA:CutRangeMin[0]=-10:CutRangeMax[0]=10:VarProp[1]=FMax:EffSel:Steps=30:Cycles=3:PopSize=400:SC_steps=10:SC_rate=5:SC_factor=0.95" );
+                           "H:!V:FitMethod=GA:VarProp[0]=FMax:VarProp[1]=FMin:VarProp[2]=FMax:EffSel:Steps=30:Cycles=3:PopSize=400:SC_steps=10:SC_rate=5:SC_factor=0.95" );
+                           //"H:!V:FitMethod=GA:CutRangeMin[0]=-10:CutRangeMax[0]=10:VarProp[1]=FMax:EffSel:Steps=30:Cycles=3:PopSize=400:SC_steps=10:SC_rate=5:SC_factor=0.95" );
    
    if (Use["CutsSA"])
       factory->BookMethod( TMVA::Types::kCuts, "CutsSA",
@@ -605,18 +606,23 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
    factory->EvaluateAllMethods();    
 
 
-   if (Use["Cuts"]) {
+   if (Use["Cuts"] || Use["CutsGA"] ) {
 
     for( unsigned iEff=1; iEff<11; ++iEff ) {
 
-       TMVA::IMethod* method = (TMVA::IMethod*)factory->GetMethod("Cuts");
+       TMVA::IMethod* method;
+       if( Use["Cuts"]) method = (TMVA::IMethod*)factory->GetMethod("Cuts");
+       if( Use["CutsGA"]) method = (TMVA::IMethod*)factory->GetMethod("CutsGA");
        TMVA::MethodCuts* cuts = dynamic_cast<TMVA::MethodCuts*>(method);
 
        std::string optcutsdir = "optcuts_" + optName;
        std::string mkdir_command = "mkdir -p " + optcutsdir;
        system(mkdir_command.c_str());
        char cutsFileName[500];
-       sprintf( cutsFileName, "%s/cuts_cat%d_Seff%d.txt", optcutsdir.c_str(), category, 10*iEff );
+       if( Use["Cuts"] )
+         sprintf( cutsFileName, "%s/cuts_cat%d_Seff%d.txt", optcutsdir.c_str(), category, 10*iEff );
+       if( Use["CutsGA"]) 
+         sprintf( cutsFileName, "%s/cutsGA_cat%d_Seff%d.txt", optcutsdir.c_str(), category, 10*iEff );
 
        ofstream ofs(cutsFileName);
 
