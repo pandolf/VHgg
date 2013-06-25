@@ -324,6 +324,16 @@ public :
    Float_t         nHadIso03ele2;
    Float_t         photIso03ele1;
    Float_t         photIso03ele2;
+   Int_t           chargeelenontr901;
+   Int_t           chargeelenontr902;
+   Float_t         ptelenontr901;
+   Float_t         ptelenontr902;
+   Float_t         etaelenontr901;
+   Float_t         etaelenontr902;
+   Float_t         phielenontr901;
+   Float_t         phielenontr902;
+   Float_t         eneelenontr901;
+   Float_t         eneelenontr902;
    Float_t         pteleloose1;
    Float_t         pteleloose2;
    Float_t         etaeleloose1;
@@ -799,6 +809,16 @@ public :
    TBranch        *b_nHadIso03eleloose2;   //!
    TBranch        *b_photIso03eleloose1;   //!
    TBranch        *b_photIso03eleloose2;   //!
+   TBranch        *b_chargeelenontr901;   //!
+   TBranch        *b_chargeelenontr902;   //!
+   TBranch        *b_ptelenontr901;   //!
+   TBranch        *b_ptelenontr902;   //!
+   TBranch        *b_etaelenontr901;   //!
+   TBranch        *b_etaelenontr902;   //!
+   TBranch        *b_phielenontr901;   //!
+   TBranch        *b_phielenontr902;   //!
+   TBranch        *b_eneelenontr901;   //!
+   TBranch        *b_eneelenontr902;   //!
    TBranch        *b_chargemu1;   //!
    TBranch        *b_chargemu2;   //!
    TBranch        *b_ptmu1;   //!
@@ -908,6 +928,8 @@ public :
    void invertPhotID() { invert_photonCuts_ = true; };
    void setDatasetName(const std::string&  datasetname);
    virtual void     finalize();
+   float getNeutrinoPz( TLorentzVector lepton, float pxPFMet, float pyPFMet);
+
 
 
    std::string selectionType_;

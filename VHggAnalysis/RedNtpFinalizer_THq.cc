@@ -11,7 +11,7 @@
 
 
 
-#define DEBUG_EVENT_NUMBER_ -1
+#define DEBUG_EVENT_NUMBER_ 49934
 
 
 
@@ -269,6 +269,7 @@ void RedNtpFinalizer_THq::finalize()
    float pt_top_t;
    float eta_top_t;
    int   nCentralJets_t;
+   int   nFwdJets_t;
    float hardestCentralJetPt_t;
    float deltaPhi_top_higgs_t;
    float deltaEta_lept_qJet_t;
@@ -277,6 +278,9 @@ void RedNtpFinalizer_THq::finalize()
    float m_ele_phot_t;
    float zeppen_t;
    float cosThetaStar_t;
+   float cosThetaStar_tH_t;
+   float deltaR_top_phot_min_hadr_t;
+   float deltaR_qJet_phot_min_hadr_t;
 
 
    float eventWeight = 1.;
@@ -322,6 +326,7 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("pt_top",              &pt_top_t,             "pt_top_t/F");
    tree_passedEvents->Branch("eta_top",             &eta_top_t,            "eta_top_t/F");
    tree_passedEvents->Branch("nCentralJets",        &nCentralJets_t,       "nCentralJets_t/I");
+   tree_passedEvents->Branch("nFwdJets",        &nFwdJets_t,       "nFwdJets_t/I");
    tree_passedEvents->Branch("hardestCentralJetPt", &hardestCentralJetPt_t,"hardestCentralJetPt_t/F");
    tree_passedEvents->Branch("deltaPhi_top_higgs",  &deltaPhi_top_higgs_t, "deltaPhi_top_higgs_t/F");
    tree_passedEvents->Branch("deltaEta_lept_qJet",  &deltaEta_lept_qJet_t, "deltaEta_lept_qJet_t/F");
@@ -337,8 +342,11 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("deltaR_lept_phot",  &deltaR_lept_phot_t, "deltaR_lept_phot_t/F");
    tree_passedEvents->Branch("m_ele_phot",  &m_ele_phot_t, "m_ele_phot_t/F");
    tree_passedEvents->Branch("zeppen",  &zeppen_t, "zeppen_t/F");
+   tree_passedEvents->Branch("deltaR_top_phot_min_hadr",  &deltaR_top_phot_min_hadr_t, "deltaR_top_phot_min_hadr_t/F");
+   tree_passedEvents->Branch("deltaR_qJet_phot_min_hadr",  &deltaR_qJet_phot_min_hadr_t, "deltaR_qJet_phot_min_hadr_t/F");
 
    tree_passedEvents->Branch("cosThetaStar",  &cosThetaStar_t, "cosThetaStar/F");
+   tree_passedEvents->Branch("cosThetaStar_tH",  &cosThetaStar_tH_t, "cosThetaStar_tH/F");
 
    tree_passedEvents->Branch("pt_q",   &pt_q,  "pt_q/F");
    tree_passedEvents->Branch("eta_q",  &eta_q, "eta_q/F");
@@ -504,6 +512,9 @@ void RedNtpFinalizer_THq::finalize()
       nb = tree_->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
 
+
+      bool debug = (event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999);
+
       bool isMC = ( run<5 );
 
      
@@ -552,8 +563,21 @@ void RedNtpFinalizer_THq::finalize()
 
 
 
+      if((run==207905 &&  event== 1321070689 ) || 
+        ( run==195775 &&  event== 1292353429 ) || 
+        ( run==201115 &&  event== 1284444804 ) || 
+        ( run==194691 &&  event== 1282559077 ) || 
+        ( run==208427 &&  event== 1308049577 ) || 
+        ( run==207231 &&  event== 1300454371 ) ) {
 
-      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
+
+        std::cout << std::endl << std::endl << "*** run: " << run << " event: " << event << std::endl;
+        debug = true;
+
+      }
+
+
+      if( debug ) {
         std::cout << std::endl << std::endl << "#### DEBUG LOG FOR EVENT " << DEBUG_EVENT_NUMBER_ << std::endl << std::endl;
         std::cout << std::endl << "Here are the photons: " << std::endl;
         std::cout << "   Phot1:  pt: " << ptphot1 << " eta: " << etascphot1 << std::endl;
@@ -566,21 +590,34 @@ void RedNtpFinalizer_THq::finalize()
       phot2.SetPtEtaPhiM( ptphot2, etaphot2, phiphot2, 0. );
 
 
+      if( debug ) {
+        std::cout << "Checking deltaRToTrack: " << std::endl;
+        std::cout << "deltaRToTrackphot1: " << deltaRToTrackphot1 << std::endl;
+        std::cout << "deltaRToTrackphot2: " << deltaRToTrackphot2 << std::endl;
+      }
+
+
+      if( deltaRToTrackphot1<1. || deltaRToTrackphot2<1. ) continue;
+
+      if( debug ) {
+        std::cout << "ptelenontr901: " << ptelenontr901 << " etaelenontr901: " << etaelenontr901 << std::endl;
+        std::cout << "ptelenontr902: " << ptelenontr902 << " etaelenontr902: " << etaelenontr902 << std::endl;
+        std::cout << "ptmu1: " << ptmu1 << " etamu1: " << etamu1 << std::endl;
+        std::cout << "ptmu2: " << ptmu2 << " etamu2: " << etamu2 << std::endl;
+      }
       
       // tag lepton right away
       TLorentzVector lept;
       std::vector<TLorentzVector> electrons, muons;
-      if( ptele1>ptLept_thresh_ ) {
+      if( ptelenontr901>ptLept_thresh_ ) {
         TLorentzVector l;
-        l.SetPtEtaPhiE( ptele1, etaele1, phiele1, eneele1 );
-        if( l.DeltaR( phot1 ) > 0.1 && l.DeltaR( phot2 ) > 0.1 )
-          electrons.push_back(l);
+        l.SetPtEtaPhiE( ptelenontr901, etaelenontr901, phielenontr901, eneelenontr901 );
+        electrons.push_back(l);
       }
-      if( ptele2>ptLept_thresh_ ) {
+      if( ptelenontr902>ptLept_thresh_ ) {
         TLorentzVector l;
-        l.SetPtEtaPhiE( ptele2, etaele2, phiele2, eneele2 );
-        if( l.DeltaR( phot2 ) > 0.1 && l.DeltaR( phot2 ) > 0.1 )
-          electrons.push_back(l);
+        l.SetPtEtaPhiE( ptelenontr902, etaelenontr902, phielenontr902, eneelenontr902 );
+        electrons.push_back(l);
       }
       if( ptmu1>ptLept_thresh_ ) {
         TLorentzVector l;
@@ -592,19 +629,37 @@ void RedNtpFinalizer_THq::finalize()
         l.SetPtEtaPhiE( ptmu2, etamu2, phimu2, enemu2 );
         muons.push_back(l);
       }
-      if( electrons.size() + muons.size() > 1 ) continue;
-      else if( electrons.size() > 0 ) {
+
+
+
+      if( electrons.size() + muons.size() > 1 ) {
+
+        continue;
+
+      } else if( electrons.size() > 0 ) {
+
+        if( electrons[0].DeltaR( phot1 ) < 0.5 || electrons[0].DeltaR( phot2 ) < 0.5 ) continue;
+
         isLeptonic_t = true;
         isMu_t = false;
         lept = electrons[0];
+        charge_lept_t = chargeelenontr901;
+
       } else if( muons.size() > 0 ) {
+
         isLeptonic_t = true;
         isMu_t = true;
         lept = muons[0];
+        charge_lept_t = chargemu1;
+
       } else {
+
         isLeptonic_t = false;
         isMu_t = false;
+        charge_lept_t = 0;
+
       }
+
       
       
 //      float leptVetoPt_thresh=5.;
@@ -645,7 +700,7 @@ void RedNtpFinalizer_THq::finalize()
          || TMath::Abs(etascphot1)>2.5 || TMath::Abs(etascphot2)>2.5) continue;  // acceptance
 
 
-      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
+      if( debug ) {
         std::cout << "-> Passed photon eta acceptance." << std::endl;
       }
       //     if(ptphot1<ptphot1cut) continue; //pt first photon
@@ -659,7 +714,7 @@ void RedNtpFinalizer_THq::finalize()
       if(ptphot2 < triggerThreshPhot2) continue; //pt second photon
 
 
-      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
+      if( debug ) {
         std::cout << "-> Passed photon trigger pt thresholds." << std::endl;
         std::cout << std::endl << "Checking analysis thresholds: " << std::endl;
         std::cout << ptphot1 << " > " << ptphot1cut_ << "*" << massggnewvtx << "/120. = " << ptphot1cut_*massggnewvtx/120. << " ? " << std::endl;
@@ -667,7 +722,7 @@ void RedNtpFinalizer_THq::finalize()
 
       }
 
-      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
+      if( debug ) {
         std::cout << "-> Passed photon analysis pt thresholds." << std::endl;
       }
 
@@ -724,18 +779,23 @@ void RedNtpFinalizer_THq::finalize()
       } // if !useGenPhotons_
 
 
-      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
+      if( debug ) {
         std::cout << "-> Passed photon ID." << std::endl;
       }
 
-      if(diphot.M()<100 || diphot.M()>180) continue;
+      if(diphot.M()<100. || diphot.M()>180.) continue;
+      bool blindCondition = !isMC && BLIND_ && massggnewvtx>115. && massggnewvtx<135.;
+      if( blindCondition ) continue;
+
+
+
 
       if( isLeptonic_t )
         h1_cutFlow_lept->Fill(0., eventWeight);
       else
         h1_cutFlow_hadr->Fill(0., eventWeight);
 
-      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
+      if( debug ) {
         std::cout << "-> Passed mgg 100-180 cut." << std::endl;
       }
 
@@ -749,11 +809,15 @@ void RedNtpFinalizer_THq::finalize()
         h1_cutFlow_hadr->Fill(1., eventWeight);
 
 
+      if( debug ) {
+        std::cout << "-> Lepton: pt: " << lept.Pt() << " eta: " << lept.Eta() << " charge: " << charge_lept_t << std::endl;
+        if( isMu_t ) std::cout << "It's a muon" << std::endl;
+        else std::cout << "It's an electron" << std::endl;
+      }
       
-      //       if( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130. ) continue;
       
       
-      if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_prepresel->Fill( massggnewvtx, eventWeight );
+      h1_mgg_prepresel->Fill( massggnewvtx, eventWeight );
       
 
       
@@ -768,10 +832,8 @@ void RedNtpFinalizer_THq::finalize()
       std::vector<int> index_selected_btagmedium;
       Ht_t = 0.;
       
+      if( debug ) std::cout << "jets: " << std::endl;
       for( unsigned ijet=0; ijet<njets; ++ijet ) {
-      	if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
-	  std::cout << ijet << "/" << njets << " pt: " << ptcorrjet[ijet] << " eta: " << etajet[ijet] << std::endl;
-	}
 	if( ptcorrjet[ijet] < ptjetthresh_count_ ) continue;
 	if( fabs(etajet[ijet]) > etajetthresh_count_ ) continue;
 	
@@ -798,6 +860,10 @@ void RedNtpFinalizer_THq::finalize()
           if( thisJet.DeltaR(lept)<0.5 ) continue;
         }
       
+
+        if( debug ) {
+           std::cout << ijet << "/" << njets << " pt: " << ptcorrjet[ijet] << " eta: " << etajet[ijet] << " btagcsvjet: " << btagcsvjet[ijet] << std::endl;
+        }
       
         bool btagged_loose = false;
         bool btagged_medium = false;
@@ -813,8 +879,8 @@ void RedNtpFinalizer_THq::finalize()
         }
       
         //// then modify btags with Scale Factors:
-        if( isMC )
-          btsfutil->modifyBTagsWithSF_fast(btagged_loose, btagged_medium, ptcorrjet[ijet], etajet[ijet], partPdgIDjet[ijet], "mean" );
+        //if( isMC )
+        //  btsfutil->modifyBTagsWithSF_fast(btagged_loose, btagged_medium, ptcorrjet[ijet], etajet[ijet], partPdgIDjet[ijet], "mean" );
       
       
         if( btagged_loose ) {
@@ -841,7 +907,11 @@ void RedNtpFinalizer_THq::finalize()
       } //for jets
       
 
-      if( index_selected_btagmedium.size()==0 ) continue;
+
+      if( index_selected_btagmedium.size()==0 ) { 
+        if( debug ) std::cout << "didn't find bJet" << std::endl;
+        continue;
+      }
 
       if( njets_selected_btagmedium>nbtagmedium_upper_thresh_ ) continue;
 
@@ -856,6 +926,8 @@ void RedNtpFinalizer_THq::finalize()
       int bJet_index = index_selected_btagmedium[0];
       TLorentzVector bJet;
       bJet.SetPtEtaPhiE(ptcorrjet[bJet_index],etajet[bJet_index],phijet[bJet_index],ecorrjet[bJet_index]);
+
+      if( debug ) std::cout << "bJet: pt: " << bJet.Pt() << " eta: " << bJet.Eta() << std::endl;
 
 
       //// veto events with 2 leptons:
@@ -937,7 +1009,7 @@ void RedNtpFinalizer_THq::finalize()
       int index_jetW2=-1;
       
 
-      TLorentzVector top;
+      TLorentzVector top, top2;
       TLorentzVector neutrino;
       TLorentzVector jetW1,jetW2;
   
@@ -945,7 +1017,8 @@ void RedNtpFinalizer_THq::finalize()
       // now look for q-jet:
       int index_qJet=-1;
       TLorentzVector qJet;
-       nCentralJets_t = 0;
+      nCentralJets_t = 0;
+      nFwdJets_t = 0;
       float hardestCentralJetPt=0.;
       float eta_thresh_qJet = (isLeptonic_t) ? 1. : eta_qJet_thresh_hadr_;
       for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
@@ -958,13 +1031,20 @@ void RedNtpFinalizer_THq::finalize()
         if( fabs(etajet[i])<eta_thresh_qJet ) {
           if( nCentralJets_t==0 ) hardestCentralJetPt = ptcorrjet[i]; //hardest central jet
           nCentralJets_t++;
-        } else if( index_qJet<0 ) { //hardest forward jet
-          index_qJet=i;
-          qJet.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
+        } else {
+          if( index_qJet<0 ) { //hardest forward jet
+            index_qJet=i;
+            qJet.SetPtEtaPhiE(ptcorrjet[i],etajet[i],phijet[i],ecorrjet[i]);
+          } else {
+            nFwdJets_t++;
+          }
         }
 
       }
       if( index_qJet<0 ) continue;
+
+      if( debug ) std::cout << "qJet: pt: " << qJet.Pt() << " eta: " << qJet.Eta() << std::endl;
+
 
 
       deltaEta_bJet_qJet_t = fabs( bJet.Eta()- qJet.Eta());
@@ -1004,10 +1084,21 @@ void RedNtpFinalizer_THq::finalize()
 
 
 
-
+        float px_neutr = epfMet*cos(phipfMet);
+        float py_neutr = epfMet*sin(phipfMet);
         neutrino.SetPtEtaPhiE( epfMet,0,phipfMet,epfMet );
 
         top = bJet + lept + neutrino;
+
+        float pz_neutr = getNeutrinoPz( lept, px_neutr, py_neutr );
+        neutrino.SetPxPyPzE( px_neutr, py_neutr, pz_neutr, epfMet );
+        top2 = bJet + lept + neutrino;
+        if( debug ) {
+          std::cout << "bJet: pt: " << bJet.Pt() << " eta: " << bJet.Eta() << std::endl;
+          std::cout << "qJet: pt: " << qJet.Pt() << " eta: " << qJet.Eta() << std::endl;
+          std::cout << "neutrino: pt: " << neutrino.Pt() << " phi: " << neutrino.Phi() << std::endl;
+          std::cout << "top: pt: " << top.Pt() << " eta: " << top.Eta() << std::endl;
+        }
 
         
 
@@ -1034,6 +1125,15 @@ void RedNtpFinalizer_THq::finalize()
         TLorentzVector qJet_topF(qJet);
         qJet_topF.Boost(-top.BoostVector());
         cosThetaStar_t = cos(lept_topF.Angle(qJet_topF.Vect()));
+
+
+        TLorentzVector th = top + diphot;
+
+        TLorentzVector lept_thF(lept);
+        lept_thF.Boost(-th.BoostVector());
+        TLorentzVector qJet_thF(qJet);
+        qJet_thF.Boost(-th.BoostVector());
+        cosThetaStar_tH_t = cos(lept_thF.Angle(qJet_thF.Vect()));
 
 
 
@@ -1149,6 +1249,9 @@ void RedNtpFinalizer_THq::finalize()
         if( fabs(jetW1.Eta())<2. ) nCentralJets_t--;
         if( fabs(jetW2.Eta())<2. ) nCentralJets_t--;
         
+        if( fabs(jetW1.Eta())>2. ) nFwdJets_t--;
+        if( fabs(jetW2.Eta())>2. ) nFwdJets_t--;
+        
 
         //for( unsigned ii=0; ii<index_selected.size(); ++ii ) {
       
@@ -1190,6 +1293,15 @@ void RedNtpFinalizer_THq::finalize()
 
         if( deltaEta_bJet_qJet_t<deltaEta_bJet_qJet_thresh_hadr_ ) continue;
 
+
+        float deltaR_top_phot1 = top.DeltaR(phot1);
+        float deltaR_top_phot2 = top.DeltaR(phot2);
+        deltaR_top_phot_min_hadr_t = TMath::Min( deltaR_top_phot1, deltaR_top_phot2 );
+
+        float deltaR_qJet_phot1 = qJet.DeltaR(phot1);
+        float deltaR_qJet_phot2 = qJet.DeltaR(phot2);
+        deltaR_qJet_phot_min_hadr_t = TMath::Min( deltaR_qJet_phot1, deltaR_qJet_phot2 );
+
         // compute costhetastar:
         // first boost bjet and qjet in top mass frame
         TLorentzVector bJet_topF(bJet);
@@ -1198,6 +1310,14 @@ void RedNtpFinalizer_THq::finalize()
         qJet_topF.Boost(-top.BoostVector());
         cosThetaStar_t = cos(bJet_topF.Angle(qJet_topF.Vect()));
 
+        TLorentzVector th = top + diphot;
+
+        TLorentzVector bJet_thF(bJet);
+        bJet_thF.Boost(-th.BoostVector());
+        TLorentzVector qJet_thF(qJet);
+        qJet_thF.Boost(-th.BoostVector());
+        cosThetaStar_tH_t = cos(bJet_thF.Angle(qJet_thF.Vect()));
+
         Ht_t = bJet.Pt() + qJet.Pt() + jetW1.Pt() + jetW2.Pt();
 
         TLorentzVector totalHardEvent = top + qJet + diphot;
@@ -1205,6 +1325,7 @@ void RedNtpFinalizer_THq::finalize()
 
         TLorentzVector higgs_top = top + diphot;
         mSt_t = higgs_top.Pt();
+        
 
       } //if is hadronic
       
@@ -1276,12 +1397,12 @@ void RedNtpFinalizer_THq::finalize()
       if(njets_selected<njets_thresh_) continue;
 
 
-      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
+      if( debug ) {
         std::cout << "-> Passed njets cut." << std::endl;
       }
 
       if(njets_selected>njets_upper_thresh_)continue;
-      if( event == DEBUG_EVENT_NUMBER_ || DEBUG_EVENT_NUMBER_==-999 ) {
+      if( debug ) {
         std::cout << "-> Passed njets upper cut." << std::endl;
       }
 
@@ -1299,11 +1420,7 @@ void RedNtpFinalizer_THq::finalize()
       ptRunPhot2_t = ptphot2*120./massggnewvtx;
       etaPhot1_t = etaphot1;
       etaPhot2_t = etaphot2;
-      if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) ){
-        mgg_t = diphot.M();
-      }else{
-        mgg_t = -1;
-      }
+      mgg_t = diphot.M();
 
       ptgg_t = diphot.Pt();
       etagg_t = diphot.Eta();
@@ -1311,12 +1428,6 @@ void RedNtpFinalizer_THq::finalize()
       
       pt_lept_t = (isLeptonic_t) ? lept.Pt() : 0.;
       eta_lept_t = (isLeptonic_t) ? lept.Eta() : 0.;
-
-      charge_lept_t = 0;
-      if( isLeptonic_t ) {
-        if( isMu_t ) charge_lept_t = chargemu1;
-        else         charge_lept_t = chargeele1;
-      }
 
       pt_qJet_t = qJet.Pt();
       eta_qJet_t = qJet.Eta();
@@ -1359,7 +1470,7 @@ void RedNtpFinalizer_THq::finalize()
       deltaPhi_top_higgs_t = deltaPhi_top_higgs;
       
       mt_top_t = top.Mt();
-      m_top_t = top.M();
+      m_top_t = top2.M();
 
       TLorentzVector W = (isLeptonic_t) ? (lept+neutrino) : (jetW1+jetW2);
 
@@ -1383,6 +1494,13 @@ void RedNtpFinalizer_THq::finalize()
       //BDT_lept_t = readerold->EvaluateMVA( "BDTG method" );
 
       LD_lept_t = thqlikeli->computeLikelihood( njets_t, eta_qJet_t, mt_top_t, charge_lept_t, deltaEta_lept_qJet_t );
+      if( debug ) {
+        std::cout << "njets_t: " <<  njets_t << std::endl;
+        std::cout << "eta_qJet_t: " <<  eta_qJet_t << std::endl;
+        std::cout << "mt_top_t: " <<  mt_top_t << std::endl;
+        std::cout << "charge_lept_t: " <<  charge_lept_t << std::endl;
+        std::cout << "deltaEta_lept_qJet_t: " <<  deltaEta_lept_qJet_t << std::endl;
+      }
 
       //if( BDT_lept_t < bdt_lept_thresh_ ) continue; 
 
@@ -1407,7 +1525,7 @@ void RedNtpFinalizer_THq::finalize()
       
       
       
-      if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg_presel->Fill( massggnewvtx, eventWeight );
+      h1_mgg_presel->Fill( massggnewvtx, eventWeight );
       h1_njets_presel->Fill( njets_selected, eventWeight ); 
       
       
@@ -1434,7 +1552,7 @@ void RedNtpFinalizer_THq::finalize()
       
       
       
-      if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       h1_mgg->Fill( massggnewvtx, eventWeight );
+      h1_mgg->Fill( massggnewvtx, eventWeight );
       
       
       
@@ -1452,24 +1570,22 @@ void RedNtpFinalizer_THq::finalize()
         float deltaPhi_met_bJet = fabs(bJet.DeltaPhi(neutrino));
         h1_deltaPhi_met_bJet->Fill(deltaPhi_met_bJet,eventWeight);
 
-        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )       {
-          h1_mgg_lept->Fill( massggnewvtx, eventWeight );
-          if( BDT_lept_t>bdt_lept_thresh_ ) {
-            h1_mgg_lept_BDT->Fill( massggnewvtx, eventWeight );
-          }
-          if( LD_lept_t>ld_lept_thresh_ ) {
-            h1_cutFlow_lept->Fill(5., eventWeight);
-            h1_mgg_lept_LD->Fill( massggnewvtx, eventWeight );
-          }
+        h1_mgg_lept->Fill( massggnewvtx, eventWeight );
+        if( BDT_lept_t>bdt_lept_thresh_ ) {
+          h1_mgg_lept_BDT->Fill( massggnewvtx, eventWeight );
         }
+//std::cout << "*****************************************************************************           run: " << run << " event: " << event << " mgg: " << massggnewvtx << " LD: " << LD_lept_t << " charge: " << charge_lept_t << std::endl;
+        if( LD_lept_t>ld_lept_thresh_ ) {
+          h1_cutFlow_lept->Fill(5., eventWeight);
+          h1_mgg_lept_LD->Fill( massggnewvtx, eventWeight );
+        }
+        
 
       } else { // hadronic channel
 
-        if( !( !isMC && BLIND_ && massggnewvtx>120. && massggnewvtx<130.) )  {
-          h1_mgg_hadr->Fill( massggnewvtx, eventWeight );
-          if( nCentralJets_t < nCentralJets_upper_thresh_hadr_ ) {
-            h1_mgg_hadr_centralJetVeto->Fill( massggnewvtx, eventWeight );
-          }
+        h1_mgg_hadr->Fill( massggnewvtx, eventWeight );
+        if( nCentralJets_t < nCentralJets_upper_thresh_hadr_ ) {
+          h1_mgg_hadr_centralJetVeto->Fill( massggnewvtx, eventWeight );
         }
 
       }
@@ -1478,7 +1594,6 @@ void RedNtpFinalizer_THq::finalize()
      
 
       
-
 
 
       tree_passedEvents->Fill();
@@ -1975,6 +2090,16 @@ void RedNtpFinalizer_THq::Init()
    tree_->SetBranchAddress("nHadIso03eleloose2", &nHadIso03eleloose2, &b_nHadIso03eleloose2);
    tree_->SetBranchAddress("photIso03eleloose1", &photIso03eleloose1, &b_photIso03eleloose1);
    tree_->SetBranchAddress("photIso03eleloose2", &photIso03eleloose2, &b_photIso03eleloose2);
+   tree_->SetBranchAddress("chargeelenontr901", &chargeelenontr901, &b_chargeelenontr901);
+   tree_->SetBranchAddress("chargeelenontr902", &chargeelenontr902, &b_chargeelenontr902);
+   tree_->SetBranchAddress("ptelenontr901", &ptelenontr901, &b_ptelenontr901);
+   tree_->SetBranchAddress("ptelenontr902", &ptelenontr902, &b_ptelenontr902);
+   tree_->SetBranchAddress("etaelenontr901", &etaelenontr901, &b_etaelenontr901);
+   tree_->SetBranchAddress("etaelenontr902", &etaelenontr902, &b_etaelenontr902);
+   tree_->SetBranchAddress("phielenontr901", &phielenontr901, &b_phielenontr901);
+   tree_->SetBranchAddress("phielenontr902", &phielenontr902, &b_phielenontr902);
+   tree_->SetBranchAddress("eneelenontr901", &eneelenontr901, &b_eneelenontr901);
+   tree_->SetBranchAddress("eneelenontr902", &eneelenontr902, &b_eneelenontr902);
    tree_->SetBranchAddress("chargemu1", &chargemu1, &b_chargemu1);
    tree_->SetBranchAddress("chargemu2", &chargemu2, &b_chargemu2);
    tree_->SetBranchAddress("ptmu1", &ptmu1, &b_ptmu1);
@@ -2141,6 +2266,10 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
 
     // leave all cuts to default
     
+  } else if( selectionType=="presel_plusPhotonCuts" ) {
+
+    ptphot1cut_ = 50.;
+    
   } else if( selectionType=="preselGEN" ) {
 
     useGenPhotons_ = true;
@@ -2247,4 +2376,34 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
 
 }
 
+
+
+
+float RedNtpFinalizer_THq::getNeutrinoPz( TLorentzVector lepton, float pxPFMet, float pyPFMet) {
+
+  
+  float mW = 80.399;
+  float app = lepton.E()*lepton.E() + pxPFMet*pxPFMet + pyPFMet*pyPFMet - lepton.Px()*lepton.Px() + pxPFMet*pxPFMet - lepton.Py()*lepton.Py() + pyPFMet*pyPFMet - lepton.Pz()*lepton.Pz() - mW*mW;
+  float a= lepton.E()*lepton.E() - lepton.Pz()*lepton.Pz();
+  float b= lepton.Pz()*app;
+  float c= ( pxPFMet*pxPFMet + pyPFMet*pyPFMet )*lepton.E()*lepton.E() - app*app/4.;
+
+  float pznp = ( -b + sqrt( pow(b,2)-4.*a*c ) )/(2.*a);
+  float pznm = ( -b - sqrt( pow(b,2)-4.*a*c ) )/(2.*a);
+  if ( b*b-4.*a*c < 0. ){ 
+    pznp=-b/(2.*a); 
+    pznm =-b/(2.*a); 
+  }
+  
+
+  float pn;
+  if( fabs(pznp) < fabs(pznm) ){
+    pn=pznp;
+  } else{ 
+    pn=pznm;
+  }
+
+  return pn;
+
+}
 
