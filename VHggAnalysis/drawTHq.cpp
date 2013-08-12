@@ -344,7 +344,7 @@ int main(int argc, char* argv[]) {
 
 
   //bool doUL = (selType != "presel" );
-  bool doUL = true;
+  bool doUL = false;
   //db_stack->set_rebin(5);
   db_stack->set_legendTitle("Leptonic Channel");
   db_stack->drawHisto("mgg_lept", "DiPhoton Invariant Mass", "GeV");
@@ -385,6 +385,9 @@ int main(int argc, char* argv[]) {
 
 void printYields( DrawBase* db, const std::string& suffix, bool doUL, float massWindow ) {
 
+
+  TH1F::AddDirectory(kTRUE);
+
   float xMin = 125.-massWindow;
   float xMax = 125.+massWindow;
   //float xMin = 120.;
@@ -399,11 +402,16 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL, float mass
   ofstream yieldsFile(yieldsFileName);
 
 
-  std::vector<TH1D*> histos = db->get_lastHistos_mc();
+  std::vector< InputFile >  mcFiles = db->get_mcFiles();
 
-  int binXmin = histos[0]->FindBin(xMin);
-  int binXmax = histos[0]->FindBin(xMax) -1;
+  float massRange_min = 100.;
+  float massRange_max = 180.;
+  float massRange = massRange_max-massRange_min;
 
+  char selection_total[1000];
+  sprintf( selection_total, "eventWeight*( isLeptonic && LD_lept>0.25 && mgg>100. && mgg<180. )" );
+  char selection_massWindow[1000];
+  sprintf( selection_massWindow, "eventWeight*( isLeptonic && LD_lept>0.25 && mgg>%f && mgg<%f )", xMin, xMax );
 
   bool foundSignal = false;
   float totalBG = 0.;
@@ -412,11 +420,24 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL, float mass
   float signal = 0.;
   float signal_noSMH = 0.;
 
-  float massRange = (histos[0]->GetXaxis()->GetXmax()-histos[0]->GetXaxis()->GetXmin());
 
   yieldsFile << std::endl << "Yields (@ 20 fb-1): " << std::endl;
 
-  for( unsigned int ii=0; ii<histos.size(); ++ii ) {
+  for( unsigned int ii=0; ii<mcFiles.size(); ++ii ) {
+
+    TH1D* h1_mgg_massWindow = new TH1D("mgg_massWindow", "", 160, 100., 180.);
+    h1_mgg_massWindow->Sumw2();
+    TH1D* h1_mgg_total = new TH1D("mgg_total", "", 160, 100., 180.);
+    h1_mgg_total->Sumw2();
+
+    TFile* thisFile = db->get_mcFile(ii).file;
+    TTree* thisTree = (TTree*)thisFile->Get("tree_passedEvents");
+
+    thisTree->Project( "mgg_massWindow", "mgg", selection_massWindow );
+    thisTree->Project( "mgg_total", "mgg", selection_total );
+
+    float integral_massWindow = db->get_lumi()*h1_mgg_massWindow->Integral();
+    float integral_total = db->get_lumi()*h1_mgg_total->Integral();
 
     std::string dataset = db->get_mcFile(ii).datasetName;
 
@@ -430,13 +451,11 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL, float mass
         float BG_SF = 1.;
         float S_SF = 0.;
         if( Ct_minus1 ) {
-          BG_SF = 1./2.4;
-          S_SF = 1.4/2.4;
+          S_SF = 1.4;
         }
 
-        float BG = histos[ii]->Integral(binXmin, binXmax)*BG_SF;
-
-        float s = histos[ii]->Integral(binXmin, binXmax)*S_SF;
+        float BG = integral_massWindow*BG_SF;
+        float s = integral_massWindow*S_SF;
 
         totalBG += BG;
         totalBG_ave += BG;
@@ -449,26 +468,29 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL, float mass
 
       } else {
 
-        totalBG += histos[ii]->Integral(binXmin, binXmax);
+        totalBG += integral_massWindow;
 
       
         float SF = (xMax-xMin)/massRange; 
-        float BG_ave = histos[ii]->Integral(1, histos[ii]->GetNbinsX())*SF;
+        float BG_ave = integral_total*SF;
         totalBG_ave += BG_ave;
-        yieldsFile << db->get_mcFile(ii).datasetName << " " << histos[ii]->Integral(1, histos[ii]->GetNbinsX())*SF << std::endl;
+        yieldsFile << db->get_mcFile(ii).datasetName << " " << BG_ave << std::endl;
 
       }
 
     } else {
 
       foundSignal = true;
-      float thq = histos[ii]->Integral(binXmin, binXmax);
+      float thq = integral_massWindow*34.;
       signal += thq;
       signal_noSMH += thq;
       yieldsFile << db->get_mcFile(ii).datasetName << " " << thq << std::endl;
       //if( Ct_minus1 ) signal/=34.;
 
     }
+
+    delete h1_mgg_total;
+    delete h1_mgg_massWindow;
 
   } //for datasets
 
