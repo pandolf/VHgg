@@ -169,17 +169,17 @@ void RedNtpFinalizer_THq::finalize()
    TH1D* h1_mgg_presel = new TH1D("mgg_presel", "", 80, 100., 180.);
    h1_mgg_presel->Sumw2();
 
-   TH1D* h1_mgg= new TH1D("mgg", "", 80, 100., 180.);
+   TH1D* h1_mgg= new TH1D("mgg", "", 160, 100., 180.);
    h1_mgg->Sumw2();
-   TH1D* h1_mgg_lept= new TH1D("mgg_lept", "", 80, 100., 180.);
+   TH1D* h1_mgg_lept= new TH1D("mgg_lept", "", 160, 100., 180.);
    h1_mgg_lept->Sumw2();
-   TH1D* h1_mgg_lept_BDT= new TH1D("mgg_lept_BDT", "", 80, 100., 180.);
+   TH1D* h1_mgg_lept_BDT= new TH1D("mgg_lept_BDT", "", 160, 100., 180.);
    h1_mgg_lept_BDT->Sumw2();
-   TH1D* h1_mgg_lept_LD= new TH1D("mgg_lept_LD", "", 80, 100., 180.);
+   TH1D* h1_mgg_lept_LD= new TH1D("mgg_lept_LD", "", 160, 100., 180.);
    h1_mgg_lept_LD->Sumw2();
-   TH1D* h1_mgg_hadr= new TH1D("mgg_hadr", "", 80, 100., 180.);
+   TH1D* h1_mgg_hadr= new TH1D("mgg_hadr", "", 160, 100., 180.);
    h1_mgg_hadr->Sumw2();
-   TH1D* h1_mgg_hadr_centralJetVeto= new TH1D("mgg_hadr_centralJetVeto", "", 80, 100., 180.);
+   TH1D* h1_mgg_hadr_centralJetVeto= new TH1D("mgg_hadr_centralJetVeto", "", 160, 100., 180.);
    h1_mgg_hadr_centralJetVeto->Sumw2();
 
 

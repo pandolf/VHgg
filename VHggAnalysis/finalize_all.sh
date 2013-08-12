@@ -1,7 +1,7 @@
 # usage: source finalize_all.sh [redntpProdVersion] [selectionType] [use_inverted_photID=\"false\"] [bTaggerType=\"CSV\"]"
 
  cp finalize_THq finalize_THq_tmp
-# ./finalize_THq_tmp  $1 DATA_Run2012ABC $2 false $3
+ ./finalize_THq_tmp  $1 DATA_Run2012 $2 false $3
 # ./finalize_THq_tmp  $1 DATA_Run2012ABC $2 true $3
 # ./finalize_THq_tmp  $1 tHqLeptonic_mH125_8TeV_testtest $2 false $3
  ./finalize_THq_tmp  $1 tHq_mH125_8TeV_testtest $2 false $3
