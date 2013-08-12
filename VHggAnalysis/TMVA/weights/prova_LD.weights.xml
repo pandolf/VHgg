@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<MethodSetup Method="LD::LD">
+  <GeneralInfo>
+    <Info name="TMVA Release" value="4.1.0 [262400]"/>
+    <Info name="ROOT Release" value="5.28/00 [334848]"/>
+    <Info name="Creator" value="pandolf"/>
+    <Info name="Date" value="Sun Mar 17 15:16:06 2013"/>
+    <Info name="Host" value="Linux lxbuild148.cern.ch 2.6.18-194.26.1.el5 #1 SMP Wed Nov 10 09:45:46 CET 2010 x86_64 x86_64 x86_64 GNU/Linux"/>
+    <Info name="Dir" value="/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/VHgg/VHggAnalysis/TMVA"/>
+    <Info name="Training events" value="6296"/>
+    <Info name="TrainingTime" value="0.00346589"/>
+    <Info name="AnalysisType" value="Classification"/>
+  </GeneralInfo>
+  <Options>
+    <Option name="V" modified="Yes">False</Option>
+    <Option name="VerbosityLevel" modified="No">Default</Option>
+    <Option name="VarTransform" modified="Yes">None</Option>
+    <Option name="H" modified="Yes">False</Option>
+    <Option name="CreateMVAPdfs" modified="No">False</Option>
+    <Option name="IgnoreNegWeightsInTraining" modified="No">False</Option>
+  </Options>
+  <Variables NVar="5">
+    <Variable VarIndex="0" Expression="njets" Label="njets" Title="njets" Unit="" Internal="njets" Type="I" Min="2" Max="10"/>
+    <Variable VarIndex="1" Expression="nbjets_loose" Label="nbjets_loose" Title="nbjets_loose" Unit="" Internal="nbjets_loose" Type="I" Min="1" Max="6"/>
+    <Variable VarIndex="2" Expression="deltaPhi_top_higgs" Label="deltaPhi_top_higgs" Title="deltaPhi_top_higgs" Unit="" Internal="deltaPhi_top_higgs" Type="F" Min="0.00306403" Max="3.14149"/>
+    <Variable VarIndex="3" Expression="eta_qJet" Label="eta_qJet" Title="eta_qJet" Unit="" Internal="eta_qJet" Type="F" Min="-4.89675" Max="4.95232"/>
+    <Variable VarIndex="4" Expression="pt_bJet" Label="pt_bJet" Title="pt_bJet" Unit="" Internal="pt_bJet" Type="F" Min="20.1206" Max="611.608"/>
+  </Variables>
+  <Spectators NSpec="0"/>
+  <Transformations NTransformations="0"/>
+  <MVAPdfs/>
+  <Weights NOut="1" NCoeff="6">
+    <Coefficient IndexOut="0" IndexCoeff="0" Value="4.1186773279288980e-01"/>
+    <Coefficient IndexOut="0" IndexCoeff="1" Value="-1.6778779835240637e-01"/>
+    <Coefficient IndexOut="0" IndexCoeff="2" Value="-7.4477153266717416e-02"/>
+    <Coefficient IndexOut="0" IndexCoeff="3" Value="7.3005274962355191e-02"/>
+    <Coefficient IndexOut="0" IndexCoeff="4" Value="-1.3940117486250046e-03"/>
+    <Coefficient IndexOut="0" IndexCoeff="5" Value="-1.5163943183400391e-03"/>
+  </Weights>
+</MethodSetup>
