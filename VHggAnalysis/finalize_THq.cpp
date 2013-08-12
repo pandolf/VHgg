@@ -9,6 +9,7 @@ struct RedntpDirStruct {
   std::string maindir;
   std::string datadir;
   std::string mcdir;
+  std::string mcdir2;
 
 };
 
@@ -166,6 +167,10 @@ int main( int argc, char* argv[] ) {
     finalize_oneDataset(redntpVersion, "tHqHadronic_mH125_8TeV_testtest", selectionType, bTaggerType, datasets);
     finalize_oneDataset(redntpVersion, "tHqLeptonic_mH125_8TeV_testtest", selectionType, bTaggerType, datasets);
 
+  } else if( dataset=="tHq_mH125_8TeV_testtest_prova_synch" ) {
+
+    finalize_oneDataset(redntpVersion, "tHqLeptonic_mH125_8TeV_testtest_prova_synch", selectionType, bTaggerType, datasets);
+
   } else {
   
     finalize_oneDataset(redntpVersion, dataset, selectionType, bTaggerType, datasets );
@@ -193,8 +198,10 @@ void finalize_oneDataset( const std::string& redntpProdVersion, const std::strin
   RedntpDirStruct dirs = get_dirs( redntpProdVersion );
 
   // lousy patch
+  bool use_mcdir2=false;
   if( dataset=="tHqLeptonic_mH125_8TeV_testtest" || dataset=="tHqHadronic_mH125_8TeV_testtest" || dataset_tstr.BeginsWith("TT_CT10") || dataset_tstr.BeginsWith("T_") || dataset_tstr.BeginsWith("Tbar_") )
-    dirs.mcdir = "/xrootdfs/cms/local/pandolf/Higgs/reduced/redntp.53xv2.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v1/merged";
+    if( dirs.mcdir2!="" )
+      use_mcdir2 = true;
 
   RedNtpFinalizer_THq* rf = new RedNtpFinalizer_THq( dataset, selectionType, bTaggerType );
   //rf->set_redNtpDir("/xrootdfs/cms/local/pandolf/HiggsGammaGamma/reduced/redntp.52xv5_VH_feasibility_signalOnly.cicpfloose.regrPho_eCorr_20062012.VH_feasibility_v0/merged");
@@ -203,7 +210,11 @@ void finalize_oneDataset( const std::string& redntpProdVersion, const std::strin
 
   std::string redNtpDir = dirs.maindir;
   if( isData ) redNtpDir = redNtpDir + "/" + dirs.datadir;
-  else         redNtpDir = redNtpDir + "/" + dirs.mcdir;
+  else {
+    if( use_mcdir2 )       redNtpDir = redNtpDir + "/" + dirs.mcdir2;
+    else                   redNtpDir = redNtpDir + "/" + dirs.mcdir;
+  }
+
 
   rf->set_redNtpDir(redNtpDir);
   rf->set_outputDir("finalizedTrees_"+redntpProdVersion);
@@ -310,6 +321,61 @@ RedntpDirStruct get_dirs( const std::string& prodVersion ) {
     returnStruct.datadir = "/xrootdfs/cms/local/micheli/Higgs/reduced/redntp.53xv2_data.preselectionMVA.scales-Moriond-Hgg_2.moriond_dataset_chargeLeptons/merged";
     //returnStruct.mcdir = "redntp.53xv2.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v0/merged";
     returnStruct.mcdir   = "/xrootdfs/cms/local/pandolf/Higgs/reduced/redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v1/merged";
+    returnStruct.mcdir2  = "/xrootdfs/cms/local/pandolf/Higgs/reduced/redntp.53xv2.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v1/merged";
+
+  }else if( prodVersion=="THq_feasibility_preselMVA" ) {
+
+    returnStruct.maindir = "/";
+    //returnStruct.maindir = "/xrootdfs/cms/local/pandolf/Higgs/reduced/";
+    returnStruct.datadir = "/xrootdfs/cms/local/micheli/Higgs/reduced/redntp.53xv2_data.preselectionMVA.scales-Moriond-Hgg_2.moriond_dataset_chargeLeptons/merged";
+    //returnStruct.mcdir = "redntp.53xv2.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v0/merged";
+    returnStruct.mcdir   = "/xrootdfs/cms/local/pandolf/Higgs/reduced/redntp.52xv5.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_preselMVA/merged";
+    returnStruct.mcdir2  = "/xrootdfs/cms/local/pandolf/Higgs/reduced/redntp.53xv2.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_preselMVA/merged";
+
+  }else if( prodVersion=="THq_prova_synch" ) {
+
+    returnStruct.maindir = "/";
+    //returnStruct.maindir = "/xrootdfs/cms/local/pandolf/Higgs/reduced/";
+    returnStruct.datadir = "/xrootdfs/cms/local/micheli/Higgs/reduced/redntp.53xv2_data.preselectionMVA.scales-Moriond-Hgg_2.moriond_dataset_chargeLeptons/merged";
+    //returnStruct.mcdir = "redntp.53xv2.cicpfloose.scales-Lisbon-Hgg.THq_feasibility_v0/merged";
+    returnStruct.mcdir   = "/xrootdfs/cms/local/phys_higgs/pandolf/test/redntp.53x_globe_synch.preselectionMVA.scales-Lisbon-Hgg.globe_synch_2/merged";
+
+  }else if( prodVersion=="DATA_prova_synch" ) {
+
+    returnStruct.maindir = "/";
+    //returnStruct.maindir = "/xrootdfs/cms/local/pandolf/Higgs/reduced/";
+    returnStruct.datadir = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/VHgg/VHggAnalysis/data_prova_sync";
+    returnStruct.mcdir = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/VHgg/VHggAnalysis/data_prova_sync";
+
+  } else if( prodVersion=="THq_postSync" ) {
+
+    returnStruct.maindir = "/";
+    returnStruct.datadir = "/xrootdfs/cms/local/phys_higgs/pandolf/test/redntp.53xv3_data.preselectionMVA.scales-Moriond-Hgg_2.thq_post_sync_2/merged/";
+    returnStruct.mcdir =   "/xrootdfs/cms/local/phys_higgs/pandolf/test/redntp.52xv5.preselectionMVA.scales-Moriond-Hgg_2.thq_post_sync/merged";
+    returnStruct.mcdir2 =  "/xrootdfs/cms/local/phys_higgs/pandolf/test/redntp.53xv2.preselectionMVA.scales-Moriond-Hgg_2.thq_post_sync/merged";
+
+  } else if( prodVersion=="THq_postSync_muonIsorel02" ) {
+
+    returnStruct.maindir = "/";
+    returnStruct.datadir = "/xrootdfs/cms/local/phys_higgs/pandolf/test/redntp.53xv3_data.preselectionMVA.scales-Moriond-Hgg_2.thq_post_sync_2_isorel02/merged/";
+    returnStruct.mcdir =   "/xrootdfs/cms/local/phys_higgs/pandolf/test/redntp.52xv5.preselectionMVA.scales-Moriond-Hgg_2.thq_post_sync_isorel02/merged";
+    returnStruct.mcdir2 =  "/xrootdfs/cms/local/phys_higgs/pandolf/test/redntp.53xv2.preselectionMVA.scales-Moriond-Hgg_2.thq_post_sync_isorel02/merged";
+
+  } else if( prodVersion=="THq_postSync_cic" ) {
+
+    returnStruct.maindir = "/";
+    //returnStruct.maindir = "/xrootdfs/cms/local/pandolf/Higgs/reduced/";
+    returnStruct.datadir = "/xrootdfs/cms/local/phys_higgs/pandolf/test/redntp.52xv5.cicpfloose.scales-Moriond-Hgg_2.thq_post_sync/merged";
+    returnStruct.mcdir = "/xrootdfs/cms/local/phys_higgs/pandolf/test/redntp.52xv5.cicpfloose.scales-Moriond-Hgg_2.thq_post_sync/merged";
+    returnStruct.mcdir2 = "/xrootdfs/cms/local/phys_higgs/pandolf/test/redntp.53xv2.cicpfloose.scales-Moriond-Hgg_2.thq_post_sync/merged";
+
+  } else if( prodVersion=="THq_provaSync2" ) {
+
+    returnStruct.maindir = "/";
+    //returnStruct.maindir = "/xrootdfs/cms/local/pandolf/Higgs/reduced/";
+    returnStruct.datadir = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/Analysis/Higgs/";
+    returnStruct.mcdir = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/Analysis/Higgs/";
+    returnStruct.mcdir2 = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/Analysis/Higgs/";
 
   } else {
 
