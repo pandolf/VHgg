@@ -11,8 +11,7 @@
 
 
 
-#define DEBUG_EVENT_NUMBER_ 49934
-
+#define DEBUG_EVENT_NUMBER_ 77
 
 
 
@@ -24,6 +23,8 @@ RedNtpFinalizer_THq::RedNtpFinalizer_THq( const std::string& dataset, const std:
   setSelectionType(selectionType);
 
   BLIND_ = true;
+
+  use_thqPartonInfo_ = false;
 
 }
 
@@ -394,6 +395,10 @@ void RedNtpFinalizer_THq::finalize()
 
    QGLikelihoodCalculator *qglikeli = new QGLikelihoodCalculator( qglFileName );
 
+   //std::string thqFile_LD = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/VHgg/VHggAnalysis/finalizedTrees_THq_feasibility/THq_tHqLeptonic_mH125_8TeV_testtest_presel_isLeptonic_CSV.root";
+   //std::string tthFile_LD = "/afs/cern.ch/work/p/pandolf/CMSSW_5_2_5/src/UserCode/pandolf/VHgg/VHggAnalysis/finalizedTrees_THq_feasibility/THq_TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_isLeptonic_CSV.root";
+   //THqLeptonicLikelihoodCalculator * thqlikeli = new THqLeptonicLikelihoodCalculator( thqFile_LD, tthFile_LD );
+
    std::string thqFile_LD = "TMVA/THq_tHqLeptonic_mH125_8TeV_testtest_presel_isLeptonic_CSV.root";
    std::string tthFile_LD = "TMVA/THq_TTH_HToGG_M-125_8TeV-pythia6_Summer12-PU_S7_START52_V9-v2_presel_isLeptonic_CSV.root";
    THqLeptonicLikelihoodCalculator * thqlikeli = new THqLeptonicLikelihoodCalculator( thqFile_LD, tthFile_LD );
@@ -563,20 +568,6 @@ void RedNtpFinalizer_THq::finalize()
 
 
 
-      if((run==207905 &&  event== 1321070689 ) || 
-        ( run==195775 &&  event== 1292353429 ) || 
-        ( run==201115 &&  event== 1284444804 ) || 
-        ( run==194691 &&  event== 1282559077 ) || 
-        ( run==208427 &&  event== 1308049577 ) || 
-        ( run==207231 &&  event== 1300454371 ) ) {
-
-
-        std::cout << std::endl << std::endl << "*** run: " << run << " event: " << event << std::endl;
-        debug = true;
-
-      }
-
-
       if( debug ) {
         std::cout << std::endl << std::endl << "#### DEBUG LOG FOR EVENT " << DEBUG_EVENT_NUMBER_ << std::endl << std::endl;
         std::cout << std::endl << "Here are the photons: " << std::endl;
@@ -600,8 +591,8 @@ void RedNtpFinalizer_THq::finalize()
       if( deltaRToTrackphot1<1. || deltaRToTrackphot2<1. ) continue;
 
       if( debug ) {
-        std::cout << "ptelenontr901: " << ptelenontr901 << " etaelenontr901: " << etaelenontr901 << std::endl;
-        std::cout << "ptelenontr902: " << ptelenontr902 << " etaelenontr902: " << etaelenontr902 << std::endl;
+        std::cout << "ptele1: " << ptele1 << " etaele1: " << etaele1 << std::endl;
+        std::cout << "ptele2: " << ptele2 << " etaele2: " << etaele2 << std::endl;
         std::cout << "ptmu1: " << ptmu1 << " etamu1: " << etamu1 << std::endl;
         std::cout << "ptmu2: " << ptmu2 << " etamu2: " << etamu2 << std::endl;
       }
@@ -609,14 +600,24 @@ void RedNtpFinalizer_THq::finalize()
       // tag lepton right away
       TLorentzVector lept;
       std::vector<TLorentzVector> electrons, muons;
-      if( ptelenontr901>ptLept_thresh_ ) {
+      //if( ptelenontr901>ptLept_thresh_ ) {
+      //  TLorentzVector l;
+      //  l.SetPtEtaPhiE( ptelenontr901, etaelenontr901, phielenontr901, eneelenontr901 );
+      //  electrons.push_back(l);
+      //}
+      //if( ptelenontr902>ptLept_thresh_ ) {
+      //  TLorentzVector l;
+      //  l.SetPtEtaPhiE( ptelenontr902, etaelenontr902, phielenontr902, eneelenontr902 );
+      //  electrons.push_back(l);
+      //}
+      if( ptele1>ptLept_thresh_ ) {
         TLorentzVector l;
-        l.SetPtEtaPhiE( ptelenontr901, etaelenontr901, phielenontr901, eneelenontr901 );
+        l.SetPtEtaPhiE( ptele1, etaele1, phiele1, eneele1 );
         electrons.push_back(l);
       }
-      if( ptelenontr902>ptLept_thresh_ ) {
+      if( ptele2>ptLept_thresh_ ) {
         TLorentzVector l;
-        l.SetPtEtaPhiE( ptelenontr902, etaelenontr902, phielenontr902, eneelenontr902 );
+        l.SetPtEtaPhiE( ptele2, etaele2, phiele2, eneele2 );
         electrons.push_back(l);
       }
       if( ptmu1>ptLept_thresh_ ) {
@@ -629,6 +630,16 @@ void RedNtpFinalizer_THq::finalize()
         l.SetPtEtaPhiE( ptmu2, etamu2, phimu2, enemu2 );
         muons.push_back(l);
       }
+      //if( ptmu1>ptLept_thresh_ ) {
+      //  TLorentzVector l;
+      //  l.SetPtEtaPhiE( ptmu1, etamu1, phimu1, enemu1 );
+      //  muons.push_back(l);
+      //}
+      //if( ptmu2>ptLept_thresh_ ) {
+      //  TLorentzVector l;
+      //  l.SetPtEtaPhiE( ptmu2, etamu2, phimu2, enemu2 );
+      //  muons.push_back(l);
+      //}
 
 
 
@@ -638,12 +649,13 @@ void RedNtpFinalizer_THq::finalize()
 
       } else if( electrons.size() > 0 ) {
 
-        if( electrons[0].DeltaR( phot1 ) < 0.5 || electrons[0].DeltaR( phot2 ) < 0.5 ) continue;
+        //if( electrons[0].DeltaR( phot1 ) < 0.5 || electrons[0].DeltaR( phot2 ) < 0.5 ) continue;
 
         isLeptonic_t = true;
         isMu_t = false;
         lept = electrons[0];
-        charge_lept_t = chargeelenontr901;
+        charge_lept_t = chargeele1;
+        //charge_lept_t = chargeelenontr901;
 
       } else if( muons.size() > 0 ) {
 
@@ -810,9 +822,13 @@ void RedNtpFinalizer_THq::finalize()
 
 
       if( debug ) {
-        std::cout << "-> Lepton: pt: " << lept.Pt() << " eta: " << lept.Eta() << " charge: " << charge_lept_t << std::endl;
-        if( isMu_t ) std::cout << "It's a muon" << std::endl;
-        else std::cout << "It's an electron" << std::endl;
+        if( isLeptonic_t ) {
+          std::cout << "-> Lepton: pt: " << lept.Pt() << " eta: " << lept.Eta() << " charge: " << charge_lept_t << std::endl;
+          if( isMu_t ) std::cout << "It's a muon" << std::endl;
+          else std::cout << "It's an electron" << std::endl;
+        } else {
+          std::cout << "-> No leptons: this is a hadronic event." << std::endl;
+        }
       }
       
       
@@ -833,26 +849,33 @@ void RedNtpFinalizer_THq::finalize()
       Ht_t = 0.;
       
       if( debug ) std::cout << "jets: " << std::endl;
+
+
       for( unsigned ijet=0; ijet<njets; ++ijet ) {
-	if( ptcorrjet[ijet] < ptjetthresh_count_ ) continue;
-	if( fabs(etajet[ijet]) > etajetthresh_count_ ) continue;
-	
-        //jet PU ID:
+
+        if( ptcorrjet[ijet] < ptjetthresh_count_ ) continue;
+        if( fabs(etajet[ijet]) > etajetthresh_count_ ) continue;
+        
+
+        //PU ID
         bool passedPUID = true;
         if(use_PUID_){
-          if((ijet+1)>=njets_PUID_thresh_){
-            if(TMath::Abs(etajet[ijet]) < 2.5) {
-	      if(betastarjet[ijet]<0)passedPUID=false;
-	      if(betastarjet[ijet] > 0.2 * log( nvtx - PUID_betastar_thresh_ ) ) passedPUID = false;
-              if(rmsjet[ijet] > 0.06) passedPUID = false;
-            } else if(TMath::Abs(etajet[ijet]) < 3.){
-              if(rmsjet[ijet] > 0.05) passedPUID = false;
-            } else {
-              if(rmsjet[ijet] > 0.055) passedPUID = false;
-            }
+
+          if(TMath::Abs(etajet[ijet]) > 4.7) passedPUID = 0;
+
+          if(TMath::Abs(etajet[ijet]) < 2.5) {
+            if(betastarjet[ijet] > 0.2 * log( nvtx - PUID_betastar_thresh_ ) ) passedPUID = 0;
+            if(rmsjet[ijet] > 0.06) passedPUID = 0;
+          } else if(TMath::Abs(etajet[ijet]) < 2.75){
+            if(betastarjet[ijet] > 0.3 * log( nvtx - PUID_betastar_thresh_ ) ) passedPUID = 0;
+            if(rmsjet[ijet] > 0.05) passedPUID = 0;
+          } else if(TMath::Abs(etajet[ijet]) < 3.){
+            if(rmsjet[ijet] > 0.05) passedPUID = 0;
+          } else {
+            if(rmsjet[ijet] > 0.055) passedPUID = 0;
           }
-          if( !passedPUID )continue;
         }
+
       
         if( isLeptonic_t ) {
           TLorentzVector thisJet;
@@ -1027,7 +1050,7 @@ void RedNtpFinalizer_THq::finalize()
 
         if( i==index_selected_btagmedium[0] ) continue;
 
-        if( ptcorrjet[i]<20. ) continue;
+        if( ptcorrjet[i]<ptjetthresh_count_ ) continue;
         if( fabs(etajet[i])<eta_thresh_qJet ) {
           if( nCentralJets_t==0 ) hardestCentralJetPt = ptcorrjet[i]; //hardest central jet
           nCentralJets_t++;
@@ -1337,7 +1360,7 @@ void RedNtpFinalizer_THq::finalize()
 
 
       
-      if( isSignalMC ) {
+      if( isSignalMC && use_thqPartonInfo_ ) {
 
         TLorentzVector h, t, q, b, Wq, Wqbar;
         h.SetPtEtaPhiE( pt_h, eta_h, phi_h, e_h );
@@ -2332,11 +2355,29 @@ void RedNtpFinalizer_THq::setSelectionType( const std::string& selectionType ) {
     nCentralJets_upper_thresh_hadr_ = 1; 
 
 
-  } else if( selectionType=="sel4" ) {
+  } else if( selectionType=="sel4" ) { //this is the flagship selection
 
     ptphot1cut_ = 50.;
     ptphot2cut_ = 25.;
 
+    //deltaEta_lept_qJet_thresh_ = 1.;
+
+    bdt_lept_thresh_ = -0.4;
+    ld_lept_thresh_ = 0.25;
+
+    njets_thresh_hadr_ = 4;
+    m_top_thresh_hadr_ = 40.;
+    //m_W_thresh_hadr_ = 30.;
+    pt_qJet_thresh_hadr_ = 45.;
+    nCentralJets_upper_thresh_hadr_ = 1; 
+
+
+  } else if( selectionType=="sel4_pt30" ) { //like sel4 but with pt(jets)>30
+
+    ptphot1cut_ = 50.;
+    ptphot2cut_ = 25.;
+
+    ptjetthresh_count_ = 30.;
     //deltaEta_lept_qJet_thresh_ = 1.;
 
     bdt_lept_thresh_ = -0.4;

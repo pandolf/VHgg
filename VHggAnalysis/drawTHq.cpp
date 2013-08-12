@@ -10,7 +10,7 @@
 bool separate_signals = true;
 bool Ct_minus1 = true;
 
-void printYields( DrawBase* db, const std::string& suffix, bool doUL=false );
+void printYields( DrawBase* db, const std::string& suffix, bool doUL=false, float massWindow=5. );
 void drawBDTRoc( DrawBase* db );
 
 
@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
 
   
   //std::string tHqFileName = "finalizedTrees_THq_feasibility/THq_tHqLeptonic_mH125_8TeV_testtest";
-  std::string tHqFileName = "finalizedTrees_THq_feasibility/THq_tHq_mH125_8TeV_testtest";
+  std::string tHqFileName = inputDir + "/THq_tHq_mH125_8TeV_testtest";
   tHqFileName += "_" + selType;
   tHqFileName += "_" + bTaggerType;
   tHqFileName += ".root";
@@ -276,9 +276,11 @@ int main(int argc, char* argv[]) {
   db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_bJet-eta_qJet", "eventWeight*isLeptonic", 50, -5., 5., "deltaEta_bJet_qJet_lept", "#Delta#eta (bJet-qJet)");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "eta_bJet-eta_qJet", "eventWeight*isLeptonic*(abs(eta_qJet)>2.)", 50, -5., 5., "deltaEta_bJet_qJet_lept_cutEtaQJet", "#Delta#eta (bJet-qJet)");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_top", "eventWeight*(isLeptonic)", 50, 0., 500., "mt_top_lept",  "Top Transverse Mass", "GeV");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "m_top", "eventWeight*(isLeptonic)", 50, 0., 500., "m_top_lept",  "Top Mass", "GeV");
   db_nostack->drawHisto_fromTree("tree_passedEvents", "mt_W", "eventWeight*(isLeptonic)", 50, 0., 250., "mt_W_lept",  "W Transverse Mass", "GeV");
 
   db_nostack->drawHisto_fromTree("tree_passedEvents", "cosThetaStar", "eventWeight*(isLeptonic)", 50, -1., 1.0001, "cosThetaStar_lept",  "cos(#theta*)");
+  db_nostack->drawHisto_fromTree("tree_passedEvents", "cosThetaStar_tH", "eventWeight*(isLeptonic)", 50, -1., 1.0001, "cosThetaStar_tH_lept",  "cos(#theta*) (tH boost)");
 
   drawBDTRoc( db_nostack );
 
@@ -313,8 +315,10 @@ int main(int argc, char* argv[]) {
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "m_top", "eventWeight*(!isLeptonic)", 50, 50., 500., "m_top_hadr",  "Top Mass", "GeV");
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "m_W", "eventWeight*(!isLeptonic)", 50, 20., 250., "m_W_hadr",  "W Mass", "GeV");
   db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "m_W", "eventWeight*(!isLeptonic && abs(m_top-172.5)<50.)", 50, 20., 250., "m_W_mTopCut_hadr",  "W Mass", "GeV");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "deltaR_top_phot_min_hadr", "eventWeight*(!isLeptonic)", 50, 0., 5., "deltaR_top_phot_min_hadr",  "Minimal #DeltaR(top, #gamma)", "");
 
-  db_nostack->drawHisto_fromTree("tree_passedEvents", "cosThetaStar", "eventWeight*(!isLeptonic)", 50, -1., 1.0001, "cosThetaStar_hadr",  "cos(#theta*)");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "cosThetaStar", "eventWeight*(!isLeptonic)", 50, -1., 1.0001, "cosThetaStar_hadr",  "cos(#theta*)");
+  db_nostack_hadr->drawHisto_fromTree("tree_passedEvents", "cosThetaStar_tH", "eventWeight*(!isLeptonic)", 50, -1., 1.0001, "cosThetaStar_tH_hadr",  "cos(#theta*) (tH boost)");
 
 
 
@@ -341,14 +345,17 @@ int main(int argc, char* argv[]) {
 
   //bool doUL = (selType != "presel" );
   bool doUL = true;
-  db_stack->set_rebin(5);
+  //db_stack->set_rebin(5);
   db_stack->set_legendTitle("Leptonic Channel");
   db_stack->drawHisto("mgg_lept", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "lept", doUL );
   db_stack->drawHisto("mgg_lept_BDT", "DiPhoton Invariant Mass", "GeV");
   printYields( db_stack, "lept_BDT", doUL );
   db_stack->drawHisto("mgg_lept_LD", "DiPhoton Invariant Mass", "GeV");
-  printYields( db_stack, "lept_LD", doUL );
+  float massWindow = 0.5;
+  for( ; massWindow<8.; massWindow+=0.5 ) 
+    printYields( db_stack, "lept_LD", doUL, massWindow );
+
 
   db_stack->set_legendTitle("Hadronic Channel");
   db_stack->drawHisto("mgg_hadr", "DiPhoton Invariant Mass", "GeV");
@@ -376,16 +383,21 @@ int main(int argc, char* argv[]) {
 
 
 
-void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
+void printYields( DrawBase* db, const std::string& suffix, bool doUL, float massWindow ) {
 
-  std::string yieldsFileName = db->get_outputdir() + "/yields_" + suffix + ".txt";
-  ofstream yieldsFile(yieldsFileName.c_str());
+  float xMin = 125.-massWindow;
+  float xMax = 125.+massWindow;
+  //float xMin = 120.;
+  //float xMax = 130.;
 
 
-  //float xMin = 122.;
-  //float xMax = 128.;
-  float xMin = 120.;
-  float xMax = 130.;
+  char yieldsFileName[1000];
+  if( massWindow<1. )
+    sprintf( yieldsFileName, "%s/yields_%s_0%.0f.txt", db->get_outputdir().c_str(), suffix.c_str(), massWindow*10. );
+  else
+    sprintf( yieldsFileName, "%s/yields_%s_%.0f.txt", db->get_outputdir().c_str(), suffix.c_str(), massWindow*10. );
+  ofstream yieldsFile(yieldsFileName);
+
 
   std::vector<TH1D*> histos = db->get_lastHistos_mc();
 
@@ -395,14 +407,20 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
   bool foundSignal = false;
   float totalBG = 0.;
   float totalBG_ave = 0.;
+  float totalBG_allSMH = 0.;
   float signal = 0.;
+  float signal_noSMH = 0.;
 
   float massRange = (histos[0]->GetXaxis()->GetXmax()-histos[0]->GetXaxis()->GetXmin());
 
   yieldsFile << std::endl << "Yields (@ 20 fb-1): " << std::endl;
+
   for( unsigned int ii=0; ii<histos.size(); ++ii ) {
-    std::string dataset=db->get_mcFile(ii).datasetName;
+
+    std::string dataset = db->get_mcFile(ii).datasetName;
+
     bool isSMH = (dataset=="VBFH"||dataset=="TTH"||dataset=="VH"||dataset=="GluGluH");
+
     if( db->get_mcFile(ii).datasetName != "tHq" ) {
 
       if( isSMH ) { 
@@ -416,16 +434,16 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
         }
 
         float BG = histos[ii]->Integral(binXmin, binXmax)*BG_SF;
-        float BG_ave = histos[ii]->Integral(1, histos[ii]->GetNbinsX())*BG_SF;
 
         float s = histos[ii]->Integral(binXmin, binXmax)*S_SF;
 
         totalBG += BG;
-        totalBG_ave += BG_ave;
+        totalBG_ave += BG;
+        totalBG_allSMH += BG;
 
         signal += s;
 
-        yieldsFile << db->get_mcFile(ii).datasetName << " (SM) " << BG_ave << std::endl;
+        yieldsFile << db->get_mcFile(ii).datasetName << " (SM) " << BG << std::endl;
         yieldsFile << db->get_mcFile(ii).datasetName << " (extra) " << s << std::endl;
 
       } else {
@@ -433,54 +451,58 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL ) {
         totalBG += histos[ii]->Integral(binXmin, binXmax);
 
       
-        float SF = (10.)/massRange; 
-        totalBG_ave += histos[ii]->Integral(1, histos[ii]->GetNbinsX())*SF;
+        float SF = (xMax-xMin)/massRange; 
+        float BG_ave = histos[ii]->Integral(1, histos[ii]->GetNbinsX())*SF;
+        totalBG_ave += BG_ave;
         yieldsFile << db->get_mcFile(ii).datasetName << " " << histos[ii]->Integral(1, histos[ii]->GetNbinsX())*SF << std::endl;
 
       }
 
     } else {
+
       foundSignal = true;
       float thq = histos[ii]->Integral(binXmin, binXmax);
       signal += thq;
+      signal_noSMH += thq;
       yieldsFile << db->get_mcFile(ii).datasetName << " " << thq << std::endl;
       //if( Ct_minus1 ) signal/=34.;
+
     }
-  }
+
+  } //for datasets
 
   if( !foundSignal ) std::cout << "WARNING!!! DIDN'T FIND SIGNAL tHq!" << std::endl; 
 
 
-  //yieldsFile << "Total BG: " << totalBG << " (averaged: " << totalBG_ave << ")" << std::endl;
-  yieldsFile << "Total signal: " << signal << std::endl;
-  yieldsFile << "Total BG: " << totalBG_ave << " (averaged)" << std::endl;
+  yieldsFile << "Total signal: " << signal << "  w/o SMH: " << signal_noSMH << std::endl;
+  //yieldsFile << "Total BG / GeV: " << totalBG_ave/(xMax-xMin) << std::endl;
+  yieldsFile << "Total BG (averaged): " << totalBG_ave << std::endl;
+  yieldsFile << "Total SMH BG under peak: " << totalBG_allSMH << std::endl;
+  yieldsFile << "Total extra SMH under peak: " << signal-signal_noSMH << std::endl;
 
-  //float signal_xsec = 2.28E-03*(19.37 + 1.573 + 0.6966 + 0.3943 + 0.1302); 
   float signal_xsec = 2.28E-03*(0.0152*34. + 1.4*(19.37 + 1.573 + 0.6966 + 0.3943 + 0.1302));
-  //float signal_xsec = 2.28E-03*(0.0152*34.);
+  float signal_xsec_noSMH = 2.28E-03*(0.0152*34.);
   float total_signal = signal_xsec*db->get_lumi();
+  float total_signal_noSMH = signal_xsec_noSMH*db->get_lumi();
   float effS = signal/total_signal;
-  yieldsFile << "Signal efficiency: " << effS << std::endl;
+  float effS_noSMH = signal_noSMH/total_signal_noSMH;
+  yieldsFile << "Signal efficiency: " << effS << " w/o SMH: " << effS_noSMH << std::endl;
 
 
   
   if( doUL && foundSignal ) {
 
-    //float ul = CLA( db->get_lumi(), 0., effS, 0., totalBG, 0. );
     float ul_bgave = CLA( db->get_lumi(), 0., effS, 0., totalBG_ave, 0. );
+    float ul_bgave_noSMH = CLA( db->get_lumi(), 0., effS_noSMH, 0., totalBG_allSMH, 0. ); //fix this
     yieldsFile << std::endl << "No error on BG:" << std::endl;
-    yieldsFile << "UL: " << ul_bgave << std::endl;
-    yieldsFile << "UL/SM: " << ul_bgave/signal_xsec << std::endl;
-    //yieldsFile << "UL: " << ul << "    (average BG): " << ul_bgave << std::endl;
-    //yieldsFile << "UL/SM: " << ul/signal_xsec << "    (average BG): " << ul_bgave/signal_xsec << std::endl;
+    yieldsFile << "UL: " << ul_bgave << "  all SMH in BG: " << ul_bgave_noSMH << std::endl;
+    yieldsFile << "UL/SM: " << ul_bgave/signal_xsec << "  all SMH in BG: " << ul_bgave_noSMH/signal_xsec_noSMH << std::endl;//fix this
 
-    //float ul_bgerr = CLA( db->get_lumi(), 0., effS, 0., totalBG, 0.30*totalBG );
     float ul_bgerrave = CLA( db->get_lumi(), 0., effS, 0., totalBG_ave, 0.30*totalBG_ave );
+    float ul_bgerrave_noSMH = CLA( db->get_lumi(), 0., effS_noSMH, 0., totalBG_allSMH, 0.30*totalBG_allSMH );//fix this
     yieldsFile << std::endl << "30\% error on BG:" << std::endl;
-    //yieldsFile << "UL: "    << ul_bgerr << "    (average BG): " << ul_bgerrave << std::endl;
-    //yieldsFile << "UL/SM: " << ul_bgerr/signal_xsec << "    (average BG): " << ul_bgerrave/signal_xsec << std::endl; 
-    yieldsFile << "UL: " << ul_bgerrave << std::endl;
-    yieldsFile << "UL/SM: " << ul_bgerrave/signal_xsec << std::endl;
+    yieldsFile << "UL: " << ul_bgerrave << "  all SMH in BG: " << ul_bgerrave_noSMH << std::endl;
+    yieldsFile << "UL/SM: " << ul_bgerrave/signal_xsec << "  all SMH in BG: " << ul_bgerrave_noSMH/signal_xsec_noSMH << std::endl;
 
   }
 

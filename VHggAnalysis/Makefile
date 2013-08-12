@@ -23,7 +23,7 @@ ROOFIT_LIBS := $(shell cd $(CMSSW_BASE); scram tool info roofitcore | grep LIB= 
 ROOFIT_LIBS += $(shell cd $(CMSSW_BASE); scram tool info roofit | grep LIB= | sed 's|LIB=||') 
 
 
-INCLUDES += -I.  -I.. -I$(ROOTSYS)/include  -I$(ROOFIT_INCLUDE)/ -I$(CMSSW_BASE)/src -I$(CMSSW_BASE)/src/UserCode/pandolf/CommonTools -I$(CMSSW_BASE)/src/UserCode/pandolf/
+INCLUDES += -I.  -I.. -I$(ROOTSYS)/include  -I$(ROOFIT_INCLUDE)/ -I$(CMSSW_BASE)/src -I$(CMSSW_BASE)/src/CommonTools -I$(CMSSW_BASE)/src/UserCode/pandolf/
 ROOTSYS  ?= ERROR_RootSysIsNotDefined
 
 EXTRALIBS  :=  -L$(ROOTSYS)/lib -L$(ROOFIT_LIBDIR)/ -lHtml -lMathCore -lGenVector -lMinuit -lEG -lRooFitCore -lRooFit -lRIO -lTMVA
@@ -38,118 +38,125 @@ OLIST += $(OBJDIR)/DrawBase.o $(OBJDIR)/fitTools.o
 OLIST += $(OBJDIR)/TAbsFitParticle.o $(OBJDIR)/TAbsFitConstraint.o $(OBJDIR)/TFitConstraintM.o $(OBJDIR)/TFitParticleEtEtaPhi.o $(OBJDIR)/TKinFitter.o $(OBJDIR)/DiJetKinFitter.o
 OLIST += $(OBJDIR)/HelicityLikelihoodDiscriminant.o $(OBJDIR)/RooPentaSpinTwo.o $(OBJDIR)/RooBphione.o $(OBJDIR)/RooBtheta.o $(OBJDIR)/RooBkg2l2jHL.o $(OBJDIR)/RooSpinZero5DV2.o $(OBJDIR)/RooBkgd2L2JV2.o 
 OLIST +=$(patsubst %.cc,$(OBJDIR)/%.o,$(notdir $(CCFILES)))
+OLIST += $(OBJDIR)/THqLeptonicLikelihoodCalculator.o
 
-$(OBJDIR)/RedNtpFinalizer.o: $(CMSSW_BASE)/src/UserCode/pandolf/CommonTools/RedNtpFinalizer.cc
+
+$(OBJDIR)/THqLeptonicLikelihoodCalculator.o: $(CMSSW_BASE)/src/THqStudies/THqLeptonicLikelihood/src/THqLeptonicLikelihoodCalculator.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/AnalysisJet.o: $(CMSSW_BASE)/src/UserCode/pandolf/CommonTools/AnalysisJet.cc
+$(OBJDIR)/RedNtpFinalizer.o: $(CMSSW_BASE)/src/CommonTools/RedNtpFinalizer.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/BTagSFUtil.o: $(CMSSW_BASE)/src/UserCode/pandolf/BTagSFUtil/src/BTagSFUtil.cc
+$(OBJDIR)/AnalysisJet.o: $(CMSSW_BASE)/src/CommonTools/AnalysisJet.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/SFlightFuncs.o: $(CMSSW_BASE)/src/UserCode/pandolf/BTagSFUtil/src/SFlightFuncs.cc
+$(OBJDIR)/BTagSFUtil.o: $(CMSSW_BASE)/src/BTagSFUtil/src/BTagSFUtil.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/MistagFuncs.o: $(CMSSW_BASE)/src/UserCode/pandolf/BTagSFUtil/src/MistagFuncs.cc
+$(OBJDIR)/SFlightFuncs.o: $(CMSSW_BASE)/src/BTagSFUtil/src/SFlightFuncs.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/Bins.o: $(CMSSW_BASE)/src/UserCode/pandolf/QGLikelihood/src/Bins.cc
+$(OBJDIR)/MistagFuncs.o: $(CMSSW_BASE)/src/BTagSFUtil/src/MistagFuncs.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-
-
-$(OBJDIR)/QGLikelihoodCalculator.o: $(CMSSW_BASE)/src/UserCode/pandolf/QGLikelihood/src/QGLikelihoodCalculator.cc
-	@echo "Compiling $<"
-	mkdir -p $(OBJDIR)
-	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
-
-
-
-$(OBJDIR)/DrawBase.o: $(CMSSW_BASE)/src/UserCode/pandolf/CommonTools/DrawBase.C
-	@echo "Compiling $<"
-	mkdir -p $(OBJDIR)
-	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
-
-$(OBJDIR)/fitTools.o: $(CMSSW_BASE)/src/UserCode/pandolf/CommonTools/fitTools.C
+$(OBJDIR)/Bins.o: $(CMSSW_BASE)/src/QGLikelihood/src/Bins.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
 
-$(OBJDIR)/DiJetKinFitter.o: $(CMSSW_BASE)/src/UserCode/pandolf/KinematicFit/DiJetKinFitter.cc
+
+$(OBJDIR)/QGLikelihoodCalculator.o: $(CMSSW_BASE)/src/QGLikelihood/src/QGLikelihoodCalculator.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/TAbsFitParticle.o: $(CMSSW_BASE)/src/UserCode/pandolf/KinematicFit/TAbsFitParticle.cc
+
+
+$(OBJDIR)/DrawBase.o: $(CMSSW_BASE)/src/CommonTools/DrawBase.C
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/TAbsFitConstraint.o: $(CMSSW_BASE)/src/UserCode/pandolf/KinematicFit/TAbsFitConstraint.cc
+$(OBJDIR)/fitTools.o: $(CMSSW_BASE)/src/CommonTools/fitTools.C
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/TFitConstraintM.o: $(CMSSW_BASE)/src/UserCode/pandolf/KinematicFit/TFitConstraintM.cc
+
+$(OBJDIR)/DiJetKinFitter.o: $(CMSSW_BASE)/src/KinematicFit/DiJetKinFitter.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/TFitParticleEtEtaPhi.o: $(CMSSW_BASE)/src/UserCode/pandolf/KinematicFit/TFitParticleEtEtaPhi.cc
+$(OBJDIR)/TAbsFitParticle.o: $(CMSSW_BASE)/src/KinematicFit/TAbsFitParticle.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/TKinFitter.o: $(CMSSW_BASE)/src/UserCode/pandolf/KinematicFit/TKinFitter.cc
+$(OBJDIR)/TAbsFitConstraint.o: $(CMSSW_BASE)/src/KinematicFit/TAbsFitConstraint.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/HelicityLikelihoodDiscriminant.o: $(CMSSW_BASE)/src/UserCode/pandolf/HelicityLikelihoodDiscriminant/HelicityLikelihoodDiscriminant.cc
+$(OBJDIR)/TFitConstraintM.o: $(CMSSW_BASE)/src/KinematicFit/TFitConstraintM.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/RooPentaSpinTwo.o: $(CMSSW_BASE)/src/UserCode/pandolf/HelicityLikelihoodDiscriminant/PDFs/RooPentaSpinTwo.cc
+$(OBJDIR)/TFitParticleEtEtaPhi.o: $(CMSSW_BASE)/src/KinematicFit/TFitParticleEtEtaPhi.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/RooBphione.o: $(CMSSW_BASE)/src/UserCode/pandolf/HelicityLikelihoodDiscriminant/PDFs/RooBphione.cc
+$(OBJDIR)/TKinFitter.o: $(CMSSW_BASE)/src/KinematicFit/TKinFitter.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/RooBtheta.o: $(CMSSW_BASE)/src/UserCode/pandolf/HelicityLikelihoodDiscriminant/PDFs/RooBtheta.cc
+$(OBJDIR)/HelicityLikelihoodDiscriminant.o: $(CMSSW_BASE)/src/HelicityLikelihoodDiscriminant/HelicityLikelihoodDiscriminant.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/RooBkg2l2jHL.o: $(CMSSW_BASE)/src/UserCode/pandolf/HelicityLikelihoodDiscriminant/PDFs/RooBkg2l2jHL.cc
+$(OBJDIR)/RooPentaSpinTwo.o: $(CMSSW_BASE)/src/HelicityLikelihoodDiscriminant/PDFs/RooPentaSpinTwo.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/RooSpinZero5DV2.o: $(CMSSW_BASE)/src/UserCode/pandolf/HelicityLikelihoodDiscriminant/PDFs/RooSpinZero5DV2.cc
+$(OBJDIR)/RooBphione.o: $(CMSSW_BASE)/src/HelicityLikelihoodDiscriminant/PDFs/RooBphione.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
 
-$(OBJDIR)/RooBkgd2L2JV2.o: $(CMSSW_BASE)/src/UserCode/pandolf/HelicityLikelihoodDiscriminant/PDFs/RooBkgd2L2JV2.cc
+$(OBJDIR)/RooBtheta.o: $(CMSSW_BASE)/src/HelicityLikelihoodDiscriminant/PDFs/RooBtheta.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/RooBkg2l2jHL.o: $(CMSSW_BASE)/src/HelicityLikelihoodDiscriminant/PDFs/RooBkg2l2jHL.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/RooSpinZero5DV2.o: $(CMSSW_BASE)/src/HelicityLikelihoodDiscriminant/PDFs/RooSpinZero5DV2.cc
+	@echo "Compiling $<"
+	mkdir -p $(OBJDIR)
+	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)
+
+$(OBJDIR)/RooBkgd2L2JV2.o: $(CMSSW_BASE)/src/HelicityLikelihoodDiscriminant/PDFs/RooBkgd2L2JV2.cc
 	@echo "Compiling $<"
 	mkdir -p $(OBJDIR)
 	@$(CC) $(CCFLAGS) -c $< -o $@ $(INCLUDES)

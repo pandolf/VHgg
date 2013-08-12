@@ -118,7 +118,6 @@ public :
    Float_t         pid_hcalisophot1;
    Float_t         pid_hcalisophot2;
    Int_t           njets;
-   Int_t           isFirstPhotAnEle;
    Float_t         ptjet[10];
    Float_t         ptcorrjet[10];
    Float_t         ecorrjet[10];
@@ -890,7 +889,6 @@ public :
 
    float   Ht_thresh_;
    bool  invert_photonCuts_;
-   bool eleVeto_;
    bool use_PUID_;
 
    int njets_PUID_thresh_;

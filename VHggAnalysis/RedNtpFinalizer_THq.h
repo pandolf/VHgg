@@ -984,6 +984,8 @@ public :
 
    bool BLIND_;
 
+   bool use_thqPartonInfo_;
+
 };
 
 #endif
