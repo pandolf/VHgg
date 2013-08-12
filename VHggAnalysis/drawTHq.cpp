@@ -404,6 +404,7 @@ void printYields( DrawBase* db, const std::string& suffix, bool doUL, float mass
   int binXmin = histos[0]->FindBin(xMin);
   int binXmax = histos[0]->FindBin(xMax) -1;
 
+
   bool foundSignal = false;
   float totalBG = 0.;
   float totalBG_ave = 0.;
