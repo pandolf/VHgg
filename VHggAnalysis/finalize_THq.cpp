@@ -193,6 +193,7 @@ void finalize_oneDataset( const std::string& redntpProdVersion, const std::strin
 
   std::cout << std::endl << std::endl << std::endl << "####     Finalizing " << dataset << std::endl;
   std::cout << "####     Selection: " << selectionType << std::endl;
+  std::cout << "####     Ntuple version: " << redntpProdVersion << std::endl;
   std::cout << "####     b-Tagger: " << bTaggerType << std::endl << std::endl;
 
   RedntpDirStruct dirs = get_dirs( redntpProdVersion );
