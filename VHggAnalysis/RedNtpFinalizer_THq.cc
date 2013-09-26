@@ -287,8 +287,7 @@ void RedNtpFinalizer_THq::finalize()
    float eventWeight = 1.;
 
    TTree* tree_passedEvents = new TTree();
-   tree_passedEvents->SetName("thq_m125_8TeV");
-   //tree_passedEvents->SetName("tree_passedEvents");
+   tree_passedEvents->SetName("tree_passedEvents");
    tree_passedEvents->Branch( "run", &run, "run/I" );
    tree_passedEvents->Branch( "lumi", &lumi, "lumi/I" );
    tree_passedEvents->Branch( "event", &event, "event/I" );
@@ -347,22 +346,6 @@ void RedNtpFinalizer_THq::finalize()
    tree_passedEvents->Branch("deltaR_top_phot_min_hadr",  &deltaR_top_phot_min_hadr_t, "deltaR_top_phot_min_hadr_t/F");
    tree_passedEvents->Branch("deltaR_qJet_phot_min_hadr",  &deltaR_qJet_phot_min_hadr_t, "deltaR_qJet_phot_min_hadr_t/F");
 
-   int category =11;
-   bool isLep_ele;
-   tree_passedEvents->Branch("category",        &category, "category/I");
-   tree_passedEvents->Branch("isLep_ele",        &isLep_ele, "isLep_ele/O");
-   tree_passedEvents->Branch("ptele1",        &ptele1, "ptele1/F");
-   tree_passedEvents->Branch("etaele1",       &etaele1, "etaele1/F");
-   tree_passedEvents->Branch("phiele1",       &phiele1, "phiele1/F");
-   tree_passedEvents->Branch("sIeIeele1",     &sIeIeele1, "sIeIeele1/F");
-   tree_passedEvents->Branch("dphiele1",      &dphiele1, "dphiele1/F");
-   tree_passedEvents->Branch("detaele1",      &detaele1, "detaele1/F");
-   tree_passedEvents->Branch("mhitsele1",     &mhitsele1, "mhitsele1/I");
-   tree_passedEvents->Branch("d0ele1",        &d0ele1, "d0ele1/F");
-   tree_passedEvents->Branch("dzele1",        &dzele1, "dzele1/F");
-   tree_passedEvents->Branch("oEmoPele1",     &oEmoPele1, "oEmoPele1/F");
-   tree_passedEvents->Branch("matchconvele1", &matchconvele1, "matchconvele1/I");
-   tree_passedEvents->Branch("isorelele1",    &isorelele1, "isorelele1/F");
 
 
    tree_passedEvents->Branch("cosThetaStar",  &cosThetaStar_t, "cosThetaStar/F");
