@@ -1,4 +1,4 @@
-// @(#)root/tmva $Id: TMVAClassification.C,v 1.15 2013/06/24 14:15:45 pandolf Exp $
+// @(#)root/tmva $Id: TMVAClassification.C,v 1.16 2013/06/25 15:23:31 pandolf Exp $
 /**********************************************************************************
  * Project   : TMVA - a Root-integrated toolkit for multivariate data analysis    *
  * Package   : TMVA                                                               *
@@ -608,26 +608,27 @@ void TMVAClassification( std::string optName, int category, TString myMethodList
 
    if (Use["Cuts"] || Use["CutsGA"] ) {
 
-    for( unsigned iEff=1; iEff<11; ++iEff ) {
+    std::string optcutsdir = "optcuts_" + optName;
+    std::string mkdir_command = "mkdir -p " + optcutsdir;
+    system(mkdir_command.c_str());
+
+    for( unsigned iEff=1; iEff<101; ++iEff ) {
 
        TMVA::IMethod* method;
        if( Use["Cuts"]) method = (TMVA::IMethod*)factory->GetMethod("Cuts");
        if( Use["CutsGA"]) method = (TMVA::IMethod*)factory->GetMethod("CutsGA");
        TMVA::MethodCuts* cuts = dynamic_cast<TMVA::MethodCuts*>(method);
 
-       std::string optcutsdir = "optcuts_" + optName;
-       std::string mkdir_command = "mkdir -p " + optcutsdir;
-       system(mkdir_command.c_str());
        char cutsFileName[500];
        if( Use["Cuts"] )
-         sprintf( cutsFileName, "%s/cuts_cat%d_Seff%d.txt", optcutsdir.c_str(), category, 10*iEff );
+         sprintf( cutsFileName, "%s/cuts_cat%d_Seff%d.txt", optcutsdir.c_str(), category, iEff );
        if( Use["CutsGA"]) 
-         sprintf( cutsFileName, "%s/cutsGA_cat%d_Seff%d.txt", optcutsdir.c_str(), category, 10*iEff );
+         sprintf( cutsFileName, "%s/cutsGA_cat%d_Seff%d.txt", optcutsdir.c_str(), category, iEff );
 
        ofstream ofs(cutsFileName);
 
        std::vector<Double_t> cutsMin, cutsMax;
-       cuts->GetCuts((float)iEff*0.10, cutsMin, cutsMax);
+       cuts->GetCuts((float)iEff*0.01, cutsMin, cutsMax);
 
 
        for( unsigned iCut=0; iCut<cutsMin.size(); ++iCut) {
